@@ -27,7 +27,7 @@ from funnel.common import (
     EVIDENCE_DIR,
     PARQUET_FILE,
     dir_size_bytes,
-    free_ram_gb,
+    require_available_ram,
     manifest,
     require_dataset_hash_match,
     write_json,
@@ -731,9 +731,8 @@ class SpillSampler(threading.Thread):
 
 def main() -> None:
     started = time.perf_counter()
-    free_before = free_ram_gb()
-    print(f"Free RAM before run: {free_before} GB; DuckDB memory_limit {DUCKDB_MEMORY_LIMIT}, "
-          f"threads {DUCKDB_THREADS}", flush=True)
+    available_before = require_available_ram()
+    print(f"DuckDB memory_limit {DUCKDB_MEMORY_LIMIT}, threads {DUCKDB_THREADS}", flush=True)
     sha = require_dataset_hash_match()
     con = connect()
     con.execute(f"CREATE VIEW events AS SELECT * FROM read_parquet('{PARQUET_FILE.as_posix()}')")
@@ -764,7 +763,7 @@ def main() -> None:
     elapsed = round(time.perf_counter() - started, 1)
     write_json(EVIDENCE_DIR / "profile_run.json", {
         "manifest": profile["manifest"],
-        "free_ram_gb_before_run": free_before,
+        "available_ram_gb_before_run": available_before,
         "duckdb_memory_limit": DUCKDB_MEMORY_LIMIT,
         "duckdb_threads": DUCKDB_THREADS,
         "elapsed_seconds": elapsed,

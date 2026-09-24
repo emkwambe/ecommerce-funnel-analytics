@@ -74,6 +74,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the texts now read "a separate cart-removal signal", "on the cart event for cart events", and "Cart events with no view at or before in the session". The regenerated `docs/data-profile.md` and `profile.json` carry the new wording.
 - **Guard added:** `analysis/tests/test_naming_rules.py` (Sprint 1 Step 2).
 
+**2026-09-24 · Sprint 1 Step 0 · 4 GB DuckDB limit still left too little headroom; RAM gate measured the wrong quantity**
+- **Origin:** Claude Code
+- **What was produced:** the Sprint 0 fix set `DUCKDB_MEMORY_LIMIT = "4GB"`, and the pre-run report read free physical memory.
+- **What was wrong:** on this machine, 4 GB still left too little headroom. Memory stood near or below the 3 GB level that the project owner set as the minimum for a heavy run, so a 4 GB DuckDB ceiling could exceed what was actually available. The pre-run report also measured free physical memory, which excludes standby pages the OS can hand out at once, rather than available memory.
+- **How it was caught:** human review of the Sprint 1 preflight report.
+- **Fix:** `DUCKDB_MEMORY_LIMIT = "2GB"` (the reason is documented in `funnel/common.py`), with the same value in the dbt profile. Threads stay at 4, insertion order stays off, and queries spill to `data/duckdb_tmp`. The gate now reads `\Memory\Available MBytes`.
+- **Guard added:** `require_available_ram()` in `funnel/common.py` reports available memory and halts below 3 GB. `funnel.profile` and `funnel.ingest --recheck` call it, and `python -m funnel.ramcheck` runs it before `dbt build`.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

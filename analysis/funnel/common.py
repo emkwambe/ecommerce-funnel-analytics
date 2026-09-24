@@ -27,12 +27,18 @@ RAW_FILE_NAME = "2019-Oct.csv"
 RAW_CSV = RAW_DIR / RAW_FILE_NAME
 PARQUET_FILE = PARQUET_DIR / "2019-Oct.parquet"
 
-# DuckDB resource limits: a fixed ceiling, not a share of total RAM. The project
-# machine has 15.78 GB of RAM but was observed with ~3.8 GB free while other
-# applications ran; an 8 GB limit got a profile run killed under memory pressure
-# (see ai-workflow/correction-log.md). Heavy queries spill to DUCKDB_TMP_DIR instead.
-DUCKDB_MEMORY_LIMIT = "4GB"
+# DuckDB resource limits: a fixed ceiling, not a share of total RAM, set for the
+# project machine (15.78 GB total RAM, with other applications often holding most of it).
+# History (see ai-workflow/correction-log.md): an 8 GB limit got a profile run killed
+# under memory pressure; 4 GB completed but still left too little headroom, with
+# available memory near or below the 3 GB run gate. 2 GB keeps DuckDB inside the
+# memory the gate guarantees; heavy queries spill to DUCKDB_TMP_DIR instead.
+# The dbt profile (pipeline/profiles.yml) uses the same values.
+DUCKDB_MEMORY_LIMIT = "2GB"
 DUCKDB_THREADS = 4
+
+# Heavy runs need at least this much available memory (\Memory\Available MBytes).
+MIN_AVAILABLE_RAM_GB = 3.0
 
 # The line in data-source.md that the stage-command hash gate reads.
 SHA_LINE_PATTERN = re.compile(r"^- \*\*SHA-256:\*\* `([0-9a-f]{64})`", re.MULTILINE)
@@ -98,25 +104,34 @@ def require_dataset_hash_match(raw_csv: Path = RAW_CSV) -> str:
     return actual
 
 
-def free_ram_gb() -> float | None:
-    """Free physical memory, reported before heavy runs (None if unavailable)."""
+def available_ram_gb() -> float | None:
+    r"""Available memory from the Windows counter \Memory\Available MBytes, in GB.
+
+    Available memory includes standby pages the OS can hand out at once, which is
+    what matters for a new heavy run. Returns None if the counter can't be read.
+    """
     if sys.platform != "win32":
         return None
-    import ctypes
+    result = subprocess.run(
+        ["powershell", "-NoProfile", "-Command",
+         r"(Get-Counter '\Memory\Available MBytes').CounterSamples[0].CookedValue"],
+        capture_output=True, text=True,
+    )
+    try:
+        return round(float(result.stdout.strip()) / 1024, 2)
+    except ValueError:
+        return None
 
-    class MemoryStatusEx(ctypes.Structure):
-        _fields_ = [
-            ("dwLength", ctypes.c_ulong), ("dwMemoryLoad", ctypes.c_ulong),
-            ("ullTotalPhys", ctypes.c_ulonglong), ("ullAvailPhys", ctypes.c_ulonglong),
-            ("ullTotalPageFile", ctypes.c_ulonglong), ("ullAvailPageFile", ctypes.c_ulonglong),
-            ("ullTotalVirtual", ctypes.c_ulonglong), ("ullAvailVirtual", ctypes.c_ulonglong),
-            ("ullAvailExtendedVirtual", ctypes.c_ulonglong),
-        ]
 
-    status = MemoryStatusEx()
-    status.dwLength = ctypes.sizeof(MemoryStatusEx)
-    ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status))
-    return round(status.ullAvailPhys / 1024**3, 2)
+def require_available_ram(threshold_gb: float = MIN_AVAILABLE_RAM_GB) -> float:
+    """Report available memory and halt a heavy run below the threshold."""
+    available = available_ram_gb()
+    print(rf"Available memory (\Memory\Available MBytes): {available} GB; gate {threshold_gb} GB", flush=True)
+    if available is None:
+        sys.exit("HALT: could not read available memory; not starting a heavy run.")
+    if available < threshold_gb:
+        sys.exit(f"HALT: available memory {available} GB is below {threshold_gb} GB; close programs and rerun.")
+    return available
 
 
 def dir_size_bytes(path: Path) -> int:

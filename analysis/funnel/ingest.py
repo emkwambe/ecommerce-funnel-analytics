@@ -31,6 +31,7 @@ from funnel.common import (
     RAW_FILE_NAME,
     load_kaggle_token_into_env,
     manifest,
+    require_available_ram,
     require_dataset_hash_match,
     sha256_file,
     utc_now_iso,
@@ -331,6 +332,7 @@ def recheck() -> dict[str, Any]:
     Halts unless the CSV hash equals docs/data-source.md, then adds the UTC
     round trip to ingest.json and regenerates data-source.md.
     """
+    require_available_ram()
     sha = require_dataset_hash_match()
     ingest_path = EVIDENCE_DIR / "ingest.json"
     ingest = json.loads(ingest_path.read_text(encoding="utf-8"))
