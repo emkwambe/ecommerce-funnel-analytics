@@ -1,6 +1,6 @@
 # E-commerce Funnel Analytics
 
-Where does the view-to-purchase funnel lose the most recoverable revenue, and what should the team test first?
+Where in the view-to-purchase funnel do sessions most often end with no observed purchase, which categories hold the most carted value with no observed purchase in the session, and what should the team test first?
 
 This portfolio project analyzes a real e-commerce event log (view, cart, and purchase events) with a dbt pipeline on DuckDB, a documented metric layer, KPI dashboards, a data discrepancy investigation, and a natural-language-to-SQL agent. It also records how Claude Code was used under a human-in-the-loop workflow (`ai-workflow/`).
 

@@ -2,7 +2,7 @@
 
 ## What this project is
 
-A public portfolio project that analyzes a large real e-commerce event log (view, cart, and purchase events) to answer one business question: **where does the view-to-purchase funnel lose the most recoverable revenue, and what should the team test first?**
+A public portfolio project that analyzes a large real e-commerce event log (view, cart, and purchase events) to answer one business question: **Where in the view-to-purchase funnel do sessions most often end with no observed purchase, which categories hold the most carted value with no observed purchase in the session, and what should the team test first?**
 
 It demonstrates:
 

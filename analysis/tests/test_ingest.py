@@ -9,7 +9,7 @@ import pytest
 
 from funnel import common
 from funnel.common import EVIDENCE_DIR
-from funnel.ingest import convert_to_parquet, count_csv_data_lines, raw_event_time_format
+from funnel.ingest import convert_to_parquet, count_csv_data_lines, raw_event_time_format, utc_round_trip
 
 CSV = (
     "event_time,event_type,product_id,category_id,category_code,brand,price,user_id,user_session\n"
@@ -59,3 +59,24 @@ def test_hash_gate_halts_on_mismatch(tmp_path, monkeypatch):
         common.require_dataset_hash_match(raw)
     doc.write_text(f"- **SHA-256:** `{common.sha256_file(raw)}`\n", encoding="utf-8")
     assert common.require_dataset_hash_match(raw) == common.sha256_file(raw)
+
+
+def test_utc_round_trip_exact_on_clean_utc_text(tmp_path):
+    csv = tmp_path / "utc.csv"
+    csv.write_bytes(CSV.encode("utf-8"))
+    rt = utc_round_trip(duckdb.connect(), csv)
+    assert rt["rows_checked"] == 3
+    assert rt["rows_changed_by_round_trip"] == 0
+    assert (rt["raw_text_min"], rt["parsed_min"]) == ("2019-10-01 00:00:00 UTC", "2019-10-01 00:00:00")
+
+
+def test_utc_round_trip_detects_values_the_parse_would_change(tmp_path):
+    csv = tmp_path / "shifted.csv"
+    csv.write_bytes((
+        CSV
+        + "2019-10-01 03:00:00+03,view,2,10,a.b,x,1.5,101,s2\n"      # offset: parse shifts the clock time
+        + "2019-10-01 00:00:05.500 UTC,view,2,10,a.b,x,1.5,101,s2\n"  # fraction: dropped on format
+    ).encode("utf-8"))
+    rt = utc_round_trip(duckdb.connect(), csv)
+    assert rt["rows_checked"] == 5
+    assert rt["rows_changed_by_round_trip"] == 2

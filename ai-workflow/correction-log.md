@@ -66,6 +66,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the command was rerun with absolute paths, and all later commands use them.
 - **Guard added:** none beyond the existing CLAUDE.md rule.
 
+**2026-09-24 · Sprint 1 Step 0 · Generated wording used terms the metric contract prohibits**
+- **Origin:** Claude Code
+- **What was produced:** Sprint 0 generated text. The D9 option in `funnel/profile.py` read "a separate abandonment signal", the D3 option read "the cart event for carts", and a row label in `funnel/verification.py` read "Carts with no view at or before in the session".
+- **What was wrong:** `docs/metrics.md` Section 1 prohibits "abandonment" and the use of "carts" as a count label. The texts predate the contract, but the D9 option already described customer behavior as abandonment.
+- **How it was caught:** Claude Code's review of existing outputs against `docs/metrics.md` Section 1 at the start of Sprint 1.
+- **Fix:** the texts now read "a separate cart-removal signal", "on the cart event for cart events", and "Cart events with no view at or before in the session". The regenerated `docs/data-profile.md` and `profile.json` carry the new wording.
+- **Guard added:** `analysis/tests/test_naming_rules.py` (Sprint 1 Step 2).
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

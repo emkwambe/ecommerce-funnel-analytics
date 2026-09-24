@@ -31,6 +31,7 @@ from funnel.common import (
     RAW_FILE_NAME,
     load_kaggle_token_into_env,
     manifest,
+    require_dataset_hash_match,
     sha256_file,
     utc_now_iso,
     write_json,
@@ -162,6 +163,35 @@ def raw_event_time_format(con: duckdb.DuckDBPyConnection, csv_path: Path = RAW_C
     }
 
 
+def utc_round_trip(con: duckdb.DuckDBPyConnection, csv_path: Path = RAW_CSV) -> dict[str, Any]:
+    """Check that parsing event_time to TIMESTAMP keeps the logged UTC clock time.
+
+    Each raw text value is cast to TIMESTAMP (the cast DuckDB's reader applies),
+    formatted back as 'YYYY-MM-DD HH:MM:SS UTC', and compared with the raw text.
+    A changed row means the parse shifted or altered the value.
+    """
+    src = f"read_csv('{csv_path.as_posix()}', header = true, all_varchar = true)"
+    checked, changed, raw_min, raw_max, parsed_min, parsed_max = con.execute(
+        f"""
+        SELECT count(*),
+               count(*) FILTER (WHERE strftime(CAST(event_time AS TIMESTAMP), '%Y-%m-%d %H:%M:%S') || ' UTC'
+                                <> event_time),
+               min(event_time), max(event_time),
+               CAST(min(CAST(event_time AS TIMESTAMP)) AS VARCHAR),
+               CAST(max(CAST(event_time AS TIMESTAMP)) AS VARCHAR)
+        FROM {src} WHERE event_time IS NOT NULL
+        """
+    ).fetchone()
+    return {
+        "rows_checked": int(checked),
+        "rows_changed_by_round_trip": int(changed),
+        "raw_text_min": raw_min,
+        "raw_text_max": raw_max,
+        "parsed_min": parsed_min,
+        "parsed_max": parsed_max,
+    }
+
+
 def render_data_source_md(ingest: dict[str, Any]) -> str:
     cols = "\n".join(
         f"| `{c['name']}` | `{c['type']}` |" for c in ingest["conversion"]["parquet_columns"]
@@ -231,6 +261,19 @@ All three counts match: **{ingest['checks']['row_counts_match']}**. Parquet type
 ## Raw `event_time` text format
 
 Checked on the raw CSV as text, before type inference. Rows not matching `{fmt['expected_regex']}`: {fmt['rows_not_matching']}. Null rows: {fmt['null_rows']}. Text after `HH:MM:SS`, with row counts: {suffixes}.
+{_render_utc_round_trip(ingest.get("utc_round_trip"))}"""
+
+
+def _render_utc_round_trip(rt: dict[str, Any] | None) -> str:
+    if not rt:
+        return ""
+    return f"""
+## UTC round trip (`funnel.ingest.utc_round_trip`)
+
+`event_time` is stored as `TIMESTAMP` without a zone. Each raw value was cast to `TIMESTAMP`, formatted back as
+`YYYY-MM-DD HH:MM:SS UTC`, and compared with the raw text. Rows checked: {rt['rows_checked']}; rows changed:
+{rt['rows_changed_by_round_trip']}. Raw text range {rt['raw_text_min']} to {rt['raw_text_max']}; parsed range
+{rt['parsed_min']} to {rt['parsed_max']}. Stored values are the logged UTC clock time when no rows change.
 """
 
 
@@ -282,10 +325,42 @@ def run(force_download: bool) -> dict[str, Any]:
     return ingest
 
 
+def recheck() -> dict[str, Any]:
+    """Rerun the raw-file checks on the existing CSV without downloading or converting.
+
+    Halts unless the CSV hash equals docs/data-source.md, then adds the UTC
+    round trip to ingest.json and regenerates data-source.md.
+    """
+    sha = require_dataset_hash_match()
+    ingest_path = EVIDENCE_DIR / "ingest.json"
+    ingest = json.loads(ingest_path.read_text(encoding="utf-8"))
+    if ingest["raw_file"]["sha256"] != sha:
+        sys.exit("HALT: ingest.json does not describe the current raw file.")
+    con = connect()
+    print("Running UTC round trip on the raw CSV ...", flush=True)
+    rt = utc_round_trip(con)
+    ingest["utc_round_trip"] = rt
+    ingest["checks"]["utc_round_trip_exact"] = rt["rows_changed_by_round_trip"] == 0
+    ingest["checks"]["utc_round_trip_covers_all_rows"] = rt["rows_checked"] == ingest["conversion"]["parquet_rows"]
+    ingest["manifest"] = manifest(f"{SCRIPT} --recheck", sha)
+    write_json(ingest_path, ingest)
+    if not all(ingest["checks"].values()):
+        print(json.dumps(ingest["checks"], indent=2))
+        sys.exit("HALT: a recheck failed; data-source.md not written.")
+    write_text(DATA_SOURCE_MD, render_data_source_md(ingest))
+    return ingest
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--force-download", action="store_true")
+    parser.add_argument("--recheck", action="store_true",
+                        help="rerun raw-file checks on the existing CSV; no download or conversion")
     args = parser.parse_args()
+    if args.recheck:
+        ingest = recheck()
+        print(json.dumps({"utc_round_trip": ingest["utc_round_trip"], "checks": ingest["checks"]}, indent=2))
+        return
     ingest = run(args.force_download)
     print(json.dumps({k: ingest[k] for k in ("raw_file", "checks")}, indent=2))
     c = ingest["conversion"]

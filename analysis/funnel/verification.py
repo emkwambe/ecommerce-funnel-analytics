@@ -57,7 +57,7 @@ def render(preflight: str, ingest: dict[str, Any], profile: dict[str, Any], pyte
          oa["purchase_events_with_no_view_of_product_in_session"]),
         ("Purchases with no cart of the product in the session",
          oa["purchase_events_with_no_cart_of_product_in_session"]),
-        ("Carts with no view at or before in the session", oa["cart_events_with_no_view_at_or_before_in_session"]),
+        ("Cart events with no view at or before in the session", oa["cart_events_with_no_view_at_or_before_in_session"]),
         ("Sessions with more than one purchase event", orc["sessions_with_more_than_one_purchase_event"]),
         ("(session, product) pairs with repeated purchase events",
          orc["session_product_pairs_with_more_than_one_purchase_event"]),
