@@ -1,10 +1,10 @@
 {
   "manifest": {
-    "git_commit_sha": "a6503a5d3acf6b4dcd6678bb6c09e11f02cafa74",
-    "git_worktree_dirty": true,
+    "git_commit_sha": "dcac233b3c4b2301e5714b35e40e71ba83cfb713",
+    "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-24T06:53:45+00:00",
-    "script": "funnel.ingest"
+    "generated_at_utc": "2026-09-24T11:59:29+00:00",
+    "script": "funnel.ingest --recheck"
   },
   "source": {
     "kaggle_slug": "mkechinov/ecommerce-behavior-data-from-multi-category-store",
@@ -114,6 +114,16 @@
   "checks": {
     "size_matches_kaggle_listing": true,
     "row_counts_match": true,
-    "types_preserved": true
+    "types_preserved": true,
+    "utc_round_trip_exact": true,
+    "utc_round_trip_covers_all_rows": true
+  },
+  "utc_round_trip": {
+    "rows_checked": 42448764,
+    "rows_changed_by_round_trip": 0,
+    "raw_text_min": "2019-10-01 00:00:00 UTC",
+    "raw_text_max": "2019-10-31 23:59:59 UTC",
+    "parsed_min": "2019-10-01 00:00:00",
+    "parsed_max": "2019-10-31 23:59:59"
   }
 }

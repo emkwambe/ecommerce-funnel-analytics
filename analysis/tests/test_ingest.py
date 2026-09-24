@@ -43,9 +43,12 @@ def test_real_ingest_parquet_row_count_equals_csv_row_count():
     conv = ingest["conversion"]
     assert conv["csv_rows_newline_count"] == conv["csv_rows_duckdb"] == conv["parquet_rows"]
     assert conv["csv_columns"] == conv["parquet_columns"]
-    assert ingest["checks"] == {
-        "size_matches_kaggle_listing": True, "row_counts_match": True, "types_preserved": True,
+    required = {
+        "size_matches_kaggle_listing", "row_counts_match", "types_preserved",
+        "utc_round_trip_exact", "utc_round_trip_covers_all_rows",
     }
+    assert required <= set(ingest["checks"]), f"missing checks: {required - set(ingest['checks'])}"
+    assert all(ingest["checks"].values()), ingest["checks"]
     assert ingest["raw_file"]["sha256"] == common.recorded_dataset_sha256()
 
 

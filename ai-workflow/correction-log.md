@@ -82,6 +82,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** `DUCKDB_MEMORY_LIMIT = "2GB"` (the reason is documented in `funnel/common.py`), with the same value in the dbt profile. Threads stay at 4, insertion order stays off, and queries spill to `data/duckdb_tmp`. The gate now reads `\Memory\Available MBytes`.
 - **Guard added:** `require_available_ram()` in `funnel/common.py` reports available memory and halts below 3 GB. `funnel.profile` and `funnel.ingest --recheck` call it, and `python -m funnel.ramcheck` runs it before `dbt build`.
 
+**2026-09-24 · Sprint 1 Step 0 · Ingest evidence test pinned the exact set of checks**
+- **Origin:** Claude Code
+- **What was produced:** `test_real_ingest_parquet_row_count_equals_csv_row_count` asserted that `ingest.json` `checks` equalled a fixed three-key dict.
+- **What was wrong:** once `--recheck` added the two UTC round-trip checks, the test failed on a correct file. It tested the dict's shape rather than whether the checks passed.
+- **How it was caught:** the pytest commit gate (1 failed, 42 passed) before the recheck evidence commit.
+- **Fix:** the test now requires the five named checks to be present and every check to be true.
+- **Guard added:** the same test now also fails if a UTC check is missing.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

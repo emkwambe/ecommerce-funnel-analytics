@@ -63,3 +63,10 @@ All three counts match: **True**. Parquet types equal the CSV-inferred types: **
 ## Raw `event_time` text format
 
 Checked on the raw CSV as text, before type inference. Rows not matching `^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} UTC$`: 0. Null rows: 0. Text after `HH:MM:SS`, with row counts: `' UTC'`: 42448764.
+
+## UTC round trip (`funnel.ingest.utc_round_trip`)
+
+`event_time` is stored as `TIMESTAMP` without a zone. Each raw value was cast to `TIMESTAMP`, formatted back as
+`YYYY-MM-DD HH:MM:SS UTC`, and compared with the raw text. Rows checked: 42448764; rows changed:
+0. Raw text range 2019-10-01 00:00:00 UTC to 2019-10-31 23:59:59 UTC; parsed range
+2019-10-01 00:00:00 to 2019-10-31 23:59:59. Stored values are the logged UTC clock time when no rows change.
