@@ -1,0 +1,29 @@
+# Preflight recaptured 2026-09-24T07:05:49Z (after ingest; the Step 0 gate ran before the conventions commit)
+$ py -0p
+ -V:3.13 *        C:\Program Files\Python313\python.exe
+ -V:3.12          C:\Users\HP\AppData\Local\Programs\Python\Python312\python.exe
+ -V:3.11          C:\Users\HP\AppData\Local\Programs\Python\Python311\python.exe
+$ node -v
+v22.18.0
+$ vercel --version
+Vercel CLI 58.4.4
+58.4.4
+$ gh auth status
+github.com
+  ✓ Logged in to github.com account emkwambe (keyring)
+  - Active account: true
+  - Git operations protocol: https
+  - Token: gho_************************************
+  - Token scopes: 'gist', 'read:org', 'repo', 'workflow'
+$ df -h /c
+Filesystem      Size  Used Avail Use% Mounted on
+C:              476G  423G   53G  89% /c
+$ (Get-PSDrive C).Free / 1GB
+52.86
+$ TotalPhysicalMemory / 1GB
+15.78
+$ analysis/.venv/Scripts/kaggle.exe --version
+Kaggle CLI 2.2.4
+$ KAGGLE_API_TOKEN presence (value never printed)
+user env: set, KGAT_ prefix: True
+$ ls ~/.kaggle

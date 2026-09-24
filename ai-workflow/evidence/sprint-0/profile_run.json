@@ -1,0 +1,26 @@
+{
+  "manifest": {
+    "git_commit_sha": "a6503a5d3acf6b4dcd6678bb6c09e11f02cafa74",
+    "git_worktree_dirty": true,
+    "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+    "generated_at_utc": "2026-09-24T07:39:13+00:00",
+    "script": "funnel.profile"
+  },
+  "free_ram_gb_before_run": 1.94,
+  "duckdb_memory_limit": "4GB",
+  "duckdb_threads": 4,
+  "elapsed_seconds": 806.5,
+  "check_seconds": {
+    "schema": 15.4,
+    "time": 2.1,
+    "event_types": 0.2,
+    "duplicates": 515.4,
+    "price": 13.5,
+    "category_brand": 5.1,
+    "sessions_users": 58.7,
+    "ordering_anomalies": 148.1,
+    "order_reconstruction": 11.2
+  },
+  "peak_spill_bytes": 3839197184,
+  "spill_sample_interval_seconds": 1.0
+}

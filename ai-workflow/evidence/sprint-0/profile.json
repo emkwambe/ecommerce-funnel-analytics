@@ -1,0 +1,360 @@
+{
+  "manifest": {
+    "git_commit_sha": "a6503a5d3acf6b4dcd6678bb6c09e11f02cafa74",
+    "git_worktree_dirty": true,
+    "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+    "generated_at_utc": "2026-09-24T07:39:13+00:00",
+    "script": "funnel.profile"
+  },
+  "schema": {
+    "row_count": 42448764,
+    "columns": [
+      {
+        "name": "event_time",
+        "type": "TIMESTAMP",
+        "null_count": 0,
+        "null_share": 0.0
+      },
+      {
+        "name": "event_type",
+        "type": "VARCHAR",
+        "null_count": 0,
+        "null_share": 0.0
+      },
+      {
+        "name": "product_id",
+        "type": "BIGINT",
+        "null_count": 0,
+        "null_share": 0.0
+      },
+      {
+        "name": "category_id",
+        "type": "BIGINT",
+        "null_count": 0,
+        "null_share": 0.0
+      },
+      {
+        "name": "category_code",
+        "type": "VARCHAR",
+        "null_count": 13515609,
+        "null_share": 0.318398
+      },
+      {
+        "name": "brand",
+        "type": "VARCHAR",
+        "null_count": 6113008,
+        "null_share": 0.144009
+      },
+      {
+        "name": "price",
+        "type": "DOUBLE",
+        "null_count": 0,
+        "null_share": 0.0
+      },
+      {
+        "name": "user_id",
+        "type": "BIGINT",
+        "null_count": 0,
+        "null_share": 0.0
+      },
+      {
+        "name": "user_session",
+        "type": "VARCHAR",
+        "null_count": 2,
+        "null_share": 0.0
+      }
+    ],
+    "distinct_counts": {
+      "product_id": 166794,
+      "category_id": 624,
+      "user_id": 3022290,
+      "user_session": 9244421
+    }
+  },
+  "time": {
+    "event_time_type": "TIMESTAMP",
+    "session_timezone_for_display": "UTC",
+    "min_event_time": "2019-10-01 00:00:00",
+    "max_event_time": "2019-10-31 23:59:59",
+    "events_before_2019_10_01_utc": 0,
+    "events_on_or_after_2019_11_01_utc": 0,
+    "events_outside_october_2019_utc": 0,
+    "null_event_time": 0,
+    "events_with_sub_second_precision": 0
+  },
+  "event_types": {
+    "levels": [
+      "view",
+      "cart",
+      "purchase"
+    ],
+    "counts": {
+      "view": 40779399,
+      "cart": 926516,
+      "purchase": 742849
+    }
+  },
+  "duplicates": {
+    "exact_duplicate_rows": {
+      "surplus_rows": 30220,
+      "duplicate_groups": 18099
+    },
+    "near_duplicates_session_product_type_time": {
+      "surplus_rows": 30221,
+      "duplicate_groups": 18100,
+      "groups_with_non_identical_rows": 1
+    },
+    "near_duplicates_session_product_type_same_second": {
+      "surplus_rows": 30221,
+      "duplicate_groups": 18100,
+      "groups_with_non_identical_rows": 1
+    }
+  },
+  "price": {
+    "zero_price_events": 68673,
+    "negative_price_events": 0,
+    "null_price_events": 0,
+    "zero_price_purchase_events": 0,
+    "negative_price_purchase_events": 0,
+    "quantiles": {
+      "min": 0.0,
+      "p01": 5.89,
+      "p50": 162.93,
+      "p99": 1741.34,
+      "max": 2574.07
+    },
+    "products_with_more_than_one_distinct_price": 57550,
+    "max_distinct_prices_for_one_product": 98
+  },
+  "category_brand": {
+    "category_code": {
+      "null_count": 13515609,
+      "empty_string_count": 0,
+      "null_or_empty_count": 13515609,
+      "null_or_empty_share": 0.318398
+    },
+    "brand": {
+      "null_count": 6113008,
+      "empty_string_count": 0,
+      "null_or_empty_count": 6113008,
+      "null_or_empty_share": 0.144009
+    },
+    "category_ids_mapping_to_more_than_one_category_code": 0,
+    "category_ids_with_both_null_and_non_null_code": 0,
+    "category_codes_mapping_to_more_than_one_category_id": 55
+  },
+  "sessions_users": {
+    "null_user_session_events": 2,
+    "sessions_non_null": 9244421,
+    "sessions_with_more_than_one_user_id": 348,
+    "sessions_spanning_more_than_24_hours": 17086,
+    "events_in_session_quantiles": {
+      "min": 1,
+      "p25": 1,
+      "p50": 2,
+      "p75": 5,
+      "p90": 10,
+      "p99": 32,
+      "max": 1159
+    }
+  },
+  "ordering_anomalies": {
+    "purchase_events_evaluated": 742849,
+    "purchase_events_with_no_view_of_product_in_session": 1276,
+    "purchase_events_with_no_cart_of_product_in_session": 406639,
+    "cart_events_evaluated": 926514,
+    "cart_events_with_no_view_at_or_before_in_session": 4655,
+    "cart_events_with_no_view_strictly_before_in_session": 7336,
+    "purchase_or_cart_events_not_evaluable_null_session_or_product": 2
+  },
+  "order_reconstruction": {
+    "order_or_transaction_id_columns": [],
+    "order_or_transaction_id_exists": false,
+    "sessions_with_at_least_one_purchase_event": 629560,
+    "sessions_with_more_than_one_purchase_event": 80261,
+    "session_product_pairs_with_more_than_one_purchase_event": 41406,
+    "surplus_purchase_events_in_repeated_pairs": 52477,
+    "session_product_pairs_with_repeated_purchase_in_same_second": 75,
+    "publisher_statement_multiple_purchases": "### Multiple purchases per session\n\nA session can have multiple **purchase** events. It's ok, because it's a single order."
+  },
+  "raw_event_time_format": {
+    "expected_regex": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} UTC$",
+    "rows_not_matching": 0,
+    "null_rows": 0,
+    "suffixes_after_time": [
+      {
+        "suffix": " UTC",
+        "rows": 42448764
+      }
+    ]
+  },
+  "decisions_needed": [
+    {
+      "id": "D1",
+      "title": "Deduplication",
+      "observed": true,
+      "evidence": [
+        "Exact duplicate rows: 30220 surplus rows in 18099 groups.",
+        "Same (user_session, product_id, event_type, event_time): 30221 surplus rows in 18100 groups; 1 of those groups contain rows that differ in another column.",
+        "Same (user_session, product_id, event_type) within one second: 30221 surplus rows in 18100 groups; 1 contain non-identical rows."
+      ],
+      "choice_forced": "Which rows count as one event before any funnel count.",
+      "options": [
+        "Keep all rows as logged.",
+        "Drop exact duplicate rows only.",
+        "Collapse on (user_session, product_id, event_type, event_time).",
+        "Collapse on (user_session, product_id, event_type) within the same second.",
+        "Apply different rules per event type (for example, collapse purchases only)."
+      ]
+    },
+    {
+      "id": "D2",
+      "title": "Zero, negative, and null prices",
+      "observed": true,
+      "evidence": [
+        "Zero-price events: 68673 (of which purchase events: 0).",
+        "Negative-price events: 0 (of which purchase events: 0).",
+        "Null-price events: 0."
+      ],
+      "choice_forced": "Whether zero, negative, or null priced purchases count toward revenue and toward purchase counts.",
+      "options": [
+        "Count them as purchases and as revenue at their logged price.",
+        "Count them as purchases but exclude them from revenue.",
+        "Exclude them from both purchases and revenue.",
+        "Flag them in a separate data-quality metric only."
+      ]
+    },
+    {
+      "id": "D3",
+      "title": "Price varies for the same product",
+      "observed": true,
+      "evidence": [
+        "Products with more than one distinct price: 57550; maximum distinct prices for one product: 98."
+      ],
+      "choice_forced": "Which price is the value of a purchase or of a lost cart.",
+      "options": [
+        "Use the price logged on each event.",
+        "Use the price on the purchase event for purchases and the cart event for carts.",
+        "Use a per-product reference price (for example, the median across the month)."
+      ]
+    },
+    {
+      "id": "D4",
+      "title": "Order definition without an order ID",
+      "observed": true,
+      "evidence": [
+        "Order or transaction ID columns found: none.",
+        "Sessions with at least one purchase event: 629560; with more than one: 80261.",
+        "(user_session, product_id) pairs with more than one purchase event: 41406 (52477 surplus events); pairs with repeats in the same second: 75.",
+        "Publisher statement (evidence only, not a decision), verbatim from the Kaggle dataset page: \"A session can have multiple **purchase** events. It's ok, because it's a single order.\""
+      ],
+      "choice_forced": "What one order is, which determines order counts and order value.",
+      "options": [
+        "One order per session that has at least one purchase event.",
+        "One order per (session, product) purchase pair.",
+        "One order per purchase event.",
+        "Purchase events grouped by user_id within a time window."
+      ]
+    },
+    {
+      "id": "D5",
+      "title": "Purchases without a view or cart of that product in the session",
+      "observed": true,
+      "evidence": [
+        "Purchase events evaluated: 742849.",
+        "With no view of the product in the session: 1276.",
+        "With no cart of the product in the session: 406639."
+      ],
+      "choice_forced": "Whether the funnel requires the preceding steps in the same session.",
+      "options": [
+        "Count them in the purchase step regardless of earlier steps.",
+        "Exclude them from step-to-step funnel counts but keep them in totals.",
+        "Attribute earlier steps across sessions by user_id.",
+        "Treat purchases without a cart as a separate path (for example, direct buy)."
+      ]
+    },
+    {
+      "id": "D6",
+      "title": "Cart events with no prior view",
+      "observed": true,
+      "evidence": [
+        "Cart events evaluated: 926514.",
+        "No view at or before the cart time in the session: 4655.",
+        "No view strictly before the cart time (same-second views excluded): 7336."
+      ],
+      "choice_forced": "Whether view-before-cart is required, and whether a same-second view counts as prior.",
+      "options": [
+        "Require no ordering; count any cart.",
+        "Require a view at or before the cart in the same session.",
+        "Require a view strictly before the cart.",
+        "Look for the view across sessions by user_id."
+      ]
+    },
+    {
+      "id": "D7",
+      "title": "Missing or inconsistent category and brand",
+      "observed": true,
+      "evidence": [
+        "category_code null or empty: 13515609 events.",
+        "brand null or empty: 6113008 events.",
+        "category_id values mapping to more than one category_code: 0; with both null and non-null codes: 0.",
+        "category_code values mapping to more than one category_id: 55."
+      ],
+      "choice_forced": "How category and brand breakdowns treat missing and inconsistent labels.",
+      "options": [
+        "Group missing labels as an explicit 'unknown' level.",
+        "Break down by category_id instead of category_code.",
+        "Exclude missing labels from category or brand breakdowns only.",
+        "Map each category_id to one code by a stated rule."
+      ]
+    },
+    {
+      "id": "D8",
+      "title": "Session anomalies",
+      "observed": true,
+      "evidence": [
+        "Events with null user_session: 2.",
+        "Sessions with more than one user_id: 348.",
+        "Sessions spanning more than 24 hours: 17086."
+      ],
+      "choice_forced": "Whether the session is a valid funnel unit as logged.",
+      "options": [
+        "Use user_session as logged.",
+        "Exclude null, multi-user, or over-24-hour sessions.",
+        "Split sessions by user_id, or re-sessionize by an inactivity gap.",
+        "Use user_id with a time window instead of sessions."
+      ]
+    },
+    {
+      "id": "D9",
+      "title": "Event types beyond view, cart, purchase",
+      "observed": false,
+      "evidence": [
+        "Event type levels observed: view, cart, purchase.",
+        "Counts per level: view 40779399, cart 926516, purchase 742849."
+      ],
+      "choice_forced": "Which event types enter the funnel.",
+      "options": [
+        "Use view, cart, and purchase only; ignore other levels.",
+        "Use other levels (for example, remove_from_cart) as a separate abandonment signal.",
+        "Net cart events against removals before counting cart."
+      ]
+    },
+    {
+      "id": "D10",
+      "title": "Time zone and month boundary",
+      "observed": true,
+      "evidence": [
+        "event_time type: TIMESTAMP; range 2019-10-01 00:00:00 to 2019-10-31 23:59:59 (displayed in UTC).",
+        "Events outside October 2019 in UTC: 0.",
+        "The store's local time zone is not stated in the data."
+      ],
+      "choice_forced": "Which clock defines days and hours for time breakdowns, and how boundary events are handled.",
+      "options": [
+        "Use UTC as logged.",
+        "Convert to a stated store-local time zone.",
+        "Drop or keep events outside October 2019 in UTC."
+      ]
+    }
+  ]
+}

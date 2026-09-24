@@ -1,0 +1,119 @@
+{
+  "manifest": {
+    "git_commit_sha": "a6503a5d3acf6b4dcd6678bb6c09e11f02cafa74",
+    "git_worktree_dirty": true,
+    "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+    "generated_at_utc": "2026-09-24T06:53:45+00:00",
+    "script": "funnel.ingest"
+  },
+  "source": {
+    "kaggle_slug": "mkechinov/ecommerce-behavior-data-from-multi-category-store",
+    "url": "https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store"
+  },
+  "raw_file": {
+    "name": "2019-Oct.csv",
+    "size_bytes": 5668612855,
+    "kaggle_listed_size_bytes": 5668612855,
+    "sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+    "retrieved_at_utc": "2026-09-24T06:37:16+00:00",
+    "download_artifact": "2019-Oct.csv.zip",
+    "download_artifact_sha256": "cb9a926bfe9317ed07044aa185f44771795e0d00489907bdd036ca434cacc4a8"
+  },
+  "conversion": {
+    "csv_columns": [
+      {
+        "name": "event_time",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "event_type",
+        "type": "VARCHAR"
+      },
+      {
+        "name": "product_id",
+        "type": "BIGINT"
+      },
+      {
+        "name": "category_id",
+        "type": "BIGINT"
+      },
+      {
+        "name": "category_code",
+        "type": "VARCHAR"
+      },
+      {
+        "name": "brand",
+        "type": "VARCHAR"
+      },
+      {
+        "name": "price",
+        "type": "DOUBLE"
+      },
+      {
+        "name": "user_id",
+        "type": "BIGINT"
+      },
+      {
+        "name": "user_session",
+        "type": "VARCHAR"
+      }
+    ],
+    "parquet_columns": [
+      {
+        "name": "event_time",
+        "type": "TIMESTAMP"
+      },
+      {
+        "name": "event_type",
+        "type": "VARCHAR"
+      },
+      {
+        "name": "product_id",
+        "type": "BIGINT"
+      },
+      {
+        "name": "category_id",
+        "type": "BIGINT"
+      },
+      {
+        "name": "category_code",
+        "type": "VARCHAR"
+      },
+      {
+        "name": "brand",
+        "type": "VARCHAR"
+      },
+      {
+        "name": "price",
+        "type": "DOUBLE"
+      },
+      {
+        "name": "user_id",
+        "type": "BIGINT"
+      },
+      {
+        "name": "user_session",
+        "type": "VARCHAR"
+      }
+    ],
+    "csv_rows_duckdb": 42448764,
+    "parquet_rows": 42448764,
+    "csv_rows_newline_count": 42448764
+  },
+  "raw_event_time_format": {
+    "expected_regex": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} UTC$",
+    "rows_not_matching": 0,
+    "null_rows": 0,
+    "suffixes_after_time": [
+      {
+        "suffix": " UTC",
+        "rows": 42448764
+      }
+    ]
+  },
+  "checks": {
+    "size_matches_kaggle_listing": true,
+    "row_counts_match": true,
+    "types_preserved": true
+  }
+}
