@@ -1,0 +1,26 @@
+# Python
+analysis/.venv/
+__pycache__/
+.pytest_cache/
+*.egg-info/
+
+# Data (raw, parquet, warehouse) is never committed
+data/
+
+# Web
+web/node_modules/
+web/.next/
+web/.vercel/
+
+# dbt
+pipeline/target/
+pipeline/logs/
+
+# Secrets and environment files
+.env*
+kaggle.json
+
+# Full-resolution evidence images (commit only downsized copies)
+ai-workflow/evidence/**/*-full.png
+ai-workflow/evidence/**/*-full.jpg
+ai-workflow/evidence/**/full/
