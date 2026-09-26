@@ -30,7 +30,7 @@ Observed behavior outranks remembered behavior. When sources conflict, follow th
 | Production smoke (`npm --prefix web run smoke`) | Deployed state: pages, exports, manifest hashes, attribution | — | Pass/fail per check |
 | Screenshots (`npm --prefix web run screenshots`) | Rendered pages at 390 px and desktop, both themes; page overflow and clipped scroll boxes | Reading a text rendering of a page | WebP evidence (300 KB limit), pass/fail per page |
 | CI (GitHub Actions, from Sprint 2) | Gates that run independently of the local agent: pytest on committed exports and fixtures, web lint and build, link check | Heavy data runs (no raw data or dbt in CI) | CI logs |
-| Copilot review | A second-model code review | Validating statistics or domain meaning | Review comments (to evaluate, not obey). Availability: recorded in Sprint 2 Step 1 |
+| Copilot review | A second-model code review | Validating statistics or domain meaning | Review comments (to evaluate, not obey). **Not available to this account, as observed 2026-09-26** (Sprint 2 Step 1, PR #1): `gh pr edit 1 --add-reviewer "@copilot"` and the REST call `POST /pulls/1/requested_reviewers` with `copilot-pull-request-reviewer[bot]` both returned success, but no reviewer was recorded and the PR timeline shows no `review_requested` event. The first project (`email-experiment-readout`) has no PRs, so there is no earlier evidence. PRs proceed on CI plus the owner's review; recheck if the owner enables a Copilot plan |
 | LLM judgment (Chat or Code) | Planning, framing questions, drafting | Anything that can be computed, queried, or tested | Proposals only; never evidence |
 
 ## Environment
@@ -60,7 +60,7 @@ Observed behavior outranks remembered behavior. When sources conflict, follow th
 ### External systems
 | System | Role | Notes |
 |---|---|---|
-| GitHub (`emkwambe/ecommerce-funnel-analytics`) | Source, CI, Copilot review | Tier: Governed from Sprint 2 (branch → PR → CI → Copilot review if available → owner merge). Tags: `v1.0.1` only; v1.0.0 was never tagged (see `CHANGELOG.md`) |
+| GitHub (`emkwambe/ecommerce-funnel-analytics`, public) | Source, CI (status checks `python-tests`, `web-build`, `docs-checks`; GitGuardian also reports on PRs) | Copilot review not available (see above). Tier: Governed from Sprint 2 (branch → PR → CI → Copilot review if available → owner merge). Tags: `v1.0.1` only; v1.0.0 was never tagged (see `CHANGELOG.md`) |
 | Vercel (project `ecommerce-funnel-analytics`, id `prj_0lDt1FQ5rZPbWrx2KFzrPk7HEFjG`) | Production | Domain: https://ecommercefunnel-analytics.vercel.app, a project domain (verified via the project domains API, not a one-off alias). No git link: deploys happen only through the CLI, so merges and PRs do not deploy. Vercel builds on Node 24.x; local builds use Node 22.18.0 |
 | Kaggle: "eCommerce behavior data from multi category store" (REES46, Open CDP), October 2019 file | Data source | License field `copyright-authors`; owner's basis for use and the dataset SHA-256 in `docs/data-source.md`. Aggregates only; no raw or row-level data committed. Token: `KAGGLE_API_TOKEN` (see `.env.example`) |
 
