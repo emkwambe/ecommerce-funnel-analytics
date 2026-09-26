@@ -154,6 +154,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the tie tests ran and passed before the marts were built. The final Step 3 evidence is a full `dbt build` with no selection.
 - **Guard added:** `funnel.build` reads dbt's manifest and run results after every build. It records tests run against tests expected (every test that depends on a model built in the run), and it fails the run if any expected test did not run or was skipped. `analysis/tests/test_build_coverage.py` covers the guard, including this case.
 
+**2026-09-26 · Sprint 1 Step 3 · Build record's dbt summary was always empty**
+- **Origin:** Claude Code
+- **What was produced:** `summary_lines()` in `funnel/build.py` kept dbt's result lines by stripping a leading timestamp when a line began with digits.
+- **What was wrong:** dbt colours its log output, so every line begins with an ANSI escape code, not a digit. No line matched, and every record in `ai-workflow/evidence/sprint-1/dbt_build_runs.json` up to and including the clean-tree full build at `6f8045b` has `"dbt_summary": []`. The exit codes, elapsed times, spill figures, and test-coverage counts in those records are unaffected.
+- **How it was caught:** Claude Code's review of the final Step 3 evidence record before committing it.
+- **Fix:** ANSI codes are stripped before the timestamp. The record also stores the `Done.` line's counts as `dbt_done_counts`. The full build is rerun from a clean tree, so the Step 3 evidence record is complete. Earlier records are left as written.
+- **Guard added:** `funnel.build` fails a run whose output has no `Done. PASS=` line. `test_summary_lines_strip_colour_codes_and_timestamps` uses real dbt output, including the escape codes.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

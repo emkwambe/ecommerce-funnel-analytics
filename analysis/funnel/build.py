@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -41,14 +42,25 @@ def dbt_command(extra_args: list[str]) -> list[str]:
             *extra_args]
 
 
+ANSI_ESCAPE = re.compile(r"\x1b\[[0-9;]*m")
+LOG_TIMESTAMP = re.compile(r"^\d{2}:\d{2}:\d{2}\s+")
+DONE_COUNTS = re.compile(r"\b([A-Z][A-Z-]*)=(\d+)")
+
+
 def summary_lines(output: str) -> list[str]:
-    """dbt's own result lines, with the log timestamp prefix removed."""
+    """dbt's own result lines, with colour codes and the log timestamp removed."""
     lines = []
     for raw in output.splitlines():
-        text = raw.split("  ", 1)[-1].strip() if raw[:2].isdigit() else raw.strip()
+        text = LOG_TIMESTAMP.sub("", ANSI_ESCAPE.sub("", raw).strip())
         if text.startswith(SUMMARY_PREFIXES):
             lines.append(text)
     return lines
+
+
+def done_counts(lines: list[str]) -> dict[str, int] | None:
+    """Counts from dbt's 'Done. PASS=.. WARN=.. ERROR=.. ... TOTAL=..' line."""
+    done = next((line for line in reversed(lines) if line.startswith("Done. PASS=")), None)
+    return {k.lower().replace("-", "_"): int(v) for k, v in DONE_COUNTS.findall(done)} if done else None
 
 
 def test_coverage(manifest_nodes: dict[str, Any], results: list[dict[str, Any]]) -> dict[str, Any]:
@@ -122,7 +134,8 @@ def main() -> None:
         "peak_spill_bytes": peak_spill,
         "spill_sample_interval_seconds": 1.0,
         "dbt_exit_code": exit_code,
-        "dbt_summary": summary_lines("".join(chunks)),
+        "dbt_summary": (summary := summary_lines("".join(chunks))),
+        "dbt_done_counts": done_counts(summary),
         "test_coverage": coverage,
     }
     append_run(record)
@@ -135,6 +148,9 @@ def main() -> None:
           f"(models built: {coverage['models_built']})", flush=True)
     if coverage["tests_expected_not_run"]:
         print("HALT: expected tests did not run: " + ", ".join(coverage["tests_expected_not_run"]), flush=True)
+        sys.exit(exit_code or 1)
+    if record["dbt_done_counts"] is None:
+        print("HALT: dbt's 'Done. PASS=' summary line was not found in the output.", flush=True)
         sys.exit(exit_code or 1)
     sys.exit(exit_code)
 

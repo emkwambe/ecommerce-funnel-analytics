@@ -50,3 +50,22 @@ def test_skipped_test_counts_as_not_run():
 def test_failed_model_expects_no_tests():
     results = [result(MODEL_INT, "error")]
     assert coverage_of(NODES, results)["tests_expected"] == 0
+
+
+def test_summary_lines_strip_colour_codes_and_timestamps():
+    from funnel.build import done_counts, summary_lines
+
+    output = (
+        "\x1b[0m05:56:11  Finished running 10 table models, 78 data tests in 0 hours 17 minutes.\n"
+        "\x1b[0m05:56:11  \x1b[32mCompleted successfully\x1b[0m\n"
+        "\x1b[0m05:56:11  Done. PASS=88 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=88\n"
+    )
+    lines = summary_lines(output)
+    assert lines == [
+        "Finished running 10 table models, 78 data tests in 0 hours 17 minutes.",
+        "Completed successfully",
+        "Done. PASS=88 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=88",
+    ]
+    assert done_counts(lines) == {"pass": 88, "warn": 0, "error": 0, "skip": 0, "no_op": 0, "reused": 0,
+                                  "total": 88}
+    assert done_counts([]) is None
