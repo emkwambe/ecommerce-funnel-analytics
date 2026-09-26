@@ -1,0 +1,132 @@
+version: 2
+
+models:
+  - name: int_sessions
+    description: >
+      One row per valid session (metrics.md Section 3): user_session as logged, excluding
+      null-session events and sessions with more than one user_id. Sessions longer than
+      24 hours are kept and flagged for the sensitivity check.
+    columns:
+      - name: user_session
+        description: Session identifier (grain key).
+        data_tests: [unique, not_null]
+      - name: user_id
+        description: The session's single user_id.
+      - name: session_start
+        description: Timestamp of the session's first event, UTC.
+        data_tests: [not_null]
+      - name: session_end
+        description: Timestamp of the session's last event, UTC.
+        data_tests: [not_null]
+      - name: session_start_day_utc
+        description: >
+          UTC day of the session's first event. Daily KPIs assign each session, its order, and
+          its revenue to this day, labeled "UTC day of session start" (Section 9, Time).
+        data_tests: [not_null]
+      - name: has_view
+        description: At least one view event (Section 6, Sessions with an observed view).
+        data_tests: [not_null]
+      - name: has_cart
+        description: At least one cart event (Section 6, Sessions with an observed cart event).
+        data_tests: [not_null]
+      - name: has_purchase
+        description: At least one purchase event; such a session is one order (Section 4, D4).
+        data_tests: [not_null]
+      - name: is_long_session
+        description: Last event more than 24 hours after the first (Section 3; kept, sensitivity check).
+        data_tests: [not_null]
+      - name: event_count
+        description: Deduplicated events in the session.
+        data_tests: [not_null]
+      - name: view_event_count
+        description: View events in the session.
+      - name: cart_event_count
+        description: Cart events in the session (observed cart events, Section 7).
+      - name: purchase_event_count
+        description: Purchase events in the session.
+
+  - name: int_session_products
+    description: >
+      One row per (valid session, product) pair with at least one event (Sections 4 and 7).
+      Carted value, zero-price carted pairs, and the carted-value category are defined at this
+      grain. Tie tests fail the build if a latest or earliest value is ambiguous.
+    data_tests:
+      - unique:
+          arguments:
+            column_name: "user_session || '|' || product_id"
+    columns:
+      - name: user_session
+        description: Session identifier (grain key, with product_id).
+        data_tests: [not_null]
+      - name: product_id
+        description: Product identifier (grain key, with user_session).
+        data_tests: [not_null]
+      - name: has_view
+        description: The product has a view event in the session.
+      - name: is_carted
+        description: The product has a cart event in the session (a carted pair, Section 7).
+        data_tests: [not_null]
+      - name: is_purchased
+        description: The product has a purchase event in the session.
+        data_tests: [not_null]
+      - name: cart_event_count
+        description: Cart events of the pair.
+      - name: purchase_event_count
+        description: Purchase events of the pair; more than one may be extra units or repeated logging (Section 4).
+      - name: latest_cart_time
+        description: Timestamp of the pair's latest cart event.
+      - name: latest_cart_price
+        description: Price on the pair's latest cart event, zero included (reference only; not a value metric).
+      - name: latest_nonzero_cart_price
+        description: >
+          Price on the latest cart event of the pair whose price is above zero: the pair's carted
+          value (Section 7). Null for zero-price carted pairs.
+      - name: is_zero_price_carted_pair
+        description: >
+          Carted pair whose cart events are all zero-price. Counted in pair counts, excluded from
+          value; the count is a data-quality metric (Sections 7 and 10).
+        data_tests: [not_null]
+      - name: latest_cart_category_top
+        description: Top-level category on the pair's latest cart event; groups carted value (Section 7).
+      - name: latest_cart_category_code_label
+        description: Full category code on the pair's latest cart event, for drill-downs (Sections 7 and 9).
+      - name: earliest_purchase_price
+        description: Price on the pair's earliest purchase event; summed for secondary revenue (Section 4).
+
+  - name: int_purchases
+    description: >
+      One row per deduplicated purchase event in a valid session, with its purchase path
+      (Sections 4 and 5).
+    columns:
+      - name: event_id
+        description: Deduplicated event key from stg_events (grain key).
+        data_tests: [unique, not_null]
+      - name: user_session
+        description: Session identifier.
+        data_tests: [not_null]
+      - name: product_id
+        description: Product identifier.
+        data_tests: [not_null]
+      - name: event_time
+        description: Purchase timestamp, UTC.
+      - name: session_start_day_utc
+        description: UTC day of session start, for daily revenue (Section 9, Time).
+        data_tests: [not_null]
+      - name: price
+        description: Purchase price; revenue is the sum of these (Section 4, primary).
+        data_tests: [not_null]
+      - name: category_top
+        description: Top-level category on the purchase event, or "unknown".
+      - name: category_code_label
+        description: Full category code on the purchase event, or "unknown".
+      - name: brand_label
+        description: Brand on the purchase event, or "unknown".
+      - name: purchase_path
+        description: Section 5 path label, by whether the product has a cart event anywhere in the same session.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - "Purchase with an observed same-session cart event"
+                  - "Purchase with no observed same-session cart event"

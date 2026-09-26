@@ -74,6 +74,79 @@
       "spill_sample_interval_seconds": 1.0,
       "dbt_exit_code": 0,
       "dbt_summary": []
+    },
+    {
+      "manifest": {
+        "git_commit_sha": "6c40518bb3eb2f54aed997b3c85aa538b898bd74",
+        "git_worktree_dirty": true,
+        "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+        "generated_at_utc": "2026-09-26T05:22:46+00:00",
+        "script": "funnel.build"
+      },
+      "dbt_args": [
+        "build",
+        "--select",
+        "intermediate",
+        "--indirect-selection",
+        "cautious"
+      ],
+      "available_ram_gb_before_run": 5.25,
+      "duckdb_memory_limit": "2GB",
+      "duckdb_threads": 4,
+      "dbt_threads": 1,
+      "elapsed_seconds": 176.7,
+      "peak_spill_bytes": 9033940992,
+      "spill_sample_interval_seconds": 1.0,
+      "dbt_exit_code": 0,
+      "dbt_summary": []
+    },
+    {
+      "manifest": {
+        "git_commit_sha": "6c40518bb3eb2f54aed997b3c85aa538b898bd74",
+        "git_worktree_dirty": true,
+        "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+        "generated_at_utc": "2026-09-26T05:23:44+00:00",
+        "script": "funnel.build"
+      },
+      "dbt_args": [
+        "build",
+        "--select",
+        "assert_no_tied_latest_nonzero_cart_price",
+        "assert_no_tied_latest_cart_category",
+        "assert_no_tied_earliest_purchase_price"
+      ],
+      "available_ram_gb_before_run": 5.93,
+      "duckdb_memory_limit": "2GB",
+      "duckdb_threads": 4,
+      "dbt_threads": 1,
+      "elapsed_seconds": 19.3,
+      "peak_spill_bytes": 0,
+      "spill_sample_interval_seconds": 1.0,
+      "dbt_exit_code": 0,
+      "dbt_summary": []
+    },
+    {
+      "manifest": {
+        "git_commit_sha": "6c40518bb3eb2f54aed997b3c85aa538b898bd74",
+        "git_worktree_dirty": true,
+        "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+        "generated_at_utc": "2026-09-26T05:24:42+00:00",
+        "script": "funnel.build"
+      },
+      "dbt_args": [
+        "build",
+        "--select",
+        "marts"
+      ],
+      "available_ram_gb_before_run": 5.96,
+      "duckdb_memory_limit": "2GB",
+      "duckdb_threads": 4,
+      "dbt_threads": 1,
+      "elapsed_seconds": 25.7,
+      "peak_spill_bytes": 2296086528,
+      "spill_sample_interval_seconds": 1.0,
+      "dbt_exit_code": 0,
+      "dbt_summary": []
     }
   ]
 }

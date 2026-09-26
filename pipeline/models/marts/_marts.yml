@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: mart_kpis_daily
+    description: >
+      Section 4 (orders, revenue, AOV, revenue per session) and Section 6 (session funnel) metrics
+      over valid sessions, one row per UTC day of session start and one row for the month.
+      Each session, its order, and its revenue count on the UTC day of the session's first event
+      (Section 9, Time).
+    columns:
+      - name: period_key
+        description: period_type and period_start (grain key).
+        data_tests: [unique, not_null]
+      - name: period_type
+        description: "'day' or 'month'."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["day", "month"]
+      - name: period_start
+        description: UTC day of session start, or the first day of the month for the month row.
+        data_tests: [not_null]
+      - name: period_label
+        description: Display label; always names the UTC day of session start (Section 1 rule 5; Section 9).
+      - name: sessions
+        description: Valid sessions (Section 6, Sessions).
+      - name: sessions_with_view
+        description: Valid sessions with at least one view event (Section 6, "Sessions with an observed view").
+      - name: sessions_with_cart
+        description: Valid sessions with at least one cart event (Section 6, "Sessions with an observed cart event").
+      - name: sessions_with_purchase
+        description: Valid sessions with at least one purchase event (Section 6, "Sessions with an observed purchase").
+      - name: orders
+        description: Sessions with an observed purchase; one order per such session (Section 4, D4).
+      - name: viewing_sessions_with_cart
+        description: Sessions with a view and at least one cart event; numerator of the view-to-cart session rate (Section 6).
+      - name: cart_sessions_with_carted_product_purchase
+        description: >
+          Sessions with at least one cart event and at least one purchase of a product that has a
+          cart event in that session; numerator of the cart-session purchase rate (Section 6).
+      - name: cart_sessions_with_no_observed_purchase
+        description: >
+          Sessions with at least one cart event and no purchase event of any product (Section 6,
+          "Sessions with an observed cart event and no observed purchase in this session").
+      - name: revenue
+        description: Sum of price over deduplicated purchase events in valid sessions (Section 4, primary).
+      - name: revenue_repeat_collapsed
+        description: >
+          Sum over (session, product) purchase pairs of the earliest purchase event's price
+          (Section 4, secondary). Always shown with revenue where the difference is discussed.
+      - name: session_purchase_rate
+        description: sessions_with_purchase / sessions (Section 6, "Sessions with an observed purchase (%)").
+      - name: view_to_cart_session_rate
+        description: viewing_sessions_with_cart / sessions_with_view (Section 6, "Viewing sessions with an observed cart event (%)").
+      - name: cart_session_purchase_rate
+        description: >
+          cart_sessions_with_carted_product_purchase / sessions_with_cart (Section 6, "Sessions with
+          an observed cart event and an observed purchase of a carted product (%)").
+      - name: average_order_value
+        description: revenue / orders (Section 4).
+      - name: revenue_per_session
+        description: revenue / sessions (Section 4).
+
+  - name: mart_purchase_paths
+    description: >
+      Section 5 metrics per purchase path: purchase event counts, revenue, and revenue share.
+      Totals include both paths.
+    columns:
+      - name: purchase_path
+        description: Section 5 path label (grain key).
+        data_tests:
+          - unique
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - "Purchase with an observed same-session cart event"
+                  - "Purchase with no observed same-session cart event"
+      - name: purchase_events
+        description: Deduplicated purchase events in valid sessions on this path.
+      - name: revenue
+        description: Sum of purchase price on this path (Section 4, primary revenue).
+      - name: revenue_share
+        description: This path's revenue / total revenue (Section 5).
