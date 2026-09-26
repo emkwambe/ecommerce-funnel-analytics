@@ -1,27 +1,27 @@
 {
   "manifest": {
-    "git_commit_sha": "f6f5c28f7f027e90ddf4ab4dc7f3e0f52b2985d6",
+    "git_commit_sha": "6e920f59ffd1aefb1da7ff9b67d55d98eaaeaf87",
     "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-26T09:34:23+00:00",
+    "generated_at_utc": "2026-09-26T14:16:28+00:00",
     "script": "funnel.export"
   },
   "pipeline_build": {
-    "git_commit_sha": "4ec60953f5b37a52de4fe8b4b75cd08a74773182",
-    "generated_at_utc": "2026-09-26T09:24:02+00:00",
+    "git_commit_sha": "e335f67977579076aef48d2ca640c68f8526c9e3",
+    "generated_at_utc": "2026-09-26T11:36:33+00:00",
     "dbt_done_counts": {
-      "pass": 90,
+      "pass": 149,
       "warn": 0,
       "error": 0,
       "skip": 0,
       "no_op": 0,
       "reused": 0,
-      "total": 90
+      "total": 149
     },
     "test_coverage": {
-      "models_built": 10,
-      "tests_expected": 80,
-      "tests_run": 80,
+      "models_built": 15,
+      "tests_expected": 134,
+      "tests_run": 134,
       "tests_expected_not_run": []
     }
   },
@@ -170,7 +170,9 @@
       "summary": "One order is one valid session with an observed purchase.",
       "metrics_section": "4",
       "related_sections": [],
-      "changes": []
+      "changes": [
+        "2026-09-26 · Sprint 2 investigations: the two revenue figures (A) and later purchases of carted products (B) (Sections 4, 7, 10)"
+      ]
     },
     {
       "id": "D5",
@@ -213,7 +215,8 @@
         "10"
       ],
       "changes": [
-        "2026-09-26 · Clarifications before the first mart build (Sections 6, 9, 10)"
+        "2026-09-26 · Clarifications before the first mart build (Sections 6, 9, 10)",
+        "2026-09-26 · Sprint 2 investigations: the two revenue figures (A) and later purchases of carted products (B) (Sections 4, 7, 10)"
       ]
     },
     {
@@ -256,6 +259,15 @@
       "sections": [
         "5",
         "6"
+      ]
+    },
+    {
+      "title": "2026-09-26 · Sprint 2 investigations: the two revenue figures (A) and later purchases of carted products (B) (Sections 4, 7, 10)",
+      "date": "2026-09-26",
+      "sections": [
+        "4",
+        "7",
+        "10"
       ]
     }
   ],

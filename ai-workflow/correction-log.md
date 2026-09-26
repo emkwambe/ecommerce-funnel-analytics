@@ -1,6 +1,6 @@
 # Correction Log
 
-This log records every place where AI-generated work, from Claude Code or Claude Chat, was wrong, incomplete, or overconfident, and how the error was caught. The value of AI-assisted analysis depends on the verification around it, and that verification should be visible. A human reviews and owns every decision recorded here.
+This log records every place where AI-generated work, from Claude Code or Claude Chat, was wrong, incomplete, or overconfident, and how the error was caught. The value of AI-assisted analysis depends on the verification around it, and that verification should be visible. A human reviews and owns every decision recorded here. From Sprint 2, it also records errors in the project owner's own specifications when a check catches them (origin "Project owner").
 
 Each entry is added in the same commit as its fix.
 
@@ -250,6 +250,62 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **How it was caught:** the pytest commit gate before the Changes-entry commit (1 failed, 120 passed). Nothing was committed.
 - **Fix:** the test asserts that D4 links to exactly the Sprint 2 entry and that D1 still links to none. The owner-approved entry text is unchanged. Ships in this commit.
 - **Guard added:** none new; the test now checks the rule's output for the current contract.
+
+**2026-09-26 · Sprint 2 Step 4 · Wording guard could pass on nothing and did not check its injections**
+- **Origin:** Claude Code (`analysis/tests/test_wording_guard.py`, Sprint 2 Step 3, commit `7a73028`)
+- **What was produced:** a guard that scanned the `/investigations` pages only `if INVESTIGATIONS.exists()`, and a boundary test that injected a phrase by `str.replace` on a heading and then checked the findings.
+- **What was wrong:** with no pages, the investigations surface was silently absent and the test still passed, so the guard reported green on a surface it never read. It also did not scan the exported files those pages render from. If a heading were renamed, the injection's `replace` would change nothing, and the "inside Section 1" half would pass vacuously.
+- **How it was caught:** human review by the project owner of the merged test (`76467d3..7a73028`), before Step 4.
+- **Fix:** each surface is a parametrized case that must find all its files. The investigations surface is skipped, with the reason stated, only while no page exists; afterwards it also scans `investigation*.json` exports and `metrics_index.json`. Both injections assert that the text changed. Ships in this commit, before any Step 4 computation.
+- **Guard added:** the per-surface file assertions and the injection-changed assertions themselves.
+
+**2026-09-26 · Sprint 2 Step 4 · Added wording-guard term `prove\w*` was over-broad**
+- **Origin:** Project owner (the Step 4 instruction to extend the phrase list, the owner's own specification), implemented as given by Claude Code
+- **What was produced:** the phrase `prove\w*` in the wording guard.
+- **What was wrong:** at a word boundary it also matches "provenance", a project rule term (CLAUDE.md rule 5), which appears twice in `README.md`. The guard would have failed on correct text.
+- **How it was caught:** Claude Code's pre-commit check against the stop condition in the same instruction: before committing, any new term matching existing guarded text was reported to the owner rather than resolved by rephrasing or dropping it. The test run showed `wording guard: {'README.md': ['provenance']}` (1 failed, 13 passed, 1 skipped). Nothing was committed.
+- **Fix:** the project owner chose to list the word forms `prove|proves|proved|proven|proving`. The README is unchanged. Ships in this commit.
+- **Guard added:** "provenance", "improve", and "approve" are in the legitimate-wording assertion, so widening the term back to `prove\w*`, or dropping the word boundary, fails the test (checked: the wide pattern flags "provenance", and the unanchored pattern also flags "improve" and "approve").
+
+**2026-09-26 · Sprint 2 Step 4 · Correction-log entry written outside the log's classification rules**
+- **Origin:** Claude Code
+- **What was produced:** the entry above on the over-broad `prove\w*` term, with an Origin line that named the owner's specification in prose and a "How it was caught" line with no classifier keyword.
+- **What was wrong:** the `/how-its-built` statistics classify each entry by its Origin line (only "Claude Code" or "Claude Chat") and by keywords in "How it was caught". The entry fell into "Other" on both counts.
+- **How it was caught:** the pytest commit gate (`test_every_correction_log_entry_is_classified`: 1 failed, 133 passed). Nothing was committed.
+- **Fix:** `funnel/export.py` gains the origin "Project owner" (`ORIGINS`), with the displayed rule updated. The log's opening paragraph states that owner-specification errors are recorded. The entry's lines now read "Project owner" and "Claude Code's pre-commit check". Ships in this commit.
+- **Guard added:** none new; the existing classification test caught it.
+
+**2026-09-26 · Sprint 2 Step 4 · Commit message stated a test count before the gate reported it**
+- **Origin:** Claude Code
+- **What was produced:** the commit message of `35eba66`, which reads "pytest: 136 passed, 1 skipped".
+- **What was wrong:** the message was written before the gate's rerun finished, and the gate's own output was "134 passed, 1 skipped". The commit was gated correctly (it ran only after exit code 0); only the reported count was wrong.
+- **How it was caught:** Claude Code's review of the command output after the push.
+- **Fix:** recorded here. `35eba66` is pushed and history is not rewritten.
+- **Guard added:** commit messages quote the count from the gate's output in the same command, never a count typed in advance.
+
+**2026-09-26 · Sprint 2 Step 4 · Category export order was not fully determined**
+- **Origin:** Claude Code (Sprint 1 Step 5, `funnel/export.py`)
+- **What was produced:** `funnel_category.json` rows ordered by `category_level, carted_value_with_no_observed_purchase DESC` only.
+- **What was wrong:** 33 `category_code` rows tie at a carted value of 0, and DuckDB returns tied rows in no fixed order. The Sprint 2 re-export reordered those 33 rows. Every row's content was identical (same 127 rows, compared as a multiset), so no published value changed, but the export was not reproducible from run to run (R1).
+- **How it was caught:** Claude Code's regression check comparing the regenerated exports with the committed ones, before any Sprint 2 value was read. The check expected only the Changes-entry, decision-link, and workflow keys to change. (The first draft of this entry again lacked a classifier keyword on this line, repeating the entry "Correction-log entry written outside the log's classification rules"; `test_every_correction_log_entry_is_classified` caught it at the commit gate.)
+- **Fix:** the query adds `category_key` as a final sort key. The regenerated exports from this run were discarded, and the exports are regenerated from the clean tree after this commit.
+- **Guard added:** `test_category_rows_are_in_a_fully_determined_order` in `analysis/tests/test_export_files.py` (committed with the regenerated exports) requires the rows to be in (value descending, `category_key`) order with unique keys.
+
+**2026-09-26 · Sprint 2 Step 4 · Report described a smooth timing hump as bunching below 60 seconds**
+- **Origin:** Claude Code
+- **What was produced:** the Step 4 report to the owner stated that repeat purchase events "bunch just below 60 seconds", inferred from the pre-specified threshold shares at 30 s and 60 s (`investigation_revenue_gap.json` `thresholds[].share_of_difference`).
+- **What was wrong:** the thresholds cannot show the shape between two cut-offs. The owner-approved exploratory per-second distribution (unpublished, reported to the owner only) shows no pile-up at the 60 s edge: the mass continues smoothly on both sides of it. The conclusion that the 60 s bin edge splits a large mass, so bin-based wording must be dropped, still holds.
+- **How it was caught:** Claude Code's review of the exploratory diagnostic's per-second output, before the diagnostic was reported to the owner.
+- **Fix:** the diagnostic report corrects the description. No committed file carried the wrong wording.
+- **Guard added:** none automated. Shapes are described from a distribution at the resolution of the claim, never from cumulative thresholds alone.
+
+**2026-09-26 · Sprint 2 Step 4 · Exploratory gap histogram counted each pair's first event as a gap over 300 s**
+- **Origin:** Claude Code (scratch diagnostic script, not committed)
+- **What was produced:** `least(date_diff(... lag(event_time) ...), 301)` to cap consecutive same-type gaps at ">300 s".
+- **What was wrong:** DuckDB's `least()` ignores NULL, so the first event of each (session, product, type), which has no previous event, was counted as ">300 s". The ">300 s" bucket and the totals were wrong for views, cart events, and purchases. The per-second counts from 1 to 300 s were unaffected.
+- **How it was caught:** Claude Code's consistency check of the output: the purchase gap total equalled all purchase events rather than the repeat purchase events.
+- **Fix:** gaps are filtered to non-null before capping. The rerun's purchase gaps equal the D1 per-second counts exactly, from 1 to 300 s, with the same total.
+- **Guard added:** none automated (scratch code). The totals cross-check against an independently computed figure is kept in the diagnostic.
 
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a

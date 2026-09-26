@@ -1,27 +1,27 @@
 {
   "manifest": {
-    "git_commit_sha": "f6f5c28f7f027e90ddf4ab4dc7f3e0f52b2985d6",
+    "git_commit_sha": "6e920f59ffd1aefb1da7ff9b67d55d98eaaeaf87",
     "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-26T09:34:23+00:00",
+    "generated_at_utc": "2026-09-26T14:16:28+00:00",
     "script": "funnel.export"
   },
   "pipeline_build": {
-    "git_commit_sha": "4ec60953f5b37a52de4fe8b4b75cd08a74773182",
-    "generated_at_utc": "2026-09-26T09:24:02+00:00",
+    "git_commit_sha": "e335f67977579076aef48d2ca640c68f8526c9e3",
+    "generated_at_utc": "2026-09-26T11:36:33+00:00",
     "dbt_done_counts": {
-      "pass": 90,
+      "pass": 149,
       "warn": 0,
       "error": 0,
       "skip": 0,
       "no_op": 0,
       "reused": 0,
-      "total": 90
+      "total": 149
     },
     "test_coverage": {
-      "models_built": 10,
-      "tests_expected": 80,
-      "tests_run": 80,
+      "models_built": 15,
+      "tests_expected": 134,
+      "tests_run": 134,
       "tests_expected_not_run": []
     }
   },
@@ -105,21 +105,30 @@
       "short_sha": "b8321eb",
       "date_utc": "2026-09-26 07:36 UTC",
       "subject": "metrics.md Changes 2026-09-26: session-level purchase paths; cart sessions with a purchase of no carted product"
+    },
+    {
+      "event": "changes",
+      "label": "Metric contract Changes entry",
+      "sha": "7a7302885606dd2fb942f95c6f316e2960881997",
+      "short_sha": "7a73028",
+      "date_utc": "2026-09-26 10:42 UTC",
+      "subject": "metrics.md Changes 2026-09-26: Sprint 2 investigations A and B (H3, before any quantity is computed)"
     }
   ],
   "correction_log": {
     "source": "ai-workflow/correction-log.md",
-    "n_entries": 27,
+    "n_entries": 36,
     "by_origin": {
-      "Claude Code": 24,
-      "Claude Chat": 3
+      "Claude Code": 32,
+      "Claude Chat": 3,
+      "Project owner": 1
     },
     "by_caught": {
       "Harness or shell": 4,
-      "Claude Code's own review": 13,
+      "Claude Code's own review": 18,
       "Pipeline run or generated output": 2,
-      "Human review": 2,
-      "Test or commit gate": 4,
+      "Human review": 3,
+      "Test or commit gate": 7,
       "Screenshot or smoke check": 2
     },
     "by_phase": {
@@ -131,9 +140,12 @@
       "Sprint 1 Step 5": 2,
       "Sprint 1 Step 6": 4,
       "Sprint 1 Step 7": 1,
-      "v1.0.1": 2
+      "v1.0.1": 2,
+      "Sprint 2 Step 0": 1,
+      "Sprint 2 Step 3": 1,
+      "Sprint 2 Step 4": 7
     },
-    "origin_rule": "origin is the entry's Origin line (Claude Code or Claude Chat)",
+    "origin_rule": "origin is the entry's Origin line (Claude Code, Claude Chat, or Project owner)",
     "caught_rules": [
       {
         "category": "Harness or shell",
@@ -368,15 +380,86 @@
         "title": "Git Bash rewrote leading-slash arguments into Windows paths",
         "origin": "Claude Code",
         "caught_by": "Harness or shell"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 0",
+        "title": "`.env.example` left out of the last direct commit to main",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 3",
+        "title": "Export test pinned that no Changes entry touches decision D4",
+        "origin": "Claude Code",
+        "caught_by": "Test or commit gate"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 4",
+        "title": "Wording guard could pass on nothing and did not check its injections",
+        "origin": "Claude Code",
+        "caught_by": "Human review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 4",
+        "title": "Added wording-guard term `prove\\w*` was over-broad",
+        "origin": "Project owner",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 4",
+        "title": "Correction-log entry written outside the log's classification rules",
+        "origin": "Claude Code",
+        "caught_by": "Test or commit gate"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 4",
+        "title": "Commit message stated a test count before the gate reported it",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 4",
+        "title": "Category export order was not fully determined",
+        "origin": "Claude Code",
+        "caught_by": "Test or commit gate"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 4",
+        "title": "Report described a smooth timing hump as bunching below 60 seconds",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 4",
+        "title": "Exploratory gap histogram counted each pair's first event as a gap over 300 s",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
       }
     ]
   },
   "workflow_files": [
     "ai-workflow/claim-ledger.md",
     "ai-workflow/correction-log.md",
+    "ai-workflow/method-selection/A-revenue-gap.md",
+    "ai-workflow/method-selection/B-later-purchases.md",
+    "ai-workflow/method-selection/README.md",
+    "ai-workflow/search-log.md",
     "ai-workflow/sprint-0-verification.md",
     "ai-workflow/sprint-0.md",
     "ai-workflow/sprint-1-verification.md",
-    "ai-workflow/sprint-1.md"
+    "ai-workflow/sprint-1.md",
+    "ai-workflow/sprint-2-verification.md",
+    "ai-workflow/sprint-2.md",
+    "ai-workflow/tools.md",
+    "ai-workflow/uncertainty-register.md"
   ]
 }

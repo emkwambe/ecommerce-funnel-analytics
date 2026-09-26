@@ -163,3 +163,73 @@ models:
                 values:
                   - "Purchase with an observed same-session cart event"
                   - "Purchase with no observed same-session cart event"
+  - name: int_repeat_purchase_events
+    description: >
+      metrics.md Changes 2026-09-26 (Sprint 2 investigations), A items 1 and 3. One row per repeat purchase
+      event: every purchase event of a (valid session, product) pair except one at the pair's earliest
+      purchase timestamp. Their price sum is the difference between revenue (primary) and revenue with
+      repeat purchase events collapsed (Section 4).
+    columns:
+      - name: event_id
+        description: Deduplicated purchase event (grain key).
+        data_tests: [unique, not_null]
+      - name: user_session
+        description: Session identifier.
+        data_tests: [not_null]
+      - name: product_id
+        description: Product identifier.
+        data_tests: [not_null]
+      - name: event_time
+        description: Purchase timestamp, UTC.
+        data_tests: [not_null]
+      - name: price
+        description: Purchase price (DECIMAL); summed into the revenue difference.
+        data_tests: [not_null]
+      - name: category_top
+        description: Top-level category on the repeat purchase event, or "unknown" (A item 3).
+        data_tests: [not_null]
+      - name: purchase_events_in_pair
+        description: Purchase events of the (session, product) pair, at least 2.
+        data_tests: [not_null]
+      - name: first_purchase_price
+        description: The pair's earliest purchase price, the price the collapsed figure keeps (Section 4).
+        data_tests: [not_null]
+      - name: previous_purchase_time
+        description: The latest other purchase event of the pair at or before this one (A item 3); ties give 0 s.
+        data_tests: [not_null]
+      - name: seconds_since_previous_purchase
+        description: Seconds from previous_purchase_time to event_time (second resolution; no sub-second events).
+        data_tests: [not_null]
+      - name: time_group
+        description: A item 3, time since the pair's previous purchase event.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["same_second", "under_a_minute", "a_minute_or_more"]
+      - name: time_group_label
+        description: Display label from the Changes entry ("Same second", "1 to 59 seconds later", "1 minute or more later").
+      - name: time_group_sort
+        description: Display order.
+      - name: price_group
+        description: A item 3, price compared with the pair's earliest purchase price (owner decision A-D1).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["same_price", "different_price"]
+      - name: price_group_label
+        description: Display label from the Changes entry.
+      - name: price_group_sort
+        description: Display order.
+      - name: pair_size_group
+        description: A item 3, purchase events in the pair.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["2", "3", "4_or_more"]
+      - name: pair_size_group_label
+        description: Display label ("2", "3", "4 or more").
+      - name: pair_size_group_sort
+        description: Display order.
