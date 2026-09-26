@@ -27,6 +27,19 @@ def test_one_line_trims_markup_and_length():
     assert len(state._one_line("x" * 500, 50)) == 50
 
 
+def test_one_line_keeps_colons_and_semicolons():
+    """First STATE.md draft cut 'Add "Mode: Transparent" ...' at the colon; only sentence ends split."""
+    assert state._one_line('Add "Mode: Transparent" to CLAUDE.md. More.') == 'Add "Mode: Transparent" to CLAUDE.md.'
+    assert state._one_line("On the owner's instruction: deploy; smoke. Then tag.") == \
+        "On the owner's instruction: deploy; smoke."
+
+
+def test_uncertainty_lines_are_whole():
+    for item in state.open_uncertainties():
+        assert not item.rstrip(")").endswith(":"), item
+        assert "(material; open" in item or "(critical; open" in item, item
+
+
 def test_waiting_argument_needs_three_parts(tmp_path, monkeypatch):
     import pytest
 

@@ -32,7 +32,8 @@ def _run(*args: str) -> str:
 
 def _one_line(text: str, limit: int = 160) -> str:
     text = re.sub(r"\*\*|`", "", text).strip()
-    first = re.split(r"(?<=[.;:])\s", text, maxsplit=1)[0]
+    # Split at a sentence end only; colons and semicolons often introduce the substance of the sentence.
+    first = re.split(r"(?<=[.?])\s", text, maxsplit=1)[0]
     return first if len(first) <= limit else first[: limit - 1].rstrip() + "…"
 
 
@@ -58,7 +59,9 @@ def repo_line() -> str:
     merged = json.loads(_run("gh", "pr", "list", "-R", REPO, "--state", "merged", "--limit", "1",
                              "--json", "number,mergeCommit,mergedAt"))
     open_prs = json.loads(_run("gh", "pr", "list", "-R", REPO, "--state", "open", "--json", "number,title"))
-    dirty = bool(_run("git", "-C", str(REPO_ROOT), "status", "--porcelain"))
+    # STATE.md itself is ignored: regenerating it would otherwise always report a dirty tree.
+    dirty = any(not line.endswith("ai-workflow/STATE.md")
+                for line in _run("git", "-C", str(REPO_ROOT), "status", "--porcelain").splitlines())
     last = (f"PR #{merged[0]['number']} ({merged[0]['mergeCommit']['oid'][:7]}, {merged[0]['mergedAt']})"
             if merged else "none")
     opened = ", ".join(f"#{p['number']} {p['title']}" for p in open_prs) or "none"
@@ -71,7 +74,8 @@ def open_uncertainties() -> list[str]:
     for line in text.splitlines():
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
         if len(cells) >= 9 and re.fullmatch(r"U\d+", cells[0]) and not cells[8].lower().startswith("resolved"):
-            out.append(f"{cells[0]}: {_one_line(cells[2], 140)} ({cells[4]}; {_one_line(cells[8], 60)})")
+            status = cells[8].split(" (")[0].strip()
+            out.append(f"{cells[0]}: {_one_line(cells[2], 140)} ({cells[4]}; {status})")
     return out
 
 

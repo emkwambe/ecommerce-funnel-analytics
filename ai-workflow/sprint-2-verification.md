@@ -119,9 +119,9 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 
 ## Tests
 
-`180 passed in 5.77s  (pytest_exit_code=0)`
+`182 passed in 5.61s  (pytest_exit_code=0)`
 
-## Correction log: 22 Sprint 2 entries
+## Correction log: 23 Sprint 2 entries
 
 - Sprint 2 Step 0 · `.env.example` left out of the last direct commit to main (Claude Code; Executor self-review)
 - Sprint 2 Step 3 · Export test pinned that no Changes entry touches decision D4 (Claude Code; Local test)
@@ -145,6 +145,7 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 - Sprint 2 Step 7 · Decision record attributed an ordering to the owner that the owner had not decided (Claude Code; Executor self-review)
 - Sprint 2 Step 7 · Final-report draft repeated the verification overstatement and miscounted the site's lag (Claude Code; Executor self-review)
 - Sprint 2 v1.1.2 · Correction-log classifier had no CI category (Claude Code; Executor self-review)
+- Sprint 2 v1.1.2 · First STATE.md cut decision lines at colons (Claude Code; Executor self-review)
 
 ## Sprint 2 commits on main (first parent)
 
@@ -161,3 +162,4 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 - `46bd249` Merge pull request #10 from emkwambe/sprint-2/v111-records
 - `1e881ce` Merge pull request #11 from emkwambe/sprint-2/h9-signoff
 - `4dedfac` Merge pull request #12 from emkwambe/sprint-2/v112-how-its-built
+- `4bdb41f` v1.1.2 records; Mode: Transparent; STATE.md generator (trio v2.4.0 state sync)
