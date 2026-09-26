@@ -10,7 +10,7 @@ from funnel import common
 from funnel.export import WEB_DATA
 
 EXPORTS = ("kpis.json", "funnel_category.json", "purchase_paths.json", "data_quality.json",
-           "metrics_index.json", "data_story.json")
+           "metrics_index.json", "data_story.json", "workflow.json")
 MANIFEST_KEYS = {"git_commit_sha", "git_worktree_dirty", "dataset_sha256", "generated_at_utc", "script"}
 
 

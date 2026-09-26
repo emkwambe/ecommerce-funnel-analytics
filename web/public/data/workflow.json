@@ -1,0 +1,341 @@
+{
+  "manifest": {
+    "git_commit_sha": "376017725c24f72c38bec45c44e898b2bdef760d",
+    "git_worktree_dirty": false,
+    "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+    "generated_at_utc": "2026-09-26T06:59:06+00:00",
+    "script": "funnel.export"
+  },
+  "pipeline_build": {
+    "git_commit_sha": "35256ed8eb526bf7c9dcdb043f5160920269b985",
+    "generated_at_utc": "2026-09-26T06:15:02+00:00",
+    "dbt_done_counts": {
+      "pass": 88,
+      "warn": 0,
+      "error": 0,
+      "skip": 0,
+      "no_op": 0,
+      "reused": 0,
+      "total": 88
+    },
+    "test_coverage": {
+      "models_built": 10,
+      "tests_expected": 78,
+      "tests_run": 78,
+      "tests_expected_not_run": []
+    }
+  },
+  "timeline": [
+    {
+      "event": "conventions",
+      "label": "Conventions and preflight spec committed before data access",
+      "sha": "a6503a5d3acf6b4dcd6678bb6c09e11f02cafa74",
+      "short_sha": "a6503a5",
+      "date_utc": "2026-09-24 06:12 UTC",
+      "subject": "project conventions and data preflight spec (before data access)"
+    },
+    {
+      "event": "sprint0",
+      "label": "Sprint 0: ingest and structural profile",
+      "sha": "460398ef1a60b73e435b4f61ea527379ff91e4f1",
+      "short_sha": "460398e",
+      "date_utc": "2026-09-24 07:40 UTC",
+      "subject": "Sprint 0: ingest, structural profile, tests, evidence"
+    },
+    {
+      "event": "contract",
+      "label": "Metric contract committed before any business metric",
+      "sha": "8d4093fdfa8ec287f4377474f3581e4127c0e334",
+      "short_sha": "8d4093f",
+      "date_utc": "2026-09-26 04:09 UTC",
+      "subject": "metric contract (before any business metric is computed); naming-rule test (Sprint 1 Step 2)"
+    },
+    {
+      "event": "changes",
+      "label": "Metric contract Changes entry",
+      "sha": "c0d3deaaf1c001155a41dc670637d9b6892987ea",
+      "short_sha": "c0d3dea",
+      "date_utc": "2026-09-26 05:18 UTC",
+      "subject": "metrics.md Changes 2026-09-26: data-quality basis, category funnel fields, cart-session timing"
+    },
+    {
+      "event": "changes",
+      "label": "Metric contract Changes entry",
+      "sha": "6c40518bb3eb2f54aed997b3c85aa538b898bd74",
+      "short_sha": "6c40518",
+      "date_utc": "2026-09-26 05:19 UTC",
+      "subject": "metrics.md Changes 2026-09-26: category cart-to-purchase rate mirrors Section 6"
+    },
+    {
+      "event": "build",
+      "label": "Full dbt build from a clean tree",
+      "sha": "d9065dc80370276e4c29088fdce66989a94b8af6",
+      "short_sha": "d9065dc",
+      "date_utc": "2026-09-26 06:15 UTC",
+      "subject": "Sprint 1 Step 3 evidence: full dbt build from clean tree at 35256ed"
+    },
+    {
+      "event": "verify",
+      "label": "Independent verification against the marts",
+      "sha": "b72b8e2dee697686a2d15585d1d6710f2915bd9b",
+      "short_sha": "b72b8e2",
+      "date_utc": "2026-09-26 06:22 UTC",
+      "subject": "Sprint 1 Step 4 evidence: independent verification, all 20 checks match"
+    },
+    {
+      "event": "verify",
+      "label": "Independent verification against the marts",
+      "sha": "b9e500da6c9c50687cfaa72a4d5a46855a2941d8",
+      "short_sha": "b9e500d",
+      "date_utc": "2026-09-26 06:33 UTC",
+      "subject": "Sprint 1 Step 4 evidence: verification rerun with the cart-no-view check"
+    },
+    {
+      "event": "exports",
+      "label": "JSON exports with manifests",
+      "sha": "2404581a410386868f5f51b355d83122bb12fc90",
+      "short_sha": "2404581",
+      "date_utc": "2026-09-26 06:38 UTC",
+      "subject": "Sprint 1 Step 5: JSON exports with manifests"
+    }
+  ],
+  "correction_log": {
+    "source": "ai-workflow/correction-log.md",
+    "n_entries": 24,
+    "by_origin": {
+      "Claude Code": 22,
+      "Claude Chat": 2
+    },
+    "by_caught": {
+      "Harness or shell": 3,
+      "Claude Code's own review": 12,
+      "Pipeline run or generated output": 2,
+      "Human review": 2,
+      "Test or commit gate": 4,
+      "Other": 1
+    },
+    "by_phase": {
+      "Sprint 0 Step 5": 4,
+      "Sprint 0 Step 6": 2,
+      "Sprint 1 Step 0": 5,
+      "Sprint 1 Step 2": 2,
+      "Sprint 1 Step 3": 5,
+      "Sprint 1 Step 5": 2,
+      "Sprint 1 Step 6": 4
+    },
+    "origin_rule": "origin is the entry's Origin line (Claude Code or Claude Chat)",
+    "caught_rules": [
+      {
+        "category": "Harness or shell",
+        "keywords": [
+          "harness",
+          "timeout",
+          "shell error"
+        ]
+      },
+      {
+        "category": "Human review",
+        "keywords": [
+          "human review"
+        ]
+      },
+      {
+        "category": "Test or commit gate",
+        "keywords": [
+          "pytest",
+          "commit gate"
+        ]
+      },
+      {
+        "category": "Pipeline run or generated output",
+        "keywords": [
+          "dbt exit code",
+          "generated column types"
+        ]
+      },
+      {
+        "category": "Claude Code's own review",
+        "keywords": [
+          "review",
+          "check"
+        ]
+      }
+    ],
+    "entries": [
+      {
+        "date": "2026-09-24",
+        "phase": "Sprint 0 Step 5",
+        "title": "DuckDB memory limit set without regard to available RAM",
+        "origin": "Claude Code",
+        "caught_by": "Harness or shell"
+      },
+      {
+        "date": "2026-09-24",
+        "phase": "Sprint 0 Step 5",
+        "title": "Exact-duplicate check grouped everything into one group",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-24",
+        "phase": "Sprint 0 Step 5",
+        "title": "Profile key tripped the metric-lock guard",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-24",
+        "phase": "Sprint 0 Step 6",
+        "title": "Hash-gate path bound at definition time",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-24",
+        "phase": "Sprint 0 Step 6",
+        "title": "Synthetic fixture assumed a time-zone-aware timestamp",
+        "origin": "Claude Code",
+        "caught_by": "Pipeline run or generated output"
+      },
+      {
+        "date": "2026-09-24",
+        "phase": "Sprint 0 Step 5",
+        "title": "Command relied on the working directory",
+        "origin": "Claude Code",
+        "caught_by": "Harness or shell"
+      },
+      {
+        "date": "2026-09-24",
+        "phase": "Sprint 1 Step 0",
+        "title": "Generated wording used terms the metric contract prohibits",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-24",
+        "phase": "Sprint 1 Step 0",
+        "title": "4 GB DuckDB limit still left too little headroom; RAM gate measured the wrong quantity",
+        "origin": "Claude Code",
+        "caught_by": "Human review"
+      },
+      {
+        "date": "2026-09-24",
+        "phase": "Sprint 1 Step 0",
+        "title": "Ingest evidence test pinned the exact set of checks",
+        "origin": "Claude Code",
+        "caught_by": "Test or commit gate"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 0",
+        "title": "Correction-log entry described a regeneration that had not yet run",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 0",
+        "title": "Inferred-loss wording not covered by the prohibited-term scan",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 2",
+        "title": "Injected-term check placed the term inside the excluded section",
+        "origin": "Claude Code",
+        "caught_by": "Test or commit gate"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 2",
+        "title": "Contract prose used a prohibited count label outside the naming rules",
+        "origin": "Claude Chat",
+        "caught_by": "Test or commit gate"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 3",
+        "title": "Edit command used `cd` and a bare `python`, and hung",
+        "origin": "Claude Code",
+        "caught_by": "Harness or shell"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 3",
+        "title": "DuckDB settings in the dbt profile were re-applied per cursor",
+        "origin": "Claude Code",
+        "caught_by": "Pipeline run or generated output"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 3",
+        "title": "Contract gave an impossible basis for two data-quality metrics",
+        "origin": "Claude Chat",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 3",
+        "title": "Tie tests silently skipped by the build's test selection",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 3",
+        "title": "Build record's dbt summary was always empty",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 5",
+        "title": "`.gitignore` also ignored the committed exports folder",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 5",
+        "title": "Export manifest taken per file, after earlier writes",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 6",
+        "title": "Site text stated facts not read from the exports",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 6",
+        "title": "Daily chart ticks ran past the data and overflowed at 390 px",
+        "origin": "Claude Code",
+        "caught_by": "Other"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 6",
+        "title": "Correction-log titles exported to the site unscreened",
+        "origin": "Claude Code",
+        "caught_by": "Test or commit gate"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 6",
+        "title": "Delete command used unguarded variables in its path",
+        "origin": "Claude Code",
+        "caught_by": "Human review"
+      }
+    ]
+  },
+  "workflow_files": [
+    "ai-workflow/correction-log.md",
+    "ai-workflow/sprint-0-verification.md",
+    "ai-workflow/sprint-0.md",
+    "ai-workflow/sprint-1.md"
+  ]
+}
