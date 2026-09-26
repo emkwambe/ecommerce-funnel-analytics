@@ -23,6 +23,9 @@ ROWS = [
     (D + "11:01:00", "cart", 2, 2, "c.d", "y", 0.0, 2, "V2"),
     (D + "11:02:00", "cart", 2, 2, "c.d", "y", 5.0, 2, "V2"),
     (D + "11:03:00", "cart", 2, 2, "c.d", "y", 7.0, 2, "V2"),
+    # V2: p8 carted before its only view, no purchase: a cart event with no view at or before it.
+    (D + "11:10:00", "cart", 8, 2, "c.d", "y", 3.0, 2, "V2"),
+    (D + "11:20:00", "view", 8, 2, "c.d", "y", 3.0, 2, "V2"),
     # V3: p3 bought twice with no cart event; secondary revenue keeps the earliest price (20).
     (D + "12:00:00", "purchase", 3, 3, None, None, 20.0, 3, "V3"),
     (D + "12:05:00", "purchase", 3, 3, None, None, 25.0, 3, "V3"),
@@ -59,18 +62,21 @@ def test_independent_headline(vcon):
         "Purchase with no observed same-session cart event": 2,
     }
     assert h["revenue_share_by_path"]["Purchase with an observed same-session cart event"] == Decimal(10) / Decimal(55)
-    assert h["carted_value_with_no_observed_purchase"] == Decimal("7.00")
+    assert h["carted_value_with_no_observed_purchase"] == Decimal("10.00")  # V2 p2 at 7 + V2 p8 at 3
 
 
 def test_independent_data_quality_both_bases(vcon):
     dq = verify.independent_data_quality(vcon)
+    # Cart events with no view at or before: V2 p8 (view comes later) and V6 p6 (no view).
     assert dq["raw_basis"] == {
         "exact_duplicate_rows_removed": 1, "zero_price_events": 2,
         "null_session_events": 1, "multi_user_sessions": 1,
+        "cart_events_with_no_view_at_or_before": 2,
     }
     assert dq["contract_basis"] == {
         "exact_duplicate_rows_removed": 1, "null_session_events_excluded": 1,
         "multi_user_sessions_excluded": 1, "zero_price_events": 2,
+        "cart_events_with_no_view_at_or_before": 2,
     }
 
 

@@ -148,18 +148,36 @@ def independent_data_quality(con: duckdb.DuckDBPyConnection) -> dict[str, dict[s
                                       GROUP BY user_session HAVING min(user_id) <> max(user_id)))
     """)
     valid_zero = _one(con, "SELECT count(*) FROM vev WHERE price = 0")[0]
+
+    def cart_no_view(table: str) -> int:
+        """Cart events whose (session, product) has no view at or before the cart time: compared
+        with the pair's earliest view, not with a per-event NOT EXISTS as in the dbt mart."""
+        return int(_one(con, f"""
+            WITH first_view AS (
+                SELECT user_session, product_id, min(event_time) AS first_view_time
+                FROM {table} WHERE event_type = 'view' AND user_session IS NOT NULL
+                GROUP BY user_session, product_id
+            )
+            SELECT count(*)
+            FROM {table} AS c
+            LEFT JOIN first_view AS f USING (user_session, product_id)
+            WHERE c.event_type = 'cart' AND c.user_session IS NOT NULL
+              AND (f.first_view_time IS NULL OR f.first_view_time > c.event_time)
+        """)[0])
     return {
         "raw_basis": {
             "exact_duplicate_rows_removed": int(raw_rows - dedup_rows),
             "zero_price_events": int(raw[0]),
             "null_session_events": int(raw[1]),
             "multi_user_sessions": int(raw_multi),
+            "cart_events_with_no_view_at_or_before": cart_no_view("raw_events"),
         },
         "contract_basis": {
             "exact_duplicate_rows_removed": int(raw_rows - dedup_rows),
             "null_session_events_excluded": int(dedup_null),
             "multi_user_sessions_excluded": int(dedup_multi),
             "zero_price_events": int(valid_zero),
+            "cart_events_with_no_view_at_or_before": cart_no_view("vev"),
         },
     }
 
@@ -189,7 +207,8 @@ def mart_values(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
         "purchase_events_by_path": {p: int(n) for p, n, _ in paths},
         "carted_value_with_no_observed_purchase": Decimal(carted_value),
         "data_quality": {k: dq[k] for k in ("exact_duplicate_rows_removed", "null_session_events_excluded",
-                                            "multi_user_sessions_excluded", "zero_price_events")},
+                                            "multi_user_sessions_excluded", "zero_price_events",
+                                            "cart_events_with_no_view_at_or_before")},
     }
 
 
@@ -222,6 +241,8 @@ def compare(independent: dict[str, Any], mart: dict[str, Any], dq: dict[str, dic
         "zero_price_events": sprint0["price"]["zero_price_events"],
         "null_session_events": sprint0["sessions_users"]["null_user_session_events"],
         "multi_user_sessions": sprint0["sessions_users"]["sessions_with_more_than_one_user_id"],
+        "cart_events_with_no_view_at_or_before":
+            sprint0["ordering_anomalies"]["cart_events_with_no_view_at_or_before_in_session"],
     }
     for key, value in dq["raw_basis"].items():
         add(f"sprint0_raw_basis:{key}", value, s0[key], "Sprint 0 profile.json (raw basis)")

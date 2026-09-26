@@ -13,6 +13,8 @@ It demonstrates:
 
 It is also an explicit record of how Claude Code was used under a human-in-the-loop workflow. `ai-workflow\` is a deliverable.
 
+Tier: Standard for Sprint 1 (direct commits, local gates). Governed-tier setup (CI, PR template, branch protection, Copilot review) is the first step of Sprint 2.
+
 It is the second project in a series. The first is `emkwambe/email-experiment-readout`, and the same verification standards apply.
 
 ## Repo layout
