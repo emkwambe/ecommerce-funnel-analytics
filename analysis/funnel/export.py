@@ -296,6 +296,9 @@ def data_story(con: duckdb.DuckDBPyConnection, metrics_text: str, dq: dict[str, 
 CORRECTION_LOG = REPO_ROOT / "ai-workflow" / "correction-log.md"
 ENTRY_HEADING = re.compile(r"^\*\*(\d{4}-\d{2}-\d{2}) · (.+?) · (.+)\*\*$", re.MULTILINE)
 # First matching rule wins; exported with the counts so the classification is visible.
+# Sprint 2 Step 4: "Project owner" added for errors in the owner's own specifications caught by a check.
+ORIGINS = ("Claude Code", "Claude Chat", "Project owner")
+
 CAUGHT_RULES = (
     ("Harness or shell", ("harness", "timeout", "shell error", "command error")),
     ("Human review", ("human review",)),
@@ -335,7 +338,7 @@ def parse_correction_log(text: str) -> dict[str, Any]:
         origin_text = origin.group(1) if origin else "n/a"
         if origin_text.startswith("n/a"):
             continue  # the "checks run with no error found" record is not an error
-        origin_label = next((o for o in ("Claude Code", "Claude Chat") if origin_text.startswith(o)), "Other")
+        origin_label = next((o for o in ORIGINS if origin_text.startswith(o)), "Other")
         title = public_title.group(1).strip() if public_title else h.group(3).strip()
         entries.append({"date": h.group(1), "phase": h.group(2), "title": title,
                         "origin": origin_label, "caught_by": caught_category(caught.group(1) if caught else "")})
@@ -352,7 +355,7 @@ def parse_correction_log(text: str) -> dict[str, Any]:
         "by_origin": count("origin"),
         "by_caught": count("caught_by"),
         "by_phase": count("phase"),
-        "origin_rule": "origin is the entry's Origin line (Claude Code or Claude Chat)",
+        "origin_rule": "origin is the entry's Origin line (Claude Code, Claude Chat, or Project owner)",
         "caught_rules": [{"category": label, "keywords": list(words)} for label, words in CAUGHT_RULES],
         "entries": entries,
     }

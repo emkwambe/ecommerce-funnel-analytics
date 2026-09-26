@@ -13,7 +13,7 @@ Entries up to v1.0.1 were reconstructed in Sprint 2 from the git history. Figure
 - CI (`.github/workflows/ci.yml`): pytest on committed exports and synthetic fixtures, web lint and build, and a link check of the README, changelog, and docs. A pull request template.
 - Method-selection records for the Sprint 2 investigations: A (the two revenue figures) and B (carted products purchased in a later session).
 - `docs/metrics.md` Changes entry (2026-09-26) defining every Sprint 2 investigation quantity, approved by the owner before any was computed.
-- Wording guard test (`analysis/tests/test_wording_guard.py`) on the investigation pages, the metric contract and its `/metrics` copy, and the README.
+- Wording guard test (`analysis/tests/test_wording_guard.py`) on the investigation pages and the exports they render from, the metric contract and its `/metrics` copy, and the README. Every surface must find its files, and causal and proof wording is included.
 
 ### Fixed
 - `.env.example` is committed: the `.env*` ignore rule had also matched it (correction log, Sprint 2 Step 0).

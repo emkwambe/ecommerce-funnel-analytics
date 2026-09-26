@@ -1,6 +1,6 @@
 # Correction Log
 
-This log records every place where AI-generated work, from Claude Code or Claude Chat, was wrong, incomplete, or overconfident, and how the error was caught. The value of AI-assisted analysis depends on the verification around it, and that verification should be visible. A human reviews and owns every decision recorded here.
+This log records every place where AI-generated work, from Claude Code or Claude Chat, was wrong, incomplete, or overconfident, and how the error was caught. The value of AI-assisted analysis depends on the verification around it, and that verification should be visible. A human reviews and owns every decision recorded here. From Sprint 2, it also records errors in the project owner's own specifications when a check catches them (origin "Project owner").
 
 Each entry is added in the same commit as its fix.
 
@@ -250,6 +250,30 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **How it was caught:** the pytest commit gate before the Changes-entry commit (1 failed, 120 passed). Nothing was committed.
 - **Fix:** the test asserts that D4 links to exactly the Sprint 2 entry and that D1 still links to none. The owner-approved entry text is unchanged. Ships in this commit.
 - **Guard added:** none new; the test now checks the rule's output for the current contract.
+
+**2026-09-26 · Sprint 2 Step 4 · Wording guard could pass on nothing and did not check its injections**
+- **Origin:** Claude Code (`analysis/tests/test_wording_guard.py`, Sprint 2 Step 3, commit `7a73028`)
+- **What was produced:** a guard that scanned the `/investigations` pages only `if INVESTIGATIONS.exists()`, and a boundary test that injected a phrase by `str.replace` on a heading and then checked the findings.
+- **What was wrong:** with no pages, the investigations surface was silently absent and the test still passed, so the guard reported green on a surface it never read. It also did not scan the exported files those pages render from. If a heading were renamed, the injection's `replace` would change nothing, and the "inside Section 1" half would pass vacuously.
+- **How it was caught:** human review by the project owner of the merged test (`76467d3..7a73028`), before Step 4.
+- **Fix:** each surface is a parametrized case that must find all its files. The investigations surface is skipped, with the reason stated, only while no page exists; afterwards it also scans `investigation*.json` exports and `metrics_index.json`. Both injections assert that the text changed. Ships in this commit, before any Step 4 computation.
+- **Guard added:** the per-surface file assertions and the injection-changed assertions themselves.
+
+**2026-09-26 · Sprint 2 Step 4 · Added wording-guard term `prove\w*` was over-broad**
+- **Origin:** Project owner (the Step 4 instruction to extend the phrase list, the owner's own specification), implemented as given by Claude Code
+- **What was produced:** the phrase `prove\w*` in the wording guard.
+- **What was wrong:** at a word boundary it also matches "provenance", a project rule term (CLAUDE.md rule 5), which appears twice in `README.md`. The guard would have failed on correct text.
+- **How it was caught:** Claude Code's pre-commit check against the stop condition in the same instruction: before committing, any new term matching existing guarded text was reported to the owner rather than resolved by rephrasing or dropping it. The test run showed `wording guard: {'README.md': ['provenance']}` (1 failed, 13 passed, 1 skipped). Nothing was committed.
+- **Fix:** the project owner chose to list the word forms `prove|proves|proved|proven|proving`. The README is unchanged. Ships in this commit.
+- **Guard added:** "provenance", "improve", and "approve" are in the legitimate-wording assertion, so widening the term back to `prove\w*`, or dropping the word boundary, fails the test (checked: the wide pattern flags "provenance", and the unanchored pattern also flags "improve" and "approve").
+
+**2026-09-26 · Sprint 2 Step 4 · Correction-log entry written outside the log's classification rules**
+- **Origin:** Claude Code
+- **What was produced:** the entry above on the over-broad `prove\w*` term, with an Origin line that named the owner's specification in prose and a "How it was caught" line with no classifier keyword.
+- **What was wrong:** the `/how-its-built` statistics classify each entry by its Origin line (only "Claude Code" or "Claude Chat") and by keywords in "How it was caught". The entry fell into "Other" on both counts.
+- **How it was caught:** the pytest commit gate (`test_every_correction_log_entry_is_classified`: 1 failed, 133 passed). Nothing was committed.
+- **Fix:** `funnel/export.py` gains the origin "Project owner" (`ORIGINS`), with the displayed rule updated. The log's opening paragraph states that owner-specification errors are recorded. The entry's lines now read "Project owner" and "Claude Code's pre-commit check". Ships in this commit.
+- **Guard added:** none new; the existing classification test caught it.
 
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
