@@ -94,8 +94,8 @@ export default function LaterPurchasesPage() {
           max={Math.max(c.b1_count_interval[1], c.later_km_7_day_interval[1]) * 1.25}
           caption="Share purchased by the same user in a later session within 7 days, by when the cart session started."
           rows={[
-            { key: "b1", label: sentence(c.b1_population), value: c.b1_count_share, lower: c.b1_count_interval[0], upper: c.b1_count_interval[1], color: "var(--series-1)", detail: `${c.b1_population} (fixed window)` },
-            { key: "later", label: sentence(c.later_population), value: c.later_km_7_day, lower: c.later_km_7_day_interval[0], upper: c.later_km_7_day_interval[1], color: "var(--series-2)", detail: `${c.later_population} (Kaplan–Meier)` },
+            { key: "b1", label: sentence(c.b1_population), value: c.b1_count_share, lower: c.b1_count_interval[0], upper: c.b1_count_interval[1], color: "var(--series-1)", detail: `Fixed 7-day window; ${fmtInt(b1.followed_pairs)} of ${fmtInt(b1.eligible_pairs)} carted products` },
+            { key: "later", label: sentence(c.later_population), value: c.later_km_7_day, lower: c.later_km_7_day_interval[0], upper: c.later_km_7_day_interval[1], color: "var(--series-2)", detail: "Kaplan–Meier estimate: these sessions have at most 7 days of follow-up in the data" },
           ]}
         />
         <p>

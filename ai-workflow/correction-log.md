@@ -339,6 +339,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the test checks the third entry's legend-label format on its own entries, and it separately checks that the Sprint 2 items are indexed with their labels. Ships in this commit.
 - **Guard added:** `test_changes_item_labels_are_read_from_metrics_index_not_typed` (test_web.py) keeps the Sprint 2 labels out of page code. Tests that compare a whole index are now scoped to the format they cover.
 
+**2026-09-26 · Sprint 2 Step 6 · Long field paths in Sources lines widened the investigation pages at 390 px**
+- **Origin:** Claude Code (`web/app/investigations/*/page.tsx`; the shared `Sources` component in `web/app/ui.tsx`)
+- **What was produced:** Sources lines citing long export paths with no spaces, such as `dimensions.time_since_previous_purchase[group_key=same_second].repeat_purchase_events`.
+- **What was wrong:** `Sources` rendered each path in a `<code>` element that could not wrap, so both investigation pages were wider than a 390 px screen (580 px and 524 px) in both themes.
+- **How it was caught:** the 390 px screenshot check (`npm run screenshots` against a local build): 4 of 8 page-theme combinations failed before any deploy.
+- **Fix:** `Sources` lets code paths wrap anywhere. The rerun passes all 18 page-theme combinations, including the six earlier pages, so the shared change broke none of them. Ships in this commit.
+- **Guard added:** none new; the screenshot check that caught it covers every page, the investigations included.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.
