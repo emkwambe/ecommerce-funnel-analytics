@@ -25,11 +25,109 @@ Every decision below was made by the project owner (Eddy Mkwambe). Claude Code c
 | 2026-09-26 | H4 | **Analysis B, the R3 agreement stop rule** (escalation brief `ai-workflow/escalations/2026-09-26-B-R3-agreement.md`): the owner chose **option A**, with three refinements. **(1)** Every B1 claim is scoped to its population, "carted products from sessions starting October 1–24, 2019 UTC". The late-October cohort difference (KM 7-day for sessions after the cutoff against B1) is reported as a finding in its own right on the page and in the ledger. U3 is resolved by this decision. **(2)** No page or ledger row may apply the B1 value share to the total carted value with no observed purchase; a wording test fails on any such extrapolation. **(3)** The page discloses the share of followed pairs whose first later purchase is within one hour of the latest cart event, which may reflect technical session splits rather than return visits. Any further breakdown is exploratory, search-log only, and unpublished. B claims stay at "shows", scoped as above. The B5 comparison is stated descriptively, not causally. | The owner's decision message; `ai-workflow/uncertainty-register.md` (U3 resolved); claim ledger (Step 5) |
 | 2026-09-26 | H8 | PR #5 (Sprint 2 Step 5, analysis B) merged by the owner via `gh`. An earlier report of the merge came before it had happened; Claude Code's check found the PR still open and paused Step 6 until the merge. | PR #5: state `MERGED`, merged by `emkwambe` at 2026-09-26T17:22:06Z, merge commit `a091952`, head `8a11207`. CI on `main` at `a091952` (run 36258777784): `python-tests`, `web-build`, `docs-checks` all success |
 | 2026-09-26 | Owner review (not H9) | The owner reviewed claim-ledger rows C8–C15 before merging PR #5 and found them correctly scoped (owner decision H4). This is a review of the ledger text; the H9 sign-off of those rows, against the live pages, remains for Step 7. | `ai-workflow/claim-ledger.md` rows C8–C15 at `8a11207` |
+| 2026-09-26 | H8 | PR #6 (Sprint 2 Step 6, the investigation pages) merged by the owner via `gh`. | PR #6: state `MERGED`, merged by `emkwambe` at 2026-09-26T17:42:37Z, merge commit `cb3d76d`, head `8ac2a19`. CI on `main` at `cb3d76d` (run 36259991876): `python-tests`, `web-build`, `docs-checks` all success |
 
-## Seed-stability check (H3-D5)
-
-To be filled in Step 5: the primary interval bounds (items 9, 10, and 12 at 7 days) for seed 20260926 and for seeds 20260927, 20260928, and 20260929.
+The seed-stability check (H3-D5) is reported in the generated section below.
 
 ## Copilot code review
 
 Not available to this account, as observed on PR #1 (details in `ai-workflow/tools.md`). PRs are reviewed by CI and the owner.
+
+<!-- GENERATED BELOW by python -m funnel.verification_sprint2 from saved evidence, exports, and git history. Do not edit below this line by hand. -->
+
+## Production
+
+Pending: the Step 7 deploy, production smoke, and screenshots have not run yet.
+
+## Full dbt builds (from clean trees)
+
+| Commit | Clean | dbt | Tests run / expected | Models | Available before | Elapsed | Peak spill |
+|---|---|---|---|---|---|---|---|
+| `e335f67` | True | PASS=149 ERROR=0 | 134 / 134 | 15 | 3.75 GB | 1365.4 s | 10.55 GiB |
+| `1512d76` | True | PASS=191 ERROR=0 | 170 / 170 | 21 | 5.06 GB | 1252.7 s | 10.50 GiB |
+
+## Independent verification (`python -m funnel.verify`, latest run)
+
+- Commit `7bc7bb5`, clean tree: True. 7.63 GB available before the run; 858.7 s; peak spill 21.44 GiB.
+- All checks match: **True** (152 of 152): 83 for analysis A, 45 for analysis B, and the rest from Sprint 1. Counts and DECIMAL sums exactly, rates within 1e-09. Every check is in `ai-workflow/evidence/sprint-2/verify.json`.
+
+## Analysis A: the two revenue figures (from investigation_revenue_gap.json)
+
+- Revenue $229,932,953.94; revenue with repeat purchase events collapsed $211,426,365.64; difference $18,506,588.30, the value of 52,401 repeat purchase events in 41,340 (session, product) pairs.
+
+| Dimension | Group | Share of the difference | Repeat purchase events |
+|---|---|---|---|
+| price_vs_first_purchase | Same price as the first purchase event | 99.27% | 52,071 |
+| price_vs_first_purchase | Different price from the first purchase event | 0.73% | 330 |
+| purchase_events_in_pair | 2 | 62.88% | 34,169 |
+| purchase_events_in_pair | 3 | 19.85% | 10,278 |
+| purchase_events_in_pair | 4 or more | 17.27% | 7,954 |
+
+Threshold sensitivity (share of the difference within T): 0 s 0.00%; 1 s 0.09%; 5 s 0.18%; 10 s 0.36%; 30 s 1.68%; 60 s 24.45%; 5 min 88.85%; 30 min 98.49%; 1 h 99.20%.
+
+## Analysis B: later purchases (from investigation_later_purchases.json and later_purchases.json)
+
+| Spec | Population | Followed / eligible | Count share [95% CI] | Value share [95% CI] |
+|---|---|---|---|---|
+| B1 | sessions starting October 1–24, 2019 UTC | 36,786 / 263,018 | 13.99% [13.81%, 14.16%] | 13.40% [13.14%, 13.66%] |
+| B2 | sessions starting October 1–28, 2019 UTC | 37,330 / 307,551 | 12.14% [11.98%, 12.29%] | 11.52% [11.29%, 11.73%] |
+| B3 | sessions starting October 1–17, 2019 UTC | 27,057 / 166,694 | 16.23% [16.00%, 16.46%] | 15.65% [15.30%, 15.99%] |
+| B5 | sessions starting October 1–24, 2019 UTC | 8,236 / 598,482 | 1.38% [1.34%, 1.41%] | 1.48% [1.42%, 1.53%] |
+| B6 | sessions starting October 1–24, 2019 UTC | 27,611 / 231,758 | 11.91% [11.78%, 12.05%] | 11.24% [11.05%, 11.44%] |
+| B7 | sessions starting October 1–24, 2019 UTC | 35,591 / 257,433 | 13.83% [13.65%, 14.00%] | 13.16% [12.89%, 13.41%] |
+| B8 | sessions starting October 1–24, 2019 UTC | 36,780 / 262,781 | 14.00% [13.81%, 14.18%] | 13.41% [13.14%, 13.68%] |
+
+Kaplan–Meier (all carted pairs with no purchase in the session, all of October): 1 d 10.01% [9.88%, 10.14%]; 3 d 12.21% [12.06%, 12.36%]; 7 d 13.81% [13.64%, 13.97%]; 14 d 15.10% [14.92%, 15.28%]; 30 d 16.29% [16.08%, 16.50%].
+
+Cohort difference: sessions starting after October 24, 2019 UTC, KM 7-day 12.52% [12.18%, 12.88%], against 13.99% [13.81%, 14.16%] for sessions starting October 1–24, 2019 UTC.
+
+Stop rules (pre-committed):
+
+- identity: user_id checks 1-2 are zero and check 3 is 100%: **did not fire**
+- R3 agreement: the B1 7-day count share lies inside the all-pairs KM 7-day 95% interval: **fired**. Resolution: Owner decision H4, 2026-09-26 (option A): B1 kept at 'shows', scoped to its population; the disagreement is disclosed and the late-October cohort difference reported as a finding. Records: ai-workflow/escalations/2026-09-26-B-R3-agreement.md, ai-workflow/sprint-2-verification.md.
+- comparison baseline: the B1 count share is above the B5 count share: **did not fire**
+
+Statistics run: commit `a013aff`, 7.69 GB available, 540.3 s.
+
+### Seed-stability check (owner decision H3-D5)
+
+| Seed | B1 count share 95% CI | B1 value share 95% CI | KM 7-day 95% CI |
+|---|---|---|---|
+| 20260926 | [13.809%, 14.163%] | [13.142%, 13.663%] | [13.641%, 13.968%] |
+| 20260927 | [13.814%, 14.164%] | [13.148%, 13.660%] | [13.645%, 13.973%] |
+| 20260928 | [13.809%, 14.160%] | [13.145%, 13.667%] | [13.645%, 13.971%] |
+| 20260929 | [13.815%, 14.157%] | [13.144%, 13.667%] | [13.651%, 13.961%] |
+
+The published intervals use the first seed. Across the four seeds, each bound moves by up to 0.0098%.
+
+## Tests
+
+`174 passed in 5.27s  (pytest_exit_code=0)`
+
+## Correction log: 15 Sprint 2 entries
+
+- Sprint 2 Step 0 · `.env.example` left out of the last direct commit to main (Claude Code; Claude Code's own review)
+- Sprint 2 Step 3 · Export test pinned that no Changes entry touches decision D4 (Claude Code; Test or commit gate)
+- Sprint 2 Step 4 · Wording guard could pass on nothing and did not check its injections (Claude Code; Human review)
+- Sprint 2 Step 4 · Added wording-guard term `prove\w*` was over-broad (Project owner; Claude Code's own review)
+- Sprint 2 Step 4 · Correction-log entry written outside the log's classification rules (Claude Code; Test or commit gate)
+- Sprint 2 Step 4 · Commit message stated a test count before the gate reported it (Claude Code; Claude Code's own review)
+- Sprint 2 Step 4 · Category export order was not fully determined (Claude Code; Test or commit gate)
+- Sprint 2 Step 4 · Report described a smooth timing hump as bunching below 60 seconds (Claude Code; Claude Code's own review)
+- Sprint 2 Step 4 · Exploratory gap histogram counted each pair's first event as a gap over 300 s (Claude Code; Claude Code's own review)
+- Sprint 2 Step 5 · Export opened DuckDB without the shared memory settings (Claude Code; Claude Code's own review)
+- Sprint 2 Step 5 · Independent Kaplan–Meier SQL failed when a time step removed everyone at risk (Claude Code; Test or commit gate)
+- Sprint 2 Step 5 · Ledger row claimed an independent recomputation that did not exist (Claude Code; Claude Code's own review)
+- Sprint 2 Step 6 · Legend-label test pinned the whole metrics index (Claude Code; Test or commit gate)
+- Sprint 2 Step 6 · Long field paths in Sources lines widened the investigation pages at 390 px (Claude Code; Screenshot or smoke check)
+- Sprint 2 Step 7 · Verification generator listed the timing groups that H4 kept unpublished (Claude Code; Claude Code's own review)
+
+## Sprint 2 commits on main (first parent)
+
+- `03c1eed` Sprint 2 Step 0: adopt trio v2.3 / verified-analytics v2.1; last direct commit to main
+- `6e0e959` Merge pull request #1 from emkwambe/sprint-2/governed-setup
+- `76467d3` Merge pull request #2 from emkwambe/sprint-2/method-selection
+- `ac825a5` Merge pull request #3 from emkwambe/sprint-2/metrics-changes
+- `7249dd6` Merge pull request #4 from emkwambe/sprint-2/analysis-a
+- `a091952` Merge pull request #5 from emkwambe/sprint-2/analysis-b
+- `cb3d76d` Merge pull request #6 from emkwambe/sprint-2/site

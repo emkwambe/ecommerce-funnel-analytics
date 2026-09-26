@@ -347,6 +347,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** `Sources` lets code paths wrap anywhere. The rerun passes all 18 page-theme combinations, including the six earlier pages, so the shared change broke none of them. Ships in this commit.
 - **Guard added:** none new; the screenshot check that caught it covers every page, the investigations included.
 
+**2026-09-26 · Sprint 2 Step 7 · Verification generator listed the timing groups that H4 kept unpublished**
+- **Origin:** Claude Code (`funnel/verification_sprint2.py`, first draft)
+- **What was produced:** the analysis A table in the generated verification file listed the time-since-previous-purchase groups ("1 to 59 seconds later", "1 minute or more later") with their shares.
+- **What was wrong:** under the owner's H4 decision for A, timing is reported through the cumulative thresholds only; the bin split is not published as a pattern. The draft seed-stability sentence also stated a rounded bound as "less than", which rounding could make untrue.
+- **How it was caught:** Claude Code's review of the first generated output, before any commit.
+- **Fix:** the table omits the timing groups (the threshold line, which includes 0 s, carries timing), and the sentence says "by up to", at four decimals. Ships in this commit.
+- **Guard added:** none new; the claim ledger (C5) remains the reference for what timing may be published.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.
