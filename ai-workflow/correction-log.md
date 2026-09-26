@@ -291,6 +291,22 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the query adds `category_key` as a final sort key. The regenerated exports from this run were discarded, and the exports are regenerated from the clean tree after this commit.
 - **Guard added:** `test_category_rows_are_in_a_fully_determined_order` in `analysis/tests/test_export_files.py` (committed with the regenerated exports) requires the rows to be in (value descending, `category_key`) order with unique keys.
 
+**2026-09-26 · Sprint 2 Step 4 · Report described a smooth timing hump as bunching below 60 seconds**
+- **Origin:** Claude Code
+- **What was produced:** the Step 4 report to the owner stated that repeat purchase events "bunch just below 60 seconds", inferred from the pre-specified threshold shares at 30 s and 60 s (`investigation_revenue_gap.json` `thresholds[].share_of_difference`).
+- **What was wrong:** the thresholds cannot show the shape between two cut-offs. The owner-approved exploratory per-second distribution (unpublished, reported to the owner only) shows no pile-up at the 60 s edge: the mass continues smoothly on both sides of it. The conclusion that the 60 s bin edge splits a large mass, so bin-based wording must be dropped, still holds.
+- **How it was caught:** Claude Code's review of the exploratory diagnostic's per-second output, before the diagnostic was reported to the owner.
+- **Fix:** the diagnostic report corrects the description. No committed file carried the wrong wording.
+- **Guard added:** none automated. Shapes are described from a distribution at the resolution of the claim, never from cumulative thresholds alone.
+
+**2026-09-26 · Sprint 2 Step 4 · Exploratory gap histogram counted each pair's first event as a gap over 300 s**
+- **Origin:** Claude Code (scratch diagnostic script, not committed)
+- **What was produced:** `least(date_diff(... lag(event_time) ...), 301)` to cap consecutive same-type gaps at ">300 s".
+- **What was wrong:** DuckDB's `least()` ignores NULL, so the first event of each (session, product, type), which has no previous event, was counted as ">300 s". The ">300 s" bucket and the totals were wrong for views, cart events, and purchases. The per-second counts from 1 to 300 s were unaffected.
+- **How it was caught:** Claude Code's consistency check of the output: the purchase gap total equalled all purchase events rather than the repeat purchase events.
+- **Fix:** gaps are filtered to non-null before capping. The rerun's purchase gaps equal the D1 per-second counts exactly, from 1 to 300 s, with the same total.
+- **Guard added:** none automated (scratch code). The totals cross-check against an independently computed figure is kept in the diagnostic.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.
