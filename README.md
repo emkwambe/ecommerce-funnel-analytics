@@ -36,6 +36,13 @@ Every number on the site is read from JSON exports written by code, each carryin
 - **Execution in Claude Code.** Claude Code carried out each sprint brief under the rules in [CLAUDE.md](CLAUDE.md): no hand-typed numbers, a metric lock until the contract was committed, a memory gate before heavy runs, and gated commits. It stopped and asked whenever a spec was ambiguous or a check failed.
 - **Verification.** The dbt pipeline carries schema, reconciliation, and tie tests, and every build must run all expected tests. `funnel.verify` recomputes the headline metrics from the raw file without dbt and must match exactly. Guard tests enforce the naming rules and the no-row-level-data rule.
 - **The record.** Every error that a test, check, or review caught is in [ai-workflow/correction-log.md](ai-workflow/correction-log.md), committed with its fix. Verification evidence is in [ai-workflow/](ai-workflow/), including [sprint-1-verification.md](ai-workflow/sprint-1-verification.md).
+- **Where the owner's decisions are recorded.** The AI gathers the evidence; the project owner makes the decisions, and each one is written down:
+  - changes to metric definitions: the dated Changes entries at the end of [docs/metrics.md](docs/metrics.md), each approved before anything it defines was computed;
+  - sign-off on published findings: the owner sign-off column of [ai-workflow/claim-ledger.md](ai-workflow/claim-ledger.md), naming the date and the pages checked;
+  - corrections: [ai-workflow/correction-log.md](ai-workflow/correction-log.md), including errors caught by the owner's review;
+  - from Sprint 2, merges: every change reaches `main` through a pull request that the owner merges;
+  - open questions and accepted risks: [ai-workflow/uncertainty-register.md](ai-workflow/uncertainty-register.md).
+- **Tools and environment.** [ai-workflow/tools.md](ai-workflow/tools.md) lists the tools, their verified versions, and what each may and may not be used as evidence for. [CHANGELOG.md](CHANGELOG.md) records each release, and [.env.example](.env.example) lists every environment variable the code reads.
 
 ## Reproduce
 
