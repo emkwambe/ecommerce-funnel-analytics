@@ -1,9 +1,9 @@
 {
   "manifest": {
-    "git_commit_sha": "376017725c24f72c38bec45c44e898b2bdef760d",
+    "git_commit_sha": "7bb9ceb430410cc81aaf3d3afe0f11a609f79cbc",
     "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-26T06:59:06+00:00",
+    "generated_at_utc": "2026-09-26T07:21:36+00:00",
     "script": "funnel.export"
   },
   "pipeline_build": {
@@ -101,9 +101,9 @@
   ],
   "correction_log": {
     "source": "ai-workflow/correction-log.md",
-    "n_entries": 24,
+    "n_entries": 25,
     "by_origin": {
-      "Claude Code": 22,
+      "Claude Code": 23,
       "Claude Chat": 2
     },
     "by_caught": {
@@ -112,7 +112,7 @@
       "Pipeline run or generated output": 2,
       "Human review": 2,
       "Test or commit gate": 4,
-      "Other": 1
+      "Other": 2
     },
     "by_phase": {
       "Sprint 0 Step 5": 4,
@@ -121,7 +121,8 @@
       "Sprint 1 Step 2": 2,
       "Sprint 1 Step 3": 5,
       "Sprint 1 Step 5": 2,
-      "Sprint 1 Step 6": 4
+      "Sprint 1 Step 6": 4,
+      "Sprint 1 Step 7": 1
     },
     "origin_rule": "origin is the entry's Origin line (Claude Code or Claude Chat)",
     "caught_rules": [
@@ -329,6 +330,13 @@
         "title": "Delete command used unguarded variables in its path",
         "origin": "Claude Code",
         "caught_by": "Human review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 1 Step 7",
+        "title": "Wide tables clipped at 390 px on the first production deploy",
+        "origin": "Claude Code",
+        "caught_by": "Other"
       }
     ]
   },
