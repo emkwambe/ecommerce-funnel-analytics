@@ -17,7 +17,7 @@ const set = process.env.SCREENSHOT_SET || "sprint-1";
 const fullDir = process.env.SCREENSHOT_OUT || join(repoRoot, "ai-workflow", "evidence", "full", set);
 const webpDir = join(repoRoot, "ai-workflow", "evidence", set);
 const writeWebp = process.env.SCREENSHOT_WEBP !== "0";
-const pages = (process.env.SCREENSHOT_PAGES || "/,/funnel,/data-quality,/data,/metrics,/how-its-built").split(",");
+const pages = (process.env.SCREENSHOT_PAGES || "/,/funnel,/data-quality,/data,/metrics,/how-its-built,/investigations,/investigations/revenue-figures,/investigations/later-purchases").split(",");
 const themes = ["light", "dark"];
 
 mkdirSync(fullDir, { recursive: true });

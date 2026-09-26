@@ -331,6 +331,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the independent path now recomputes the three identity checks from deduplicated events before session exclusions, and `funnel.verify` compares them (`B-all:user_id_check:*`). The hand-counted test covers them. The row cites the real check names. Ships in this commit, before the verification run that backs it.
 - **Guard added:** none automated; each ledger row's Reproduction cell is checked against `verify.json` check names before export (the export requires every `B1:` and `B-all:` check to match).
 
+**2026-09-26 · Sprint 2 Step 6 · Legend-label test pinned the whole metrics index**
+- **Origin:** Claude Code (Sprint 1 v1.0.1, `analysis/tests/test_export.py`)
+- **What was produced:** `test_metrics_index_maps_legend_labels_to_full_labels` asserted that the complete map of short labels equalled the two Sprint 1 legend labels.
+- **What was wrong:** the same brittle pattern as the Step 3 entry on decision D4. The assertion pinned the index's state at the time rather than the format it tests. When the parser began indexing the Sprint 2 entry's numbered display labels (so the investigation pages read labels instead of typing them), four more short labels appeared and the test failed on a correct index.
+- **How it was caught:** the pytest commit gate on the Step 6 branch (1 failed, 171 passed). Nothing was committed.
+- **Fix:** the test checks the third entry's legend-label format on its own entries, and it separately checks that the Sprint 2 items are indexed with their labels. Ships in this commit.
+- **Guard added:** `test_changes_item_labels_are_read_from_metrics_index_not_typed` (test_web.py) keeps the Sprint 2 labels out of page code. Tests that compare a whole index are now scoped to the format they cover.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

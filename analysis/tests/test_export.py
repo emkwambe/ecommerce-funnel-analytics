@@ -99,7 +99,12 @@ def test_every_correction_log_entry_is_classified():
 def test_metrics_index_maps_legend_labels_to_full_labels(metrics_text):
     """Changes 2026-09-26 (third entry): chart legends use short labels; tables and tooltips use the full ones."""
     index = parse_metrics_index(metrics_text)
-    legend = {e["short_label"]: e["display_label"] for e in index if e["short_label"]}
+    # The third entry's '(legend label: "...")' format; numbered Sprint 2 items are checked below.
+    legend = {e["short_label"]: e["display_label"] for e in index if e["short_label"] and "_item_" not in e["key"]}
+    items = {e["key"]: (e["short_label"], e["display_label"]) for e in index if "_item_" in e["key"]}
+    assert items["2026-09-26_item_9"][0] == "Purchased later by the same user, 7 days (%)"
+    assert items["2026-09-26_item_9"][1].startswith("Carted products with no observed purchase in the session")
+    assert set(items) >= {f"2026-09-26_item_{n}" for n in (1, 2, 4, 9, 10, 12, 13)}
     assert legend == {
         "Purchase of a carted product":
             "Sessions with an observed purchase of a product with an observed same-session cart event",

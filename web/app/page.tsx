@@ -186,6 +186,7 @@ export default function Home() {
       <Section n={4} title="Where to look next">
         <ul className="space-y-1 text-sm">
           <li><Link href="/funnel" className="text-accent underline">The session funnel</Link>, purchase paths, and categories.</li>
+          <li><Link href="/investigations" className="text-accent underline">Investigations</Link>: why there are two revenue figures, and whether carted products were purchased in a later session.</li>
           <li><Link href="/data-quality" className="text-accent underline">Data quality</Link>, with each metric&apos;s basis and the long-session sensitivity.</li>
           <li><Link href="/data" className="text-accent underline">The data</Link>: source, contents, decisions, and the reconciliation from raw rows to orders.</li>
           <li><Link href="/metrics" className="text-accent underline">Metric definitions</Link>, the contract every number follows.</li>

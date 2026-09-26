@@ -169,6 +169,20 @@ def parse_metrics_index(text: str) -> list[dict[str, str]]:
                             "definition": first[:1].upper() + first[1:] + ("." if rest else ""),
                             "note": rest.strip() or None, "display_label": full, "section": "Changes",
                             "short_label": short or None})
+        # Sprint 2 format: numbered items "N. **Title.** ..." carrying 'Display label: "..."' and optionally
+        # '. Short label: "..."'. Indexed by "<entry date>_item_<N>" so pages read labels without typing them.
+        date = heading.split(" ")[0]
+        for number, title, item in re.findall(r"^(\d+)\. \*\*(.+?)\*\*(.*?)(?=^\d+\. \*\*|^#### |\Z)", body,
+                                              re.MULTILINE | re.DOTALL):
+            labels = re.findall(r'Display label: "([^"]+)"(?:\. Short label: "([^"]+)")?', item)
+            for k, (full, short) in enumerate(labels):
+                entries.append({"key": f"{date}_item_{number}" + (f"_{k + 1}" if k else ""), "name": full,
+                                "definition": title.strip().rstrip("."), "note": None, "display_label": full,
+                                "section": "Changes", "short_label": short or None})
+    keys = [e["key"] for e in entries]
+    duplicates = sorted({k for k in keys if keys.count(k) > 1})
+    if duplicates:
+        raise ValueError(f"metrics_index keys are not unique: {duplicates}")
     for e in entries:
         e.setdefault("short_label", None)
         e.setdefault("note", None)
