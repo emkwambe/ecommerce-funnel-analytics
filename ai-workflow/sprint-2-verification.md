@@ -41,6 +41,8 @@ Every decision below was made by the project owner (Eddy Mkwambe). Claude Code c
 | 2026-09-26 | H8 (release v1.1.2) | On the owner's instruction: `main` at `4dedfac` (clean) deployed to production (deployment `dpl_8xpA8WYe66hxqzHHEWi1LspWXDen`, READY, target production). Production smoke passed 30/30. The live `workflow.json` was confirmed as the `4cdf7f0` export, with 49 entries in the template categories. The annotated tag `v1.1.2` was created on `4dedfac` and pushed. | `ai-workflow/evidence/sprint-2/smoke_production_v1.1.2.txt`; `refs/tags/v1.1.2` → tag object `788fb63`, peeled to `4dedfac` |
 | 2026-09-26 | H6 | Owner's go-ahead ("go") to delete the merged `sprint-2/*` branches listed: 11 local branches with `git branch -d` and 8 GitHub copies, and `sprint-2/v112-how-its-built` once PR #12 was verified merged. Each branch was confirmed by `git branch --merged main` and its PR state `MERGED` before deletion. Outcome: 12 local and 9 remote branches deleted; each deleted local tip equals its PR's merged head; only `main` remains. Deleted remote branches can be restored from each merged PR's page. | `git branch -d` and `git push origin --delete` output (session); `git branch -a` shows only `main` |
 | 2026-09-26 | Owner decision | Add "Mode: Transparent" to CLAUDE.md and generate `ai-workflow/STATE.md` from the trio v2.4.0 template (from git, gh, and the working context), regenerated at every stop from now on. | CLAUDE.md; `analysis/funnel/state.py`; `ai-workflow/STATE.md` |
+| 2026-09-26 | H8 | PR #13 (v1.1.2 records, Mode: Transparent, STATE.md) merged by the owner via `gh`. Recorded in the next PR, as the owner directed, rather than in a PR of its own. The owner declared Sprint 2 closed. | PR #13: state `MERGED`, merged by `emkwambe` at 2026-09-26T22:56:15Z, merge commit `59cb293`, head `c37f1ef`. CI on `main` at `59cb293` (run 36277862863): success |
+| 2026-09-26 | Owner decision | Per trio v2.4.1 state sync: never open a PR only to refresh STATE.md (the committed file is a per-PR snapshot); add a `--print` mode to `funnel.state` that generates the current state from git and gh without writing or committing; include it in the next PR; use it for every session handshake. | `analysis/funnel/state.py` (`--print`); CLAUDE.md |
 
 The seed-stability check (H3-D5) is reported in the generated section below.
 
@@ -119,7 +121,7 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 
 ## Tests
 
-`182 passed in 5.61s  (pytest_exit_code=0)`
+`186 passed in 12.78s  (pytest_exit_code=0)`
 
 ## Correction log: 23 Sprint 2 entries
 
@@ -162,4 +164,4 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 - `46bd249` Merge pull request #10 from emkwambe/sprint-2/v111-records
 - `1e881ce` Merge pull request #11 from emkwambe/sprint-2/h9-signoff
 - `4dedfac` Merge pull request #12 from emkwambe/sprint-2/v112-how-its-built
-- `4bdb41f` v1.1.2 records; Mode: Transparent; STATE.md generator (trio v2.4.0 state sync)
+- `59cb293` Merge pull request #13 from emkwambe/sprint-2/v112-records

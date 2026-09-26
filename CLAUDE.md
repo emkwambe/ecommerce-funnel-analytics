@@ -15,7 +15,11 @@ It is also an explicit record of how Claude Code was used under a human-in-the-l
 
 Tier: Governed (from Sprint 2): branch → PR → CI → Copilot review (if available) → owner merge. Never push to main directly.
 
-Mode: Transparent. The working context (`ai-workflow/`) lives in this public repository. Start every session by reading `ai-workflow/STATE.md`, then verify it against `git log`, `gh pr list`, and the working tree. Regenerate it with `python -m funnel.state` at every stop, merge, deploy, and tag (trio-sprint-workflow v2.4.0, state sync).
+Mode: Transparent. The working context (`ai-workflow/`) lives in this public repository.
+
+State sync (trio-sprint-workflow v2.4.1, §2a for the Governed tier):
+- **Start every session with `python -m funnel.state --print`.** It prints the live state from git and gh, writes and commits nothing, and flags where the committed snapshot has gone stale. The handshake uses that output, not the committed file.
+- `ai-workflow/STATE.md` is a **per-PR snapshot**: regenerate it (`python -m funnel.state --now ... --next ...`) inside each PR, as the state as of that PR. **Never open a PR only to refresh it**; after a merge its "waiting" line is expected to be stale.
 
 It is the second project in a series. The first is `emkwambe/email-experiment-readout`, and the same verification standards apply.
 
