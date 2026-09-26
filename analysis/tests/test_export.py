@@ -51,7 +51,10 @@ def test_decisions_link_to_the_changes_entries_that_apply(metrics_text):
               for did, _, _, section in DECISIONS}
     first = entries[0]["title"]  # Sections 6, 9, 10
     assert first in linked["D5"] and first in linked["D7"] and first in linked["D8"]
-    assert linked["D1"] == [] and linked["D4"] == []
+    assert linked["D1"] == []
+    # Sprint 2 (Changes 2026-09-26, Sections 4, 7, 10): the revenue-difference entry is D4's first link.
+    sprint2 = next(c["title"] for c in entries if "Sprint 2 investigations" in c["title"])
+    assert linked["D4"] == [sprint2]
 
 
 def test_correction_log_titles_safe_for_export():

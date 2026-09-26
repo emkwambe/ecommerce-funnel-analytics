@@ -159,3 +159,101 @@ Every data-quality metric states its basis. Exact duplicate rows removed are cou
    - "Sessions with an observed cart event and an observed purchase, none of a carted product" (display label): valid sessions with at least one cart event and at least one purchase event, none of them of a product carted in that session. With the numerator of "Sessions with an observed cart event and an observed purchase of a carted product (%)" and "Sessions with an observed cart event and no observed purchase in this session", it partitions sessions with an observed cart event; a reconciliation test asserts the three sum to sessions with an observed cart event.
 
 **Effect on published numbers:** no published number changes. Three counts are added to the funnel page: the two session-level purchase groups and the cart sessions with a purchase of no carted product.
+
+### 2026-09-26 · Sprint 2 investigations: the two revenue figures (A) and later purchases of carted products (B) (Sections 4, 7, 10)
+
+**Reason:** Sprint 2 investigates two open questions in the published numbers: (A) why there are two revenue figures (Section 4), and (B) how much of the carted value with no observed purchase in the session (Section 7) was followed by a purchase of the same product by the same user in a later session. The methods were approved by the project owner at H2 on 2026-09-26 (`ai-workflow/method-selection/A-revenue-gap.md`, `B-later-purchases.md`). The project owner approved this entry at H3 on 2026-09-26, with edits to decisions H3-D1, H3-D2, H3-D3, and H3-D5 (recorded in `ai-workflow/sprint-2-verification.md`), before any quantity it defines was computed.
+
+**Common rules.**
+- Every quantity below uses deduplicated events (D1) in valid sessions (Section 3), UTC timestamps (D10), and the Section 2 price rules: zero-price events count in counts and are excluded from values.
+- "Session start" is the timestamp of the session's first event.
+- Every rate is published with its numerator and denominator as counts. For B, that means the eligible pairs and the followed pairs alongside every share. For a value share, the two value sums are published as well.
+- **Intervals:** 95% percentile intervals from a cluster bootstrap at the `user_id` level. Each resample draws `user_id` values with replacement and keeps all of a drawn user's pairs. 2,000 resamples, seed 20260926, with the seed recorded in the export.
+- **Seed stability:** the primary intervals (items 9, 10, and 12 at 7 days) are recomputed with seeds 20260927, 20260928, and 20260929. The differences in the interval bounds are reported in `ai-workflow/sprint-2-verification.md`, and the published intervals use seed 20260926.
+- **Wording guard:** a phrase list of wording that states cause or loss, or that presents a later purchase as a reversal of the earlier outcome, is kept in test code (`analysis/tests/`), not in this document. It applies to the `/investigations` pages, the `/metrics` page copy, this document outside Section 1, and `README.md`.
+
+#### A. The two revenue figures
+
+1. **Repeat purchase events.** In each (session, product) pair with purchase events, every purchase event except one at the pair's earliest purchase timestamp. Section 4 guarantees a single price at that timestamp (tested by `assert_no_tied_earliest_purchase_price`), so the choice of which tied event is kept does not change any value.
+   - Display label: "Purchase events after the first of the same product in a session". Short label: "Repeat purchase events".
+2. **Difference between the two revenue figures.** Revenue (primary) minus revenue with repeat purchase events collapsed. By the Section 4 definitions, this equals the sum of the prices of the repeat purchase events; a reconciliation test asserts the equality.
+   - Display label: "Difference between revenue and revenue with repeat purchase events collapsed". Short label: "Revenue difference from repeat purchase events".
+3. **Breakdown of the difference.** Each repeat purchase event is placed in exactly one group of each dimension. Per group: repeat purchase events, their price sum, and the share of the difference. The groups of each dimension sum exactly to the difference; a reconciliation test asserts this for every dimension.
+   - **Time since the pair's previous purchase event:** the latest other purchase event of the same pair at or before this event, so tied timestamps give 0 s. Groups: "Same second", "1 to 59 seconds later", "1 minute or more later".
+   - **Price compared with the pair's earliest purchase price:** groups "Same price as the first purchase event", "Different price from the first purchase event".
+   - **Top-level category** of the repeat purchase event (Section 9 rules, with "unknown").
+   - **Purchase events in the pair:** groups "2", "3", "4 or more".
+   - **Time × price:** the two-way table of the first two dimensions.
+   - **Concentration diagnostic, per group:** the share of the group's price sum from its 10 largest pairs by that sum.
+4. **Threshold sensitivity.** For each threshold T in {0 s, 1 s, 5 s, 10 s, 30 s, 60 s, 5 min, 30 min, 1 h}: the share of the difference from repeat purchase events whose time since the pair's previous purchase event is at most T. Display label: "Share of the revenue difference from repeat purchase events within T of the previous purchase event of the same product".
+5. **Exact duplicate rows removed, by event type and group size** (a secondary case): the rows removed by D1, by event type and by the size of their duplicate group ("2", "3", "4 or more" identical rows). Counts only; no value is computed. Basis: raw rows (Section 10). The rows sum to "exact duplicate rows removed".
+6. **Cart events with no view at or before them: raw basis to contract basis** (a secondary case). The Sprint 0 raw-basis count minus the Section 10 count, attributed in this order:
+   - (i) cart events in null-session events or in multi-user sessions, on raw rows;
+   - (ii) of the rest, cart rows removed as exact duplicates by D1;
+   - (iii) a remainder.
+
+   The parts sum exactly to the difference, and a test asserts it. A non-zero remainder stops the work for escalation.
+
+**Claim tier for A:** at most "shows" for where the difference sits. Patterns may be described as "consistent with" repeated logging or "consistent with" several units. The data cannot establish which, because there is no quantity or order column. Every page that shows the difference shows both revenue figures (Section 4).
+
+#### B. Later purchases of carted products
+
+7. **Eligible carted pairs, window N.** Carted pairs with no purchase event of that product in the session (the Section 7 population of carted value with no observed purchase in this session), whose session starts at or before the cutoff for N:
+
+   | Window N | Cutoff (session start at or before, UTC) |
+   |---|---|
+   | 3 days | 2019-10-28 23:59:59 |
+   | 7 days (primary) | 2019-10-24 23:59:59 |
+   | 14 days | 2019-10-17 23:59:59 |
+
+   With the cutoff, every eligible pair's window ends within the data (last event 2019-10-31 23:59:59 UTC), so no pair is censored.
+8. **Later purchase.** A purchase event of the same `product_id` that meets all four conditions:
+   - (1) it is in a different valid session of the same `user_id`;
+   - (2) that session starts after the cart session starts;
+   - (3) its event time is strictly after the pair's latest cart event;
+   - (4) its event time t satisfies cart-session start ≤ t < cart-session start + N days.
+
+   An eligible pair is "followed" if at least one later purchase exists. A pair counts once, however many later purchases it has.
+9. **Count share (primary, N = 7).** Followed eligible pairs ÷ eligible pairs.
+   - Display label: "Carted products with no observed purchase in the session that the same user purchased in a later session within 7 days (%)". Short label: "Purchased later by the same user, 7 days (%)".
+10. **Value share (primary, N = 7).** Carted value of followed eligible pairs ÷ carted value of eligible pairs. Carted value is the pair's latest non-zero cart price (Section 7), and pairs whose cart events are all zero-price are excluded from both terms.
+    - Display label: "Carted value with no observed purchase in the session that was followed by a purchase of the same product by the same user in a later session within 7 days (%)". Short label: "Carted value purchased later by the same user, 7 days (%)".
+11. **Window sensitivities.** Items 9 and 10 with N = 3 and N = 14, each on its own eligible population. The labels replace "7 days" with the window.
+12. **Kaplan–Meier estimate (R3).**
+    - Population: all carted pairs with no purchase event of that product in the session, with no cutoff.
+    - Time: from cart-session start to the pair's first later purchase (item 8, conditions 1 to 3; no window condition).
+    - Censoring: pairs with no later purchase are censored at 2019-10-31 23:59:59 UTC.
+    - Published: 1 − S(t) daily for t = 1 … 30 days, and at 3, 7, and 14 days, with bootstrap intervals.
+    - A value-weighted version, weighted by carted value, is secondary.
+    - Display label: "Carted products with no observed purchase in the session that the same user purchased in a later session, by days since the cart session started (Kaplan–Meier estimate)".
+    - **Agreement rule:** the item 9 share lies inside the 7-day interval. Otherwise, stop and escalate with the cohort diagnostic (Kaplan–Meier on pairs from sessions starting by the 7-day cutoff versus after it).
+13. **Comparison baseline** (the brief's negative control).
+    - Population: (session, product) pairs with at least one view event, no cart event, and no purchase event of the product in the session, in sessions that contain at least one eligible carted pair for N = 7. Such a session (the view session) therefore starts at or before the 7-day cutoff.
+    - Followed: **all four conditions of item 8 apply, with only "cart" replaced by "view"**:
+      - (1) a different valid session of the same `user_id`;
+      - (2) that session starts after the view session starts;
+      - (3) the event time is strictly after the pair's latest view event;
+      - (4) view-session start ≤ t < view-session start + 7 days.
+
+      The cutoff and the window are anchored on the view session's start.
+    - Value: the pair's latest non-zero view price.
+    - Count and value shares with intervals, and the pair and value counts, as in items 9 and 10.
+    - Display label: "Viewed products with no observed cart event or purchase in the session that the same user purchased in a later session within 7 days (%) (comparison baseline)".
+    - **Stop rule:** if the item 9 share is not above this share, stop and escalate.
+14. **Sensitivities**, each with the item 9 and 10 shares at N = 7:
+    - **one pair per user and product:** only the eligible pair with the earliest cart-session start for each (user, product); ties broken by `user_session` ascending;
+    - **excluding the most active users:** users whose deduplicated events in valid sessions in the month exceed the 99.9th percentile over users are excluded (the threshold is published);
+    - **excluding cart sessions longer than 24 hours.**
+15. **`user_id` checks** (data quality, published):
+    - events in eligible sessions with a null `user_id`;
+    - eligible sessions with more than one `user_id`;
+    - the share of eligible pairs with a non-null `user_id`.
+16. **Diagnostics** (published beside the estimate, not as findings):
+    - eligible pairs that would be followed if the "session starts after" condition were dropped (overlapping sessions);
+    - among followed pairs, the share whose first later purchase is within 1 hour of the pair's latest cart event;
+    - the share of followed pairs held by the top 0.1% of users by eligible pairs;
+    - valid sessions per user in the month (quantiles).
+
+**Claim tier for B:** at most "shows", with the wording "was followed by a purchase of the same product by the same user in a later session". No wording of cause or loss (checked by the wording guard). The complement ("not followed") is **not** published as a separate figure. Each share is published with its eligible-pair and followed-pair counts (decision H3-D2). Purchases outside this log (other devices or accounts, after October 2019, other people in a household) are stated as unobservable.
+
+**Effect on published numbers:** none changes. Sprint 2 adds the quantities above on new investigation pages. The Section 7 figure is unchanged and is shown beside B.
