@@ -6,7 +6,7 @@ Where in the view-to-purchase funnel do sessions most often end with no observed
 
 This portfolio project analyzes a real e-commerce event log (view, cart, and purchase events) with a dbt pipeline on DuckDB, a documented metric layer, KPI dashboards, a data discrepancy investigation, and a natural-language-to-SQL agent. It also records how Claude Code was used under a human-in-the-loop workflow (`ai-workflow/`). It is the second project in a series, after [email-experiment-readout](https://github.com/emkwambe/email-experiment-readout).
 
-**Status:** Sprint 1 (pipeline and definitions). The metric contract is committed, the dbt pipeline is built and tested, the headline metrics are independently verified, and the site describes the funnel. Recommendations on what to test first come in a later sprint.
+**Status:** Sprint 2 (investigations). The project runs in the Governed tier: every change reaches `main` through a pull request with CI, merged by the owner. Two investigations are published: why there are two revenue figures, and whether carted products were purchased by the same user in a later session. Each was approved as a method and defined in the metric contract before it was computed, and each was checked by an independent recomputation. Recommendations on what to test first come in a later sprint.
 
 ## Data and attribution
 
@@ -27,6 +27,7 @@ This repository publishes aggregates and findings only. It contains no raw data 
 | [Data](https://ecommercefunnel-analytics.vercel.app/data) | Source, contents, the structural profile's findings, decisions D1 to D10, and the reconciliation from raw rows to orders |
 | [Metrics](https://ecommercefunnel-analytics.vercel.app/metrics) | The metric contract, rendered from `docs/metrics.md` |
 | [How it's built](https://ecommercefunnel-analytics.vercel.app/how-its-built) | The git timeline and the correction log, by the numbers |
+| Investigations (live after the v1.1.0 deploy; link added then) | Why there are two revenue figures; whether carted products were purchased by the same user in a later session. Each gives its answer, how it was checked, and what it cannot show |
 
 Every number on the site is read from JSON exports written by code, each carrying a provenance manifest (git commit, dataset SHA-256, UTC timestamp, script).
 
@@ -60,6 +61,7 @@ C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.in
 # Structural profile, dbt pipeline, independent verification, exports
 C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.profile
 C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.build
+C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.later_purchases
 C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.verify
 C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.export
 
