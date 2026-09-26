@@ -1,34 +1,8 @@
 -- metrics.md Sections 4 and 6 by UTC day of session start (Section 9, Time), plus the month total.
 -- Each session, its order, and its revenue count on the UTC day of the session's first event.
-with pair_rollup as (
-    select
-        user_session,
-        -- Section 6, cart-session purchase rate: a purchase of a product carted in that session.
-        bool_or(is_carted and is_purchased) as has_purchase_of_carted_product,
-        -- Section 4, secondary revenue: earliest purchase price per purchased pair.
-        sum(earliest_purchase_price) filter (where is_purchased) as revenue_repeat_collapsed
-    from {{ ref('int_session_products') }}
-    group by user_session
-),
-
-session_revenue as (
-    select user_session, sum(price) as revenue
-    from {{ ref('int_purchases') }}
-    group by user_session
-),
-
-session_facts as (
-    select
-        s.session_start_day_utc,
-        s.has_view,
-        s.has_cart,
-        s.has_purchase,
-        coalesce(p.has_purchase_of_carted_product, false) as has_purchase_of_carted_product,
-        coalesce(r.revenue, 0) as revenue,
-        coalesce(p.revenue_repeat_collapsed, 0) as revenue_repeat_collapsed
-    from {{ ref('int_sessions') }} as s
-    left join pair_rollup as p using (user_session)
-    left join session_revenue as r using (user_session)
+with session_facts as (
+    select * exclude (user_session, is_long_session)
+    from {{ ref('int_session_facts') }}
 ),
 
 periods as (

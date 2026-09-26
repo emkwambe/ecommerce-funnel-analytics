@@ -83,3 +83,107 @@ models:
         description: Sum of purchase price on this path (Section 4, primary revenue).
       - name: revenue_share
         description: This path's revenue / total revenue (Section 5).
+
+  - name: mart_funnel_category
+    description: >
+      Section 9 category funnel (with Changes 2026-09-26, both entries) and Section 7 carted value,
+      one row per category at two levels: category_top (headline) and category_code (drill-down,
+      full code). Funnel counts use (valid session, category) pairs entered by a view in the
+      category; one session can enter several category funnels, so counts do not sum to session
+      totals. Events, purchase events, and revenue cover all events in the category in valid
+      sessions, so they sum to the totals. Carted pairs and carted value are grouped by the category
+      on each pair's latest cart event, with no view requirement. Both population differences are
+      disclosed on the funnel page. Unknown is an explicit level.
+    columns:
+      - name: category_key
+        description: category_level and category (grain key).
+        data_tests: [unique, not_null]
+      - name: category_level
+        description: "'category_top' or 'category_code'."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["category_top", "category_code"]
+      - name: category
+        description: Top-level category or full code; "unknown" when missing (Section 9).
+        data_tests: [not_null]
+      - name: events
+        description: Deduplicated events in the category in valid sessions; basis of the unknown share of events.
+      - name: funnel_pairs
+        description: (session, category) pairs with at least one view in the category; the funnel entry step.
+      - name: funnel_pairs_with_cart
+        description: Funnel pairs with at least one cart event in the category.
+      - name: funnel_pairs_with_purchase
+        description: Funnel pairs with at least one purchase event in the category.
+      - name: funnel_cart_pairs_with_carted_product_purchase
+        description: >
+          Funnel pairs with a cart event in the category and a purchase of a product in the category
+          that has a cart event anywhere in the same session; numerator of the cart-to-purchase rate.
+      - name: funnel_pairs_with_carted_product_purchase_but_no_category_cart
+        description: >
+          Funnel pairs with a purchase of a carted product in the category but no cart event in the
+          category. Must be zero for the rate to stay within 100% (assert_category_cart_to_purchase_within_cart_step).
+      - name: purchase_events
+        description: Purchase events in the category in valid sessions.
+      - name: revenue
+        description: Category revenue, the sum of purchase price over all purchase events in the category (Changes 2026-09-26).
+      - name: carted_pairs
+        description: Carted (session, product) pairs whose latest cart event is in this category (Section 7).
+      - name: carted_pairs_with_purchase
+        description: Carted pairs with a purchase event of that product in the session.
+      - name: carted_pairs_with_no_observed_purchase
+        description: Carted pairs with no purchase event of that product in the session.
+      - name: zero_price_carted_pairs
+        description: Carted pairs whose cart events are all zero-price; in pair counts, not in value (Section 7).
+      - name: carted_value_with_no_observed_purchase
+        description: >
+          Sum of latest non-zero cart price over carted pairs with no observed purchase in this session
+          (Section 7). Displayed as "carted value with no observed purchase in this session".
+      - name: view_to_cart_step_rate
+        description: funnel_pairs_with_cart / funnel_pairs (Changes 2026-09-26, item 2).
+      - name: cart_to_purchase_step_rate
+        description: >
+          funnel_cart_pairs_with_carted_product_purchase / funnel_pairs_with_cart (Changes 2026-09-26,
+          second entry, item 1).
+
+  - name: mart_data_quality
+    description: >
+      Section 10 data-quality metrics (with Changes 2026-09-26, item 1), each with its basis and the
+      Sprint 0 raw-basis figure alongside where Sprint 0 published one (read from the committed
+      profile.json), plus the Section 3 long-session sensitivity for the five headline metrics.
+    columns:
+      - name: metric_key
+        description: Metric identifier (grain key).
+        data_tests: [unique, not_null]
+      - name: metric_group
+        description: "'data_quality' or 'long_session_sensitivity'."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["data_quality", "long_session_sensitivity"]
+      - name: metric_label
+        description: Display label.
+        data_tests: [not_null]
+      - name: basis
+        description: >
+          'raw rows' (exact duplicates only), 'deduplicated events before session exclusions'
+          (null-session events, multi-user sessions), or 'deduplicated events in valid sessions'.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - "raw rows"
+                  - "deduplicated events before session exclusions"
+                  - "deduplicated events in valid sessions"
+      - name: value
+        description: The metric on its stated basis; for sensitivity rows, the value over all valid sessions.
+        data_tests: [not_null]
+      - name: value_excluding_long_sessions
+        description: Sensitivity rows only, the value with sessions longer than 24 hours excluded (Section 3).
+      - name: sprint0_raw_basis_value
+        description: The Sprint 0 figure for the same check on raw rows, where one exists; shown alongside, never substituted.
+      - name: sort_order
+        description: Display order.

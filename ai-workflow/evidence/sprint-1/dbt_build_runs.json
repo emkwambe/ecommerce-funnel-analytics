@@ -147,6 +147,36 @@
       "spill_sample_interval_seconds": 1.0,
       "dbt_exit_code": 0,
       "dbt_summary": []
+    },
+    {
+      "manifest": {
+        "git_commit_sha": "2211ae1c73219d29d65e9d6128618268a791a902",
+        "git_worktree_dirty": true,
+        "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+        "generated_at_utc": "2026-09-26T05:37:53+00:00",
+        "script": "funnel.build"
+      },
+      "dbt_args": [
+        "build",
+        "--select",
+        "int_session_facts+",
+        "mart_funnel_category"
+      ],
+      "available_ram_gb_before_run": 5.63,
+      "duckdb_memory_limit": "2GB",
+      "duckdb_threads": 4,
+      "dbt_threads": 1,
+      "elapsed_seconds": 496.6,
+      "peak_spill_bytes": 9756016640,
+      "spill_sample_interval_seconds": 1.0,
+      "dbt_exit_code": 0,
+      "dbt_summary": [],
+      "test_coverage": {
+        "models_built": 4,
+        "tests_expected": 30,
+        "tests_run": 30,
+        "tests_expected_not_run": []
+      }
     }
   ]
 }

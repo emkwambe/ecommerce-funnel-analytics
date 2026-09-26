@@ -93,6 +93,39 @@ models:
       - name: earliest_purchase_price
         description: Price on the pair's earliest purchase event; summed for secondary revenue (Section 4).
 
+  - name: int_session_facts
+    description: >
+      One row per valid session with the flags and values that Section 4 and Section 6 metrics
+      aggregate. mart_kpis_daily and the long-session sensitivity in mart_data_quality both read
+      it, so they share one definition.
+    columns:
+      - name: user_session
+        description: Session identifier (grain key).
+        data_tests: [unique, not_null]
+      - name: session_start_day_utc
+        description: UTC day of session start (Section 9, Time).
+        data_tests: [not_null]
+      - name: is_long_session
+        description: Longer than 24 hours (Section 3, sensitivity check).
+        data_tests: [not_null]
+      - name: has_view
+        description: At least one view event.
+      - name: has_cart
+        description: At least one cart event.
+      - name: has_purchase
+        description: At least one purchase event (an order, Section 4).
+      - name: has_purchase_of_carted_product
+        description: >
+          A purchase of a product that has a cart event anywhere in the same session (Section 6;
+          Changes 2026-09-26, item 3).
+        data_tests: [not_null]
+      - name: revenue
+        description: Sum of purchase price in the session (Section 4, primary).
+        data_tests: [not_null]
+      - name: revenue_repeat_collapsed
+        description: Sum of earliest purchase price per purchased pair in the session (Section 4, secondary).
+        data_tests: [not_null]
+
   - name: int_purchases
     description: >
       One row per deduplicated purchase event in a valid session, with its purchase path

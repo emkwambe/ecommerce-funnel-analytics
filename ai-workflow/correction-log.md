@@ -146,6 +146,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** a dated Changes entry in `docs/metrics.md` (2026-09-26) counts those two metrics on deduplicated events before session exclusions. The same entry records the project owner's decisions on two gaps: what the category funnel publishes (Section 9) and the timing reading of the cart-session purchase rate (Section 6). Ships in this commit, before either affected mart is built.
 - **Guard added:** Step 3 stops at any model whose logic the contract does not define clearly.
 
+**2026-09-26 · Sprint 1 Step 3 · Tie tests silently skipped by the build's test selection**
+- **Origin:** Claude Code
+- **What was produced:** build 2 ran `python -m funnel.build --select intermediate --indirect-selection cautious`.
+- **What was wrong:** cautious selection runs a test only when all of its parents are selected. The three tie tests also reference `stg_events`, which was not in the selection, so they did not run. The build still reported `PASS=27`, which read as full coverage of the intermediate layer.
+- **How it was caught:** Claude Code's own review of the build 2 log (no `assert_no_tied` line) before any mart was built. The three tests were then run on their own (`PASS=3`) before build 3.
+- **Fix:** the tie tests ran and passed before the marts were built. The final Step 3 evidence is a full `dbt build` with no selection.
+- **Guard added:** `funnel.build` reads dbt's manifest and run results after every build. It records tests run against tests expected (every test that depends on a model built in the run), and it fails the run if any expected test did not run or was skipped. `analysis/tests/test_build_coverage.py` covers the guard, including this case.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.
