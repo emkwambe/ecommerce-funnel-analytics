@@ -15,6 +15,8 @@ It is also an explicit record of how Claude Code was used under a human-in-the-l
 
 Tier: Governed (from Sprint 2): branch → PR → CI → Copilot review (if available) → owner merge. Never push to main directly.
 
+Mode: Transparent. The working context (`ai-workflow/`) lives in this public repository. Start every session by reading `ai-workflow/STATE.md`, then verify it against `git log`, `gh pr list`, and the working tree. Regenerate it with `python -m funnel.state` at every stop, merge, deploy, and tag (trio-sprint-workflow v2.4.0, state sync).
+
 It is the second project in a series. The first is `emkwambe/email-experiment-readout`, and the same verification standards apply.
 
 ## Repo layout
