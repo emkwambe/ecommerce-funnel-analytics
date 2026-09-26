@@ -288,6 +288,7 @@ CAUGHT_RULES = (
     ("Human review", ("human review",)),
     ("Test or commit gate", ("pytest", "commit gate")),
     ("Pipeline run or generated output", ("dbt exit code", "generated column types")),
+    ("Screenshot or smoke check", ("screenshot", "smoke")),
     ("Claude Code's own review", ("review", "check")),
 )
 MILESTONES = (

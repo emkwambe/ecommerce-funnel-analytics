@@ -83,3 +83,11 @@ def test_export_uses_public_title_when_present():
     )
     titles = [e["title"] for e in parse_correction_log(log)["entries"]]
     assert titles == ["Title for the site", "Plain title"]
+
+
+def test_every_correction_log_entry_is_classified():
+    from funnel.export import CORRECTION_LOG, parse_correction_log
+
+    log = parse_correction_log(CORRECTION_LOG.read_text(encoding="utf-8"))
+    assert "Other" not in log["by_caught"], [e["title"] for e in log["entries"] if e["caught_by"] == "Other"]
+    assert "Other" not in log["by_origin"]
