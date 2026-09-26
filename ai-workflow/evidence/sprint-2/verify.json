@@ -1,14 +1,14 @@
 {
   "manifest": {
-    "git_commit_sha": "e335f67977579076aef48d2ca640c68f8526c9e3",
-    "git_worktree_dirty": true,
+    "git_commit_sha": "07920cbe59013a1969daa9722b962605edb1fd30",
+    "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-26T11:45:34+00:00",
+    "generated_at_utc": "2026-09-26T15:45:24+00:00",
     "script": "funnel.verify"
   },
-  "available_ram_gb_before_run": 5.87,
-  "elapsed_seconds": 519.4,
-  "peak_spill_bytes": 16979853312,
+  "available_ram_gb_before_run": 6.88,
+  "elapsed_seconds": 646.8,
+  "peak_spill_bytes": 16950493184,
   "rate_tolerance": 1e-09,
   "all_match": true,
   "checks": [
@@ -83,20 +83,6 @@
       "match": true
     },
     {
-      "check": "revenue_share:Purchase with no observed same-session cart event",
-      "against": "mart",
-      "independent": "0.48078959947101524",
-      "compared": "0.48078959947101524",
-      "match": true
-    },
-    {
-      "check": "purchase_events:Purchase with no observed same-session cart event",
-      "against": "mart",
-      "independent": "406605",
-      "compared": "406605",
-      "match": true
-    },
-    {
       "check": "revenue_share:Purchase with an observed same-session cart event",
       "against": "mart",
       "independent": "0.5192104005289847",
@@ -108,6 +94,20 @@
       "against": "mart",
       "independent": "336166",
       "compared": "336166",
+      "match": true
+    },
+    {
+      "check": "revenue_share:Purchase with no observed same-session cart event",
+      "against": "mart",
+      "independent": "0.48078959947101524",
+      "compared": "0.48078959947101524",
+      "match": true
+    },
+    {
+      "check": "purchase_events:Purchase with no observed same-session cart event",
+      "against": "mart",
+      "independent": "406605",
+      "compared": "406605",
       "match": true
     },
     {
@@ -759,6 +759,48 @@
       "against": "mart_cart_no_view_reconciliation",
       "independent": "0",
       "compared": "0",
+      "match": true
+    },
+    {
+      "check": "B1:eligible_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "263018",
+      "compared": "263018",
+      "match": true
+    },
+    {
+      "check": "B1:followed_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "36786",
+      "compared": "36786",
+      "match": true
+    },
+    {
+      "check": "B1:eligible_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "88048782.56",
+      "compared": "88048782.56",
+      "match": true
+    },
+    {
+      "check": "B1:followed_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "11801790.22",
+      "compared": "11801790.22",
+      "match": true
+    },
+    {
+      "check": "B1:count_share",
+      "against": "mart_later_purchase_estimates",
+      "independent": "0.13986115018743964",
+      "compared": "0.13986115018743964",
+      "match": true
+    },
+    {
+      "check": "B1:value_share",
+      "against": "mart_later_purchase_estimates",
+      "independent": "0.13403694948260964",
+      "compared": "0.13403694948260964",
       "match": true
     }
   ]
