@@ -91,3 +91,18 @@ def test_every_correction_log_entry_is_classified():
     log = parse_correction_log(CORRECTION_LOG.read_text(encoding="utf-8"))
     assert "Other" not in log["by_caught"], [e["title"] for e in log["entries"] if e["caught_by"] == "Other"]
     assert "Other" not in log["by_origin"]
+
+
+def test_metrics_index_maps_legend_labels_to_full_labels(metrics_text):
+    """Changes 2026-09-26 (third entry): chart legends use short labels; tables and tooltips use the full ones."""
+    index = parse_metrics_index(metrics_text)
+    legend = {e["short_label"]: e["display_label"] for e in index if e["short_label"]}
+    assert legend == {
+        "Purchase of a carted product":
+            "Sessions with an observed purchase of a product with an observed same-session cart event",
+        "Purchases only of products not carted in the session":
+            "Sessions with observed purchases only of products with no observed same-session cart event",
+    }
+    names = {e["name"] for e in index}
+    assert "Sessions with an observed cart event and an observed purchase, none of a carted product" in names
+    assert all(e["definition"] for e in index)

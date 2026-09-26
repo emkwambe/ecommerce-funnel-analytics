@@ -118,7 +118,24 @@ def independent_headline(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
         JOIN latest_nonzero AS l USING (user_session, product_id)
         WHERE pp.user_session IS NULL AND l.rn = 1
     """)[0]
+    # Changes 2026-09-26 (third entry): per purchasing session, whether any purchased product has a
+    # cart event in the session; recomputed here from events, not from the mart's pair rollup.
+    only_uncarted, cart_sessions_no_carted_purchase = _one(con, """
+        WITH carted AS (SELECT DISTINCT user_session, product_id FROM vev WHERE event_type = 'cart'),
+        purchasing AS (
+            SELECT p.user_session, max(CASE WHEN c.user_session IS NULL THEN 0 ELSE 1 END) AS any_carted
+            FROM vev AS p LEFT JOIN carted AS c USING (user_session, product_id)
+            WHERE p.event_type = 'purchase'
+            GROUP BY p.user_session
+        ),
+        carting AS (SELECT DISTINCT user_session FROM vev WHERE event_type = 'cart')
+        SELECT count(*) FILTER (WHERE any_carted = 0),
+               count(*) FILTER (WHERE any_carted = 0 AND user_session IN (SELECT user_session FROM carting))
+        FROM purchasing
+    """)
     return {
+        "sessions_with_purchases_only_of_uncarted_products": int(only_uncarted),
+        "cart_sessions_with_purchase_of_no_carted_product": int(cart_sessions_no_carted_purchase),
         "valid_sessions": int(sessions),
         "orders": int(orders),
         "revenue": Decimal(revenue),
@@ -186,7 +203,8 @@ def mart_values(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
     con.execute(f"ATTACH '{WAREHOUSE.as_posix()}' AS wh (READ_ONLY)")
     m = con.execute("""
         SELECT sessions, orders, revenue, revenue_repeat_collapsed, session_purchase_rate,
-               view_to_cart_session_rate, cart_session_purchase_rate
+               view_to_cart_session_rate, cart_session_purchase_rate,
+               sessions_with_purchases_only_of_uncarted_products, cart_sessions_with_purchase_of_no_carted_product
         FROM wh.main_marts.mart_kpis_daily WHERE period_type = 'month'
     """).fetchone()
     paths = con.execute("SELECT purchase_path, purchase_events, revenue_share FROM wh.main_marts.mart_purchase_paths").fetchall()
@@ -196,6 +214,8 @@ def mart_values(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
     """)[0]
     dq = dict(con.execute("SELECT metric_key, value FROM wh.main_marts.mart_data_quality").fetchall())
     return {
+        "sessions_with_purchases_only_of_uncarted_products": int(m[7]),
+        "cart_sessions_with_purchase_of_no_carted_product": int(m[8]),
         "valid_sessions": int(m[0]),
         "orders": int(m[1]),
         "revenue": Decimal(m[2]),
@@ -228,7 +248,8 @@ def compare(independent: dict[str, Any], mart: dict[str, Any], dq: dict[str, dic
 
     for key in ("valid_sessions", "orders", "revenue", "revenue_repeat_collapsed", "session_purchase_rate",
                 "view_to_cart_session_rate", "cart_session_purchase_rate",
-                "carted_value_with_no_observed_purchase"):
+                "carted_value_with_no_observed_purchase", "sessions_with_purchases_only_of_uncarted_products",
+                "cart_sessions_with_purchase_of_no_carted_product"):
         add(key, independent[key], mart[key], "mart")
     for path, share in independent["revenue_share_by_path"].items():
         add(f"revenue_share:{path}", float(share), float(mart["revenue_share_by_path"][path]), "mart")

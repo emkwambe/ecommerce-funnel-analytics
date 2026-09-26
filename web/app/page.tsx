@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getKpis, metric } from "@/lib/data";
+import { getKpis, getPurchasePaths, metric } from "@/lib/data";
 import { fmtDollars, fmtDollarsCompact, fmtInt, fmtPct } from "@/lib/format";
 import { niceDomain } from "@/lib/scale";
 import { LineChart } from "./line-chart";
@@ -11,6 +11,15 @@ const dayOfMonth = (isoDate: string) => Number(isoDate.slice(8, 10));
 
 export default function Home() {
   const { month: m, daily } = getKpis();
+  // "October 2019", from the month row, not typed.
+  const monthYear = new Date(`${m.period_start}T00:00:00Z`).toLocaleString("en-US", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  const noCartPathLabel = "Purchase with no observed same-session cart event";
+  const noCartPath = getPurchasePaths().rows.find((r) => r.purchase_path === noCartPathLabel);
+  if (!noCartPath) throw new Error(`purchase_paths.json has no row "${noCartPathLabel}"`);
   const days = [...daily].sort((a, b) => a.period_start.localeCompare(b.period_start));
   const prefix = monthName(m.period_start);
   const xs = days.map((d) => dayOfMonth(d.period_start));
@@ -29,17 +38,45 @@ export default function Home() {
           <span aria-hidden className="h-2 w-2 rounded-full bg-accent" />
           Sprint 1 · pipeline and definitions
         </span>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Where in the view-to-purchase funnel do sessions most often end with no observed purchase, which categories
-          hold the most carted value with no observed purchase in the session, and what should the team test first?
-        </h1>
-        <p className="max-w-2xl text-muted">
-          This sprint defines every metric, builds and tests the pipeline, and describes the funnel. It makes no
-          recommendation yet: what to test first is the next sprint&apos;s question.
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">E-commerce Funnel Analytics: {monthYear}</h1>
+        <p className="max-w-2xl text-lg leading-relaxed">
+          <span className="font-medium">The question:</span>{" "}
+          <span className="text-muted">
+            Where in the view-to-purchase funnel do sessions most often end with no observed purchase, which categories
+            hold the most carted value with no observed purchase in the session, and what should the team test first?
+          </span>
         </p>
       </header>
 
-      <Section n={1} title={`The month in numbers (${prefix} ${m.period_start.slice(0, 4)}, UTC)`}>
+      <Section n={1} title="What the data shows">
+        <div className="space-y-2">
+          <p>
+            In {monthYear}, {fmtPct(noCartPath.revenue_share, 1)} of revenue came from purchases with no observed
+            same-session cart event, and{" "}
+            {fmtPct(m.sessions_with_purchases_only_of_uncarted_products / m.sessions_with_purchase, 1)} of purchasing
+            sessions contained only such purchases.
+          </p>
+          <Sources fields={[
+            `purchase_paths.json: rows["${noCartPath.purchase_path}"].revenue_share`,
+            "kpis.json: month.sessions_with_purchases_only_of_uncarted_products, .sessions_with_purchase",
+          ]} />
+        </div>
+        <div className="space-y-2">
+          <p>
+            {fmtPct(m.view_to_cart_session_rate, 1)} of viewing sessions had an observed cart event;{" "}
+            {fmtPct(m.cart_session_purchase_rate, 1)} of sessions with an observed cart event had an observed purchase
+            of a carted product. These rates use different denominators; comparing them describes where observed
+            sessions end, not why.
+          </p>
+          <Sources fields={["kpis.json: month.view_to_cart_session_rate, .cart_session_purchase_rate"]} />
+        </div>
+        <p className="text-sm text-muted">
+          This sprint defines every metric, builds and tests the pipeline, and describes the funnel. It makes no
+          recommendation yet: what to test first is the next sprint&apos;s question.
+        </p>
+      </Section>
+
+      <Section n={2} title={`The month in numbers (${prefix} ${m.period_start.slice(0, 4)}, UTC)`}>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <Kpi entry={metric("Sessions")} value={fmtInt(m.sessions)} basis="valid sessions" />
           <Kpi entry={metric("Order")} label="Orders" value={fmtInt(m.orders)} basis="sessions with an observed purchase" />
@@ -72,7 +109,7 @@ export default function Home() {
         <Sources fields={["kpis.json: month.sessions, .orders, .session_purchase_rate, .revenue, .revenue_repeat_collapsed, .average_order_value, .revenue_per_session"]} />
       </Section>
 
-      <Section n={2} title="By UTC day of session start">
+      <Section n={3} title="By UTC day of session start">
         <p className="text-muted">
           Each session, its order, and its revenue count on the UTC day of the session&apos;s first event. The store&apos;s
           local time zone is unknown.
@@ -146,7 +183,7 @@ export default function Home() {
         </details>
       </Section>
 
-      <Section n={3} title="Where to look next">
+      <Section n={4} title="Where to look next">
         <ul className="space-y-1 text-sm">
           <li><Link href="/funnel" className="text-accent underline">The session funnel</Link>, purchase paths, and categories.</li>
           <li><Link href="/data-quality" className="text-accent underline">Data quality</Link>, with each metric&apos;s basis and the long-session sensitivity.</li>

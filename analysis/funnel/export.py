@@ -154,6 +154,19 @@ def parse_metrics_index(text: str) -> list[dict[str, str]]:
         entries.append({"key": "changes_" + _slug(heading), "name": heading.strip(),
                         "definition": " ".join(body.split()), "display_label": heading.strip(),
                         "section": "Changes"})
+        # Metrics a Changes entry defines: - "Full label" (legend label: "Short"): definition
+        #                                 - "Full label" (display label): definition
+        for full, short, definition in re.findall(
+            r'^\s*- "([^"]+)" \((?:legend label: "([^"]+)"|display label)\): (.+)$', body, re.MULTILINE
+        ):
+            first, _, rest = definition.strip().partition(". ")
+            entries.append({"key": _slug(full), "name": full,
+                            "definition": first[:1].upper() + first[1:] + ("." if rest else ""),
+                            "note": rest.strip() or None, "display_label": full, "section": "Changes",
+                            "short_label": short or None})
+    for e in entries:
+        e.setdefault("short_label", None)
+        e.setdefault("note", None)
     return entries
 
 
@@ -284,7 +297,7 @@ CORRECTION_LOG = REPO_ROOT / "ai-workflow" / "correction-log.md"
 ENTRY_HEADING = re.compile(r"^\*\*(\d{4}-\d{2}-\d{2}) · (.+?) · (.+)\*\*$", re.MULTILINE)
 # First matching rule wins; exported with the counts so the classification is visible.
 CAUGHT_RULES = (
-    ("Harness or shell", ("harness", "timeout", "shell error")),
+    ("Harness or shell", ("harness", "timeout", "shell error", "command error")),
     ("Human review", ("human review",)),
     ("Test or commit gate", ("pytest", "commit gate")),
     ("Pipeline run or generated output", ("dbt exit code", "generated column types")),

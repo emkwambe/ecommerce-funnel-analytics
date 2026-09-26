@@ -80,8 +80,24 @@ export default function FunnelPage() {
     { entry: metric("Sessions"), n: m.sessions },
     { entry: metric("Sessions with a view"), n: m.sessions_with_view },
     { entry: metric("Sessions with an observed cart event"), n: m.sessions_with_cart },
-    { entry: metric("Sessions with a purchase"), n: m.sessions_with_purchase },
   ];
+  const purchaseStep = metric("Sessions with a purchase");
+  // Changes 2026-09-26 (third entry), item 1: the purchase step split by session-level purchase path.
+  const purchaseGroups = [
+    {
+      entry: metric("Sessions with an observed purchase of a product with an observed same-session cart event"),
+      n: m.sessions_with_purchase_of_carted_product,
+      color: "var(--series-1)",
+    },
+    {
+      entry: metric("Sessions with observed purchases only of products with no observed same-session cart event"),
+      n: m.sessions_with_purchases_only_of_uncarted_products,
+      color: "var(--series-2)",
+    },
+  ];
+  const noCartedPurchase = metric("Sessions with an observed cart event and an observed purchase, none of a carted product");
+  const cartRowsTotal =
+    m.cart_sessions_with_carted_product_purchase + m.cart_sessions_with_no_observed_purchase + m.cart_sessions_with_purchase_of_no_carted_product;
   const rates = [
     { entry: metric("Session purchase rate"), value: m.session_purchase_rate, num: m.sessions_with_purchase, den: m.sessions },
     { entry: metric("View-to-cart session rate"), value: m.view_to_cart_session_rate, num: m.viewing_sessions_with_cart, den: m.sessions_with_view },
@@ -112,6 +128,41 @@ export default function FunnelPage() {
               <Bar share={s.n / m.sessions} />
             </li>
           ))}
+          <li className="text-sm">
+            <div className="flex justify-between gap-3">
+              <span title={purchaseStep.definition}>{purchaseStep.display_label}</span>
+              <span className="num text-muted">
+                {fmtInt(m.sessions_with_purchase)}{" "}
+                <span className="text-xs">({fmtPct(m.sessions_with_purchase / m.sessions, 2)} of sessions)</span>
+              </span>
+            </div>
+            <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted" aria-label="Legend">
+              {purchaseGroups.map((g) => (
+                <li key={g.entry.key} className="flex items-center gap-1.5">
+                  <span aria-hidden className="h-2 w-3 rounded-sm" style={{ background: g.color }} />
+                  {g.entry.short_label}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-1 flex h-2 gap-[2px] rounded bg-grid" role="img"
+              aria-label={purchaseGroups.map((g) => `${g.entry.display_label}: ${fmtInt(g.n)}`).join("; ")}>
+              {purchaseGroups.map((g, i) => (
+                <div
+                  key={g.entry.key}
+                  title={`${g.entry.display_label}: ${fmtInt(g.n)} (${fmtPct(g.n / m.sessions_with_purchase, 1)} of sessions with an observed purchase)`}
+                  className={`h-2 ${i === 0 ? "rounded-l" : ""} ${i === purchaseGroups.length - 1 ? "rounded-r" : ""}`}
+                  style={{ width: `${(g.n / m.sessions) * 100}%`, background: g.color }}
+                />
+              ))}
+            </div>
+            <ul className="mt-2 space-y-0.5 text-xs text-muted">
+              {purchaseGroups.map((g) => (
+                <li key={g.entry.key} className="num">
+                  {g.entry.display_label}: {fmtInt(g.n)} ({fmtPct(g.n / m.sessions_with_purchase, 1)})
+                </li>
+              ))}
+            </ul>
+          </li>
         </ul>
         <div className={tableWrap}>
           <table className="w-full text-sm">
@@ -135,15 +186,29 @@ export default function FunnelPage() {
                   </td>
                 </tr>
               ))}
+              {[
+                { entry: noPurchase, n: m.cart_sessions_with_no_observed_purchase },
+                { entry: noCartedPurchase, n: m.cart_sessions_with_purchase_of_no_carted_product },
+              ].map((r) => (
+                <tr key={r.entry.key} className="border-b border-line">
+                  <td className={td}>
+                    {r.entry.display_label}
+                    <div className="text-xs text-muted">{r.entry.definition}</div>
+                  </td>
+                  <td className={`${td} num text-right`}>{fmtPct(r.n / m.sessions_with_cart, 2)}</td>
+                  <td className={`${td} num text-right text-muted`}>
+                    {fmtInt(r.n)} of {fmtInt(m.sessions_with_cart)}
+                  </td>
+                </tr>
+              ))}
               <tr>
-                <td className={td}>
-                  {noPurchase.display_label}
-                  <div className="text-xs text-muted">{noPurchase.definition}</div>
+                <td className={`${td} text-xs text-muted`}>
+                  The last three rows partition {steps[2].entry.display_label.toLowerCase()} (metrics.md Changes,
+                  2026-09-26).
                 </td>
-                <td className={`${td} num text-right`}>{fmtInt(m.cart_sessions_with_no_observed_purchase)}</td>
-                <td className={`${td} num text-right text-muted`}>
-                  {fmtPct(m.cart_sessions_with_no_observed_purchase / m.sessions_with_cart, 1)} of{" "}
-                  {fmtInt(m.sessions_with_cart)}
+                <td className={`${td} num text-right text-xs text-muted`}>{fmtPct(cartRowsTotal / m.sessions_with_cart, 2)}</td>
+                <td className={`${td} num text-right text-xs text-muted`}>
+                  {fmtInt(cartRowsTotal)} of {fmtInt(m.sessions_with_cart)}
                 </td>
               </tr>
             </tbody>
@@ -157,9 +222,13 @@ export default function FunnelPage() {
           {fmtPct(m.cart_session_purchase_rate, 1)} of sessions with a cart event have an observed purchase of a carted
           product.
           {m.sessions_with_purchase > m.sessions_with_cart &&
-            " More sessions have an observed purchase than an observed cart event, because a purchase counts whether or not the product was carted in the same session (purchase paths, below)."}
+            " More sessions have an observed purchase than an observed cart event, because a purchase counts whether or not the product was carted in the same session."}{" "}
+          {fmtInt(m.sessions_with_purchases_only_of_uncarted_products)} of the {fmtInt(m.sessions_with_purchase)} sessions with
+          an observed purchase ({fmtPct(m.sessions_with_purchases_only_of_uncarted_products / m.sessions_with_purchase, 1)})
+          bought only products with no observed cart event in the same session, so the purchase bar is not a narrower step
+          of the cart-event bar above it.
         </p>
-        <Sources fields={["kpis.json: month.sessions, .sessions_with_view, .sessions_with_cart, .sessions_with_purchase, .view_to_cart_session_rate, .cart_session_purchase_rate, .cart_sessions_with_no_observed_purchase", "metrics_index.json: display_label, definition (metrics.md §6)"]} />
+        <Sources fields={["kpis.json: month.sessions, .sessions_with_view, .sessions_with_cart, .sessions_with_purchase, .view_to_cart_session_rate, .cart_session_purchase_rate, .cart_sessions_with_no_observed_purchase", "kpis.json: month.sessions_with_purchase_of_carted_product, .sessions_with_purchases_only_of_uncarted_products, .cart_sessions_with_purchase_of_no_carted_product", "metrics_index.json: display_label, short_label, definition (metrics.md §6; Changes 2026-09-26)"]} />
       </Section>
 
       <Section n={2} title="Purchase paths">

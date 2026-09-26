@@ -47,3 +47,16 @@ def test_evidence_images_within_size_limit():
     for image in images:
         assert image.suffix.lower() == ".webp", f"{image.relative_to(REPO_ROOT)}: commit WebP only"
         assert image.stat().st_size <= 300 * 1024, f"{image.relative_to(REPO_ROOT)} exceeds 300 KB"
+
+
+def test_home_findings_are_descriptive_only():
+    """v1.0.1: the "What the data shows" findings carry no wording of cause, loss, or priority."""
+    page = (WEB / "app" / "page.tsx").read_text(encoding="utf-8")
+    section = re.search(r'title="What the data shows">(.*?)</Section>', page, re.DOTALL)
+    assert section, "home page must have the 'What the data shows' section"
+    text = re.sub(r"<Sources[^>]*/>", "", section.group(1), flags=re.DOTALL).lower()
+    banned = ("because", "due to", "caused", "causes", "drives", "driven", "leads to", "results in", "lost",
+              "losing", "leak", "abandon", "priorit", "should", "must", "opportunit", "biggest problem")
+    found = [w for w in banned if re.search(rf"\b{re.escape(w)}", text)]
+    assert found == [], f"descriptive findings use {found}"
+    assert text.count("<p>") == 2, "exactly two findings, each in its own paragraph"

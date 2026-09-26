@@ -32,6 +32,9 @@ export type KpiRow = {
   viewing_sessions_with_cart: number;
   cart_sessions_with_carted_product_purchase: number;
   cart_sessions_with_no_observed_purchase: number;
+  sessions_with_purchase_of_carted_product: number;
+  sessions_with_purchases_only_of_uncarted_products: number;
+  cart_sessions_with_purchase_of_no_carted_product: number;
   revenue: number;
   revenue_repeat_collapsed: number;
   session_purchase_rate: number;
@@ -74,7 +77,17 @@ export type QualityRow = {
   sort_order: number;
 };
 
-export type MetricEntry = { key: string; name: string; definition: string; display_label: string; section: string };
+export type MetricEntry = {
+  key: string;
+  name: string;
+  definition: string;
+  display_label: string;
+  section: string;
+  /** Chart legend label, where the contract gives one; tables and tooltips use display_label. */
+  short_label: string | null;
+  /** Remainder of a Changes-entry definition after its first sentence. */
+  note: string | null;
+};
 
 export type ChangesEntry = { title: string; date: string; sections: string[] };
 

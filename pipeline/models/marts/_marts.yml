@@ -43,6 +43,21 @@ models:
         description: >
           Sessions with at least one cart event and no purchase event of any product (Section 6,
           "Sessions with an observed cart event and no observed purchase in this session").
+      - name: sessions_with_purchase_of_carted_product
+        description: >
+          "Sessions with an observed purchase of a product with an observed same-session cart event": at
+          least one purchase event on that Section 5 path (Changes 2026-09-26, third entry, item 1). Equals
+          cart_sessions_with_carted_product_purchase (assert_session_purchase_paths_partition).
+      - name: sessions_with_purchases_only_of_uncarted_products
+        description: >
+          "Sessions with observed purchases only of products with no observed same-session cart event": every
+          purchase event on that Section 5 path (Changes 2026-09-26, third entry, item 1). With the previous
+          column, sums to sessions_with_purchase.
+      - name: cart_sessions_with_purchase_of_no_carted_product
+        description: >
+          "Sessions with an observed cart event and an observed purchase, none of a carted product" (Changes
+          2026-09-26, third entry, item 2). With cart_sessions_with_carted_product_purchase and
+          cart_sessions_with_no_observed_purchase, sums to sessions_with_cart (assert_cart_sessions_partition).
       - name: revenue
         description: Sum of price over deduplicated purchase events in valid sessions (Section 4, primary).
       - name: revenue_repeat_collapsed

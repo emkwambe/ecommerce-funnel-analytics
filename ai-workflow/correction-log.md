@@ -219,6 +219,22 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** below the `sm` breakpoint, the three category funnel columns fold into a line under the category name, so no figure is hidden, and long codes wrap. The daily table uses short UTC day labels and compact revenue. All 12 combinations pass before the redeploy.
 - **Guard added:** `npm run screenshots` fails on page overflow or any clipped scroll box. `test_evidence_images_within_size_limit` holds committed evidence images to 300 KB.
 
+**2026-09-26 · v1.0.1 · Patch item specified from a text rendering of the page**
+- **Origin:** Claude Chat
+- **What was produced:** a v1.0.1 patch item asking for the home page's daily table to be collapsed.
+- **What was wrong:** the table was already a closed disclosure. The item was specified from a text rendering of the page, which shows collapsed content expanded, not from the rendered page.
+- **How it was caught:** Claude Code's review of the patch list against the committed page source (`web/app/page.tsx`, a `<details>` element), before any change was made; confirmed by the project owner.
+- **Fix:** no change to the daily table.
+- **Guard added:** page review uses rendered screenshots (`npm --prefix web run screenshots`), not text renderings.
+
+**2026-09-26 · v1.0.1 · Git Bash rewrote leading-slash arguments into Windows paths**
+- **Origin:** Claude Code
+- **What was produced:** two commands passed arguments beginning with `/` through Git Bash: `vercel api /v9/projects/...` (Sprint 1 Step 7) and `SCREENSHOT_PAGES=/funnel npm run screenshots` (v1.0.1).
+- **What was wrong:** Git Bash's path conversion rewrote them to `C:/Program Files/Git/...`, so the API call was rejected and the screenshot run navigated to a malformed URL. No output was written or committed from either.
+- **How it was caught:** the command errors ("Invalid arguments" from the Vercel CLI; a navigation error naming the rewritten URL).
+- **Fix:** the API call was rerun with `MSYS_NO_PATHCONV=1`, and the screenshot check was run from PowerShell.
+- **Guard added:** none automated; arguments that begin with `/` are passed from PowerShell or with path conversion disabled.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

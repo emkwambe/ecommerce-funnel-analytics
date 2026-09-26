@@ -36,6 +36,8 @@ ROWS = [
     (D + "14:00:00", "view", 5, 5, "g.h", "w", 4.0, 6, None),
     # V6: only a zero-price cart event: a carted pair counted, excluded from value.
     (D + "15:00:00", "cart", 6, 6, "i.j", "v", 0.0, 7, "V6"),
+    # V6 also buys p11, which it never carted: a cart session with a purchase of no carted product.
+    (D + "15:05:00", "purchase", 11, 6, "i.j", "v", 4.0, 7, "V6"),
 ]
 
 
@@ -51,18 +53,21 @@ def vcon() -> duckdb.DuckDBPyConnection:
 def test_independent_headline(vcon):
     h = verify.independent_headline(vcon)
     assert h["valid_sessions"] == 4                      # V1, V2, V3, V6
-    assert h["orders"] == 2                              # V1, V3
-    assert h["revenue"] == Decimal("55.00")              # 10 + 20 + 25
-    assert h["revenue_repeat_collapsed"] == Decimal("30.00")  # 10 + 20
-    assert h["session_purchase_rate"] == pytest.approx(2 / 4)
+    assert h["orders"] == 3                              # V1, V3, V6
+    assert h["revenue"] == Decimal("59.00")              # 10 + 20 + 25 + 4
+    assert h["revenue_repeat_collapsed"] == Decimal("34.00")  # 10 + 20 + 4
+    assert h["session_purchase_rate"] == pytest.approx(3 / 4)
     assert h["view_to_cart_session_rate"] == pytest.approx(2 / 2)   # V1, V2 view; both cart
     assert h["cart_session_purchase_rate"] == pytest.approx(1 / 3)  # V1 of V1, V2, V6
     assert h["purchase_events_by_path"] == {
         "Purchase with an observed same-session cart event": 1,
-        "Purchase with no observed same-session cart event": 2,
+        "Purchase with no observed same-session cart event": 3,
     }
-    assert h["revenue_share_by_path"]["Purchase with an observed same-session cart event"] == Decimal(10) / Decimal(55)
+    assert h["revenue_share_by_path"]["Purchase with an observed same-session cart event"] == Decimal(10) / Decimal(59)
     assert h["carted_value_with_no_observed_purchase"] == Decimal("10.00")  # V2 p2 at 7 + V2 p8 at 3
+    # Changes 2026-09-26 (third entry): V3 and V6 buy only products they did not cart; V6 also carted.
+    assert h["sessions_with_purchases_only_of_uncarted_products"] == 2
+    assert h["cart_sessions_with_purchase_of_no_carted_product"] == 1
 
 
 def test_independent_data_quality_both_bases(vcon):

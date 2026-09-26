@@ -26,6 +26,14 @@ counts as (
         count(*) filter (where has_view and has_cart) as viewing_sessions_with_cart,
         count(*) filter (where has_cart and has_purchase_of_carted_product) as cart_sessions_with_carted_product_purchase,
         count(*) filter (where has_cart and not has_purchase) as cart_sessions_with_no_observed_purchase,
+        -- Changes 2026-09-26 (third entry), item 1: session-level purchase paths.
+        count(*) filter (where has_purchase and has_purchase_of_carted_product)
+            as sessions_with_purchase_of_carted_product,
+        count(*) filter (where has_purchase and not has_purchase_of_carted_product)
+            as sessions_with_purchases_only_of_uncarted_products,
+        -- Changes 2026-09-26 (third entry), item 2.
+        count(*) filter (where has_cart and has_purchase and not has_purchase_of_carted_product)
+            as cart_sessions_with_purchase_of_no_carted_product,
         sum(revenue) as revenue,
         sum(revenue_repeat_collapsed) as revenue_repeat_collapsed
     from periods
@@ -46,6 +54,9 @@ select
     viewing_sessions_with_cart,
     cart_sessions_with_carted_product_purchase,
     cart_sessions_with_no_observed_purchase,
+    sessions_with_purchase_of_carted_product,
+    sessions_with_purchases_only_of_uncarted_products,
+    cart_sessions_with_purchase_of_no_carted_product,
     revenue,
     revenue_repeat_collapsed,
     sessions_with_purchase / nullif(sessions, 0) as session_purchase_rate,
