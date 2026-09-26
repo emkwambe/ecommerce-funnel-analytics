@@ -1,9 +1,9 @@
 {
   "manifest": {
-    "git_commit_sha": "7e3d506a1b18381f26055047fcc773782ebfc899",
+    "git_commit_sha": "6e920f59ffd1aefb1da7ff9b67d55d98eaaeaf87",
     "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-26T11:49:11+00:00",
+    "generated_at_utc": "2026-09-26T14:16:28+00:00",
     "script": "funnel.export"
   },
   "pipeline_build": {
@@ -117,15 +117,15 @@
   ],
   "correction_log": {
     "source": "ai-workflow/correction-log.md",
-    "n_entries": 34,
+    "n_entries": 36,
     "by_origin": {
-      "Claude Code": 30,
+      "Claude Code": 32,
       "Claude Chat": 3,
       "Project owner": 1
     },
     "by_caught": {
       "Harness or shell": 4,
-      "Claude Code's own review": 16,
+      "Claude Code's own review": 18,
       "Pipeline run or generated output": 2,
       "Human review": 3,
       "Test or commit gate": 7,
@@ -143,7 +143,7 @@
       "v1.0.1": 2,
       "Sprint 2 Step 0": 1,
       "Sprint 2 Step 3": 1,
-      "Sprint 2 Step 4": 5
+      "Sprint 2 Step 4": 7
     },
     "origin_rule": "origin is the entry's Origin line (Claude Code, Claude Chat, or Project owner)",
     "caught_rules": [
@@ -429,6 +429,20 @@
         "title": "Category export order was not fully determined",
         "origin": "Claude Code",
         "caught_by": "Test or commit gate"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 4",
+        "title": "Report described a smooth timing hump as bunching below 60 seconds",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 4",
+        "title": "Exploratory gap histogram counted each pair's first event as a gap over 300 s",
+        "origin": "Claude Code",
+        "caught_by": "Claude Code's own review"
       }
     ]
   },

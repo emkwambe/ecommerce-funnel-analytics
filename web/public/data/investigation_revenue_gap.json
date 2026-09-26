@@ -1,9 +1,9 @@
 {
   "manifest": {
-    "git_commit_sha": "7e3d506a1b18381f26055047fcc773782ebfc899",
+    "git_commit_sha": "6e920f59ffd1aefb1da7ff9b67d55d98eaaeaf87",
     "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-26T11:49:11+00:00",
+    "generated_at_utc": "2026-09-26T14:16:28+00:00",
     "script": "funnel.export"
   },
   "pipeline_build": {
@@ -38,6 +38,21 @@
   },
   "dimensions": {
     "time_since_previous_purchase": [
+      {
+        "row_key": "time_since_previous_purchase:same_second",
+        "dimension": "time_since_previous_purchase",
+        "group_key": "same_second",
+        "group_label": "Same second",
+        "sort_order": 1,
+        "repeat_purchase_events": 0,
+        "pairs": 0,
+        "repeat_purchase_value": 0.0,
+        "share_of_difference": 0.0,
+        "top_10_pair_share": null,
+        "revenue": 229932953.94,
+        "revenue_repeat_collapsed": 211426365.64,
+        "revenue_difference": 18506588.3
+      },
       {
         "row_key": "time_since_previous_purchase:under_a_minute",
         "dimension": "time_since_previous_purchase",
@@ -149,6 +164,36 @@
       }
     ],
     "time_by_price": [
+      {
+        "row_key": "time_by_price:same_second|same_price",
+        "dimension": "time_by_price",
+        "group_key": "same_second|same_price",
+        "group_label": "Same second · Same price as the first purchase event",
+        "sort_order": 11,
+        "repeat_purchase_events": 0,
+        "pairs": 0,
+        "repeat_purchase_value": 0.0,
+        "share_of_difference": 0.0,
+        "top_10_pair_share": null,
+        "revenue": 229932953.94,
+        "revenue_repeat_collapsed": 211426365.64,
+        "revenue_difference": 18506588.3
+      },
+      {
+        "row_key": "time_by_price:same_second|different_price",
+        "dimension": "time_by_price",
+        "group_key": "same_second|different_price",
+        "group_label": "Same second · Different price from the first purchase event",
+        "sort_order": 12,
+        "repeat_purchase_events": 0,
+        "pairs": 0,
+        "repeat_purchase_value": 0.0,
+        "share_of_difference": 0.0,
+        "top_10_pair_share": null,
+        "revenue": 229932953.94,
+        "revenue_repeat_collapsed": 211426365.64,
+        "revenue_difference": 18506588.3
+      },
       {
         "row_key": "time_by_price:under_a_minute|same_price",
         "dimension": "time_by_price",
