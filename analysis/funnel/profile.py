@@ -464,7 +464,7 @@ def decisions_needed(p: dict[str, Any]) -> list[dict[str, Any]]:
             "D3", "Price varies for the same product",
             [f"Products with more than one distinct price: {pr['products_with_more_than_one_distinct_price']}; "
              f"maximum distinct prices for one product: {pr['max_distinct_prices_for_one_product']}."],
-            "Which price is the value of a purchase or of a lost cart.",
+            "Which price is the value of a purchase, or of carted products with no observed purchase in the session.",
             ["Use the price logged on each event.",
              "Use the price on the purchase event for purchases and on the cart event for cart events.",
              "Use a per-product reference price (for example, the median across the month)."],

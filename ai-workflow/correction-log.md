@@ -98,6 +98,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** `funnel.profile` and `funnel.verification` were rerun from a clean tree at `f1b0359` (manifest `git_worktree_dirty: false`). The regenerated files carry the new wording, and every count is unchanged. The earlier entry is now accurate as of this evidence commit.
 - **Guard added:** none new; `analysis/tests/test_naming_rules.py` (Sprint 1 Step 2) will fail on the old wording.
 
+**2026-09-26 · Sprint 1 Step 0 · Inferred-loss wording not covered by the prohibited-term scan**
+- **Origin:** Claude Code
+- **What was produced:** the D3 "choice forced" text in `funnel/profile.py`, generated into `docs/data-profile.md` and `profile.json`: "Which price is the value of a purchase or of a lost cart."
+- **What was wrong:** "lost cart" states an inferred loss, which `docs/metrics.md` Section 1 rule 3 forbids in intent, and it uses "cart" for a cart event. The phrase was not on rule 3's prohibited list, so the term scan passed it.
+- **How it was caught:** Claude Code's own review of the regenerated profile during the clean-manifest rerun (evidence commit `edaa183`), reported to the project owner.
+- **Fix:** the text now reads "Which price is the value of a purchase, or of carted products with no observed purchase in the session." The code change ships in this commit, and the profile is rerun from the resulting clean tree in the next evidence commit. Counts are unaffected.
+- **Guard added:** "lost cart" and "lost carts" are added to `docs/metrics.md` Section 1 rule 3 before the contract commit, and `analysis/tests/test_naming_rules.py` covers them with an injected-term check.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.
