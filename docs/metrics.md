@@ -132,3 +132,16 @@ Every data-quality metric states its basis. Exact duplicate rows removed are cou
 3. **Section 6, cart-session purchase rate.** "A purchase of a product carted in that session" means a purchase of a product that has a cart event anywhere in the same session, consistent with Section 5. There is no timing condition.
 
 **Effect on published numbers:** none; no numbers had been published. Items 1 and 3 fix how metrics already listed are computed. Item 2 defines the category funnel's published fields.
+
+### 2026-09-26 · Category cart-to-purchase rate and category revenue population (Section 9)
+
+**Reason:** the project owner tightened item 2 of the previous entry so the category rate mirrors the Section 6 cart-session purchase rate exactly. That decision came after the previous entry was committed, so it is recorded here rather than by editing that entry.
+
+1. **Within-category cart-to-purchase rate** (supersedes the numerator in the previous entry, item 2):
+   - numerator: (session, top-level category) pairs with at least one purchase of a product in that category that has a cart event anywhere in the same session;
+   - denominator: (session, top-level category) pairs with at least one cart event in the category.
+
+   The same definition applies per full `category_code` in drill-downs. The rate is always at most 100%.
+2. **Category revenue population.** Category revenue covers all purchase events in the category in valid sessions, so category revenues sum to total revenue; a reconciliation test asserts this. This population differs slightly from the category funnel's, which contains only (session, category) pairs entered by a view in the category. The funnel page discloses this difference alongside the carted-value population note (Section 7).
+
+**Effect on published numbers:** none; no numbers had been published.
