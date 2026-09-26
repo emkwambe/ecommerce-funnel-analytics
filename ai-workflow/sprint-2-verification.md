@@ -37,6 +37,10 @@ Every decision below was made by the project owner (Eddy Mkwambe). Claude Code c
 | 2026-09-26 | **H9** | **The owner signed off claim-ledger rows C3–C15 at their ledger tiers**, after reviewing `/investigations/revenue-figures` (C3–C7) and `/investigations/later-purchases` (C8–C15) on desktop and at 390 px, including the corrected verification wording (v1.1.1, live since `c153a16`). | `ai-workflow/claim-ledger.md`, the Owner sign-off column of rows C3–C15 |
 | 2026-09-26 | H8 | PR #11 (H9 records and the final report) merged by the owner via `gh`. | PR #11: state `MERGED`, merged by `emkwambe` at 2026-09-26T18:42:37Z, merge commit `1e881ce`, head `6685c95`. CI on `main` at `1e881ce` (run 36263502810): success |
 | 2026-09-26 | Owner decisions on the final report's open items | (a) Refresh the live `/how-its-built` page now, as v1.1.2. (b) In the same PR, align the correction-log classifier with the trio template's "how caught" categories, reclassify the README link entry as CI, and log the classifier gap. Then PR, owner merge, deploy, smoke, tag v1.1.2. (c) Delete merged `sprint-2/*` branches, locally and on GitHub, only those confirmed fully merged into `main` (by `git branch --merged main` and the PR state). List them first and wait for the owner's go-ahead. | This PR; the correction log; the branch list (go-ahead pending) |
+| 2026-09-26 | H8 | PR #12 (v1.1.2) merged by the owner via `gh`. | PR #12: state `MERGED`, merged by `emkwambe` at 2026-09-26T19:00:40Z, merge commit `4dedfac`, head `c4ba51f`. CI on `main` at `4dedfac` (run 36264543709): all three jobs success |
+| 2026-09-26 | H8 (release v1.1.2) | On the owner's instruction: `main` at `4dedfac` (clean) deployed to production (deployment `dpl_8xpA8WYe66hxqzHHEWi1LspWXDen`, READY, target production). Production smoke passed 30/30. The live `workflow.json` was confirmed as the `4cdf7f0` export, with 49 entries in the template categories. The annotated tag `v1.1.2` was created on `4dedfac` and pushed. | `ai-workflow/evidence/sprint-2/smoke_production_v1.1.2.txt`; `refs/tags/v1.1.2` → tag object `788fb63`, peeled to `4dedfac` |
+| 2026-09-26 | H6 | Owner's go-ahead ("go") to delete the merged `sprint-2/*` branches listed: 11 local branches with `git branch -d` and 8 GitHub copies, and `sprint-2/v112-how-its-built` once PR #12 was verified merged. Each branch was confirmed by `git branch --merged main` and its PR state `MERGED` before deletion. Outcome: 12 local and 9 remote branches deleted; each deleted local tip equals its PR's merged head; only `main` remains. Deleted remote branches can be restored from each merged PR's page. | `git branch -d` and `git push origin --delete` output (session); `git branch -a` shows only `main` |
+| 2026-09-26 | Owner decision | Add "Mode: Transparent" to CLAUDE.md and generate `ai-workflow/STATE.md` from the trio v2.4.0 template (from git, gh, and the working context), regenerated at every stop from now on. | CLAUDE.md; `analysis/funnel/state.py`; `ai-workflow/STATE.md` |
 
 The seed-stability check (H3-D5) is reported in the generated section below.
 
@@ -115,7 +119,7 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 
 ## Tests
 
-`175 passed in 5.67s  (pytest_exit_code=0)`
+`180 passed in 5.77s  (pytest_exit_code=0)`
 
 ## Correction log: 22 Sprint 2 entries
 
@@ -156,5 +160,4 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 - `c153a16` Merge pull request #9 from emkwambe/sprint-2/verification-wording
 - `46bd249` Merge pull request #10 from emkwambe/sprint-2/v111-records
 - `1e881ce` Merge pull request #11 from emkwambe/sprint-2/h9-signoff
-- `4cdf7f0` v1.1.2: correction-log classifier uses the trio template's categories; README link entry is CI
-- `2f3f9e2` v1.1.2: exports from the clean tree at 4cdf7f0 (workflow.json: 49 of 49 log entries, template categories)
+- `4dedfac` Merge pull request #12 from emkwambe/sprint-2/v112-how-its-built
