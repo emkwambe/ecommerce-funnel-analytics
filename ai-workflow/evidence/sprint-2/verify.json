@@ -1,0 +1,765 @@
+{
+  "manifest": {
+    "git_commit_sha": "e335f67977579076aef48d2ca640c68f8526c9e3",
+    "git_worktree_dirty": true,
+    "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+    "generated_at_utc": "2026-09-26T11:45:34+00:00",
+    "script": "funnel.verify"
+  },
+  "available_ram_gb_before_run": 5.87,
+  "elapsed_seconds": 519.4,
+  "peak_spill_bytes": 16979853312,
+  "rate_tolerance": 1e-09,
+  "all_match": true,
+  "checks": [
+    {
+      "check": "valid_sessions",
+      "against": "mart",
+      "independent": "9244073",
+      "compared": "9244073",
+      "match": true
+    },
+    {
+      "check": "orders",
+      "against": "mart",
+      "independent": "629558",
+      "compared": "629558",
+      "match": true
+    },
+    {
+      "check": "revenue",
+      "against": "mart",
+      "independent": "229932953.94",
+      "compared": "229932953.94",
+      "match": true
+    },
+    {
+      "check": "revenue_repeat_collapsed",
+      "against": "mart",
+      "independent": "211426365.64",
+      "compared": "211426365.64",
+      "match": true
+    },
+    {
+      "check": "session_purchase_rate",
+      "against": "mart",
+      "independent": "0.068103962398393",
+      "compared": "0.068103962398393",
+      "match": true
+    },
+    {
+      "check": "view_to_cart_session_rate",
+      "against": "mart",
+      "independent": "0.061878719648399395",
+      "compared": "0.061878719648399395",
+      "match": true
+    },
+    {
+      "check": "cart_session_purchase_rate",
+      "against": "mart",
+      "independent": "0.4993334403551262",
+      "compared": "0.4993334403551262",
+      "match": true
+    },
+    {
+      "check": "carted_value_with_no_observed_purchase",
+      "against": "mart",
+      "independent": "107863336.42",
+      "compared": "107863336.42",
+      "match": true
+    },
+    {
+      "check": "sessions_with_purchases_only_of_uncarted_products",
+      "against": "mart",
+      "independent": "343394",
+      "compared": "343394",
+      "match": true
+    },
+    {
+      "check": "cart_sessions_with_purchase_of_no_carted_product",
+      "against": "mart",
+      "independent": "5696",
+      "compared": "5696",
+      "match": true
+    },
+    {
+      "check": "revenue_share:Purchase with no observed same-session cart event",
+      "against": "mart",
+      "independent": "0.48078959947101524",
+      "compared": "0.48078959947101524",
+      "match": true
+    },
+    {
+      "check": "purchase_events:Purchase with no observed same-session cart event",
+      "against": "mart",
+      "independent": "406605",
+      "compared": "406605",
+      "match": true
+    },
+    {
+      "check": "revenue_share:Purchase with an observed same-session cart event",
+      "against": "mart",
+      "independent": "0.5192104005289847",
+      "compared": "0.5192104005289847",
+      "match": true
+    },
+    {
+      "check": "purchase_events:Purchase with an observed same-session cart event",
+      "against": "mart",
+      "independent": "336166",
+      "compared": "336166",
+      "match": true
+    },
+    {
+      "check": "data_quality:exact_duplicate_rows_removed",
+      "against": "mart_data_quality (same basis)",
+      "independent": "30220",
+      "compared": "30220",
+      "match": true
+    },
+    {
+      "check": "data_quality:null_session_events_excluded",
+      "against": "mart_data_quality (same basis)",
+      "independent": "2",
+      "compared": "2",
+      "match": true
+    },
+    {
+      "check": "data_quality:multi_user_sessions_excluded",
+      "against": "mart_data_quality (same basis)",
+      "independent": "348",
+      "compared": "348",
+      "match": true
+    },
+    {
+      "check": "data_quality:zero_price_events",
+      "against": "mart_data_quality (same basis)",
+      "independent": "68670",
+      "compared": "68670",
+      "match": true
+    },
+    {
+      "check": "data_quality:cart_events_with_no_view_at_or_before",
+      "against": "mart_data_quality (same basis)",
+      "independent": "4145",
+      "compared": "4145",
+      "match": true
+    },
+    {
+      "check": "sprint0_raw_basis:exact_duplicate_rows_removed",
+      "against": "Sprint 0 profile.json (raw basis)",
+      "independent": "30220",
+      "compared": "30220",
+      "match": true
+    },
+    {
+      "check": "sprint0_raw_basis:zero_price_events",
+      "against": "Sprint 0 profile.json (raw basis)",
+      "independent": "68673",
+      "compared": "68673",
+      "match": true
+    },
+    {
+      "check": "sprint0_raw_basis:null_session_events",
+      "against": "Sprint 0 profile.json (raw basis)",
+      "independent": "2",
+      "compared": "2",
+      "match": true
+    },
+    {
+      "check": "sprint0_raw_basis:multi_user_sessions",
+      "against": "Sprint 0 profile.json (raw basis)",
+      "independent": "348",
+      "compared": "348",
+      "match": true
+    },
+    {
+      "check": "sprint0_raw_basis:cart_events_with_no_view_at_or_before",
+      "against": "Sprint 0 profile.json (raw basis)",
+      "independent": "4655",
+      "compared": "4655",
+      "match": true
+    },
+    {
+      "check": "A:revenue_difference (revenue - repeat collapsed, independent)",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "18506588.30",
+      "compared": "18506588.30",
+      "match": true
+    },
+    {
+      "check": "A:repeat_purchase_value equals the independent difference",
+      "against": "independent headline",
+      "independent": "18506588.30",
+      "compared": "18506588.30",
+      "match": true
+    },
+    {
+      "check": "A:repeat_purchase_value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "18506588.30",
+      "compared": "18506588.30",
+      "match": true
+    },
+    {
+      "check": "A:repeat_purchase_events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "52401",
+      "compared": "52401",
+      "match": true
+    },
+    {
+      "check": "A:time_since_previous_purchase:a_minute_or_more:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "41121",
+      "compared": "41121",
+      "match": true
+    },
+    {
+      "check": "A:time_since_previous_purchase:a_minute_or_more:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "14178836.42",
+      "compared": "14178836.42",
+      "match": true
+    },
+    {
+      "check": "A:time_since_previous_purchase:under_a_minute:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "11280",
+      "compared": "11280",
+      "match": true
+    },
+    {
+      "check": "A:time_since_previous_purchase:under_a_minute:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "4327751.88",
+      "compared": "4327751.88",
+      "match": true
+    },
+    {
+      "check": "A:price_vs_first_purchase:different_price:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "330",
+      "compared": "330",
+      "match": true
+    },
+    {
+      "check": "A:price_vs_first_purchase:different_price:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "135390.16",
+      "compared": "135390.16",
+      "match": true
+    },
+    {
+      "check": "A:price_vs_first_purchase:same_price:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "52071",
+      "compared": "52071",
+      "match": true
+    },
+    {
+      "check": "A:price_vs_first_purchase:same_price:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "18371198.14",
+      "compared": "18371198.14",
+      "match": true
+    },
+    {
+      "check": "A:category_top:accessories:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "68",
+      "compared": "68",
+      "match": true
+    },
+    {
+      "check": "A:category_top:accessories:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "2821.05",
+      "compared": "2821.05",
+      "match": true
+    },
+    {
+      "check": "A:category_top:apparel:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "332",
+      "compared": "332",
+      "match": true
+    },
+    {
+      "check": "A:category_top:apparel:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "26814.20",
+      "compared": "26814.20",
+      "match": true
+    },
+    {
+      "check": "A:category_top:appliances:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "3828",
+      "compared": "3828",
+      "match": true
+    },
+    {
+      "check": "A:category_top:appliances:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "829472.53",
+      "compared": "829472.53",
+      "match": true
+    },
+    {
+      "check": "A:category_top:auto:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "587",
+      "compared": "587",
+      "match": true
+    },
+    {
+      "check": "A:category_top:auto:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "78627.65",
+      "compared": "78627.65",
+      "match": true
+    },
+    {
+      "check": "A:category_top:computers:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "1868",
+      "compared": "1868",
+      "match": true
+    },
+    {
+      "check": "A:category_top:computers:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "800660.76",
+      "compared": "800660.76",
+      "match": true
+    },
+    {
+      "check": "A:category_top:construction:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "392",
+      "compared": "392",
+      "match": true
+    },
+    {
+      "check": "A:category_top:construction:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "65593.24",
+      "compared": "65593.24",
+      "match": true
+    },
+    {
+      "check": "A:category_top:country_yard:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "2",
+      "compared": "2",
+      "match": true
+    },
+    {
+      "check": "A:category_top:country_yard:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "475.66",
+      "compared": "475.66",
+      "match": true
+    },
+    {
+      "check": "A:category_top:electronics:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "35283",
+      "compared": "35283",
+      "match": true
+    },
+    {
+      "check": "A:category_top:electronics:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "15140317.09",
+      "compared": "15140317.09",
+      "match": true
+    },
+    {
+      "check": "A:category_top:furniture:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "415",
+      "compared": "415",
+      "match": true
+    },
+    {
+      "check": "A:category_top:furniture:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "83862.67",
+      "compared": "83862.67",
+      "match": true
+    },
+    {
+      "check": "A:category_top:kids:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "288",
+      "compared": "288",
+      "match": true
+    },
+    {
+      "check": "A:category_top:kids:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "41658.20",
+      "compared": "41658.20",
+      "match": true
+    },
+    {
+      "check": "A:category_top:medicine:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "10",
+      "compared": "10",
+      "match": true
+    },
+    {
+      "check": "A:category_top:medicine:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "390.25",
+      "compared": "390.25",
+      "match": true
+    },
+    {
+      "check": "A:category_top:sport:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "73",
+      "compared": "73",
+      "match": true
+    },
+    {
+      "check": "A:category_top:sport:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "20608.84",
+      "compared": "20608.84",
+      "match": true
+    },
+    {
+      "check": "A:category_top:stationery:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "5",
+      "compared": "5",
+      "match": true
+    },
+    {
+      "check": "A:category_top:stationery:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "51.58",
+      "compared": "51.58",
+      "match": true
+    },
+    {
+      "check": "A:category_top:unknown:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "9250",
+      "compared": "9250",
+      "match": true
+    },
+    {
+      "check": "A:category_top:unknown:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "1415234.58",
+      "compared": "1415234.58",
+      "match": true
+    },
+    {
+      "check": "A:purchase_events_in_pair:2:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "34169",
+      "compared": "34169",
+      "match": true
+    },
+    {
+      "check": "A:purchase_events_in_pair:2:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "11636092.47",
+      "compared": "11636092.47",
+      "match": true
+    },
+    {
+      "check": "A:purchase_events_in_pair:3:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "10278",
+      "compared": "10278",
+      "match": true
+    },
+    {
+      "check": "A:purchase_events_in_pair:3:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "3673626.38",
+      "compared": "3673626.38",
+      "match": true
+    },
+    {
+      "check": "A:purchase_events_in_pair:4_or_more:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "7954",
+      "compared": "7954",
+      "match": true
+    },
+    {
+      "check": "A:purchase_events_in_pair:4_or_more:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "3196869.45",
+      "compared": "3196869.45",
+      "match": true
+    },
+    {
+      "check": "A:time_by_price:a_minute_or_more|different_price:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "316",
+      "compared": "316",
+      "match": true
+    },
+    {
+      "check": "A:time_by_price:a_minute_or_more|different_price:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "128460.27",
+      "compared": "128460.27",
+      "match": true
+    },
+    {
+      "check": "A:time_by_price:a_minute_or_more|same_price:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "40805",
+      "compared": "40805",
+      "match": true
+    },
+    {
+      "check": "A:time_by_price:a_minute_or_more|same_price:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "14050376.15",
+      "compared": "14050376.15",
+      "match": true
+    },
+    {
+      "check": "A:time_by_price:under_a_minute|different_price:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "14",
+      "compared": "14",
+      "match": true
+    },
+    {
+      "check": "A:time_by_price:under_a_minute|different_price:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "6929.89",
+      "compared": "6929.89",
+      "match": true
+    },
+    {
+      "check": "A:time_by_price:under_a_minute|same_price:events",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "11266",
+      "compared": "11266",
+      "match": true
+    },
+    {
+      "check": "A:time_by_price:under_a_minute|same_price:value",
+      "against": "mart_revenue_gap_decomposition",
+      "independent": "4320821.99",
+      "compared": "4320821.99",
+      "match": true
+    },
+    {
+      "check": "A:threshold_0s:value",
+      "against": "mart_revenue_gap_thresholds",
+      "independent": "0",
+      "compared": "0.00",
+      "match": true
+    },
+    {
+      "check": "A:threshold_1s:value",
+      "against": "mart_revenue_gap_thresholds",
+      "independent": "16833.47",
+      "compared": "16833.47",
+      "match": true
+    },
+    {
+      "check": "A:threshold_5s:value",
+      "against": "mart_revenue_gap_thresholds",
+      "independent": "33940.91",
+      "compared": "33940.91",
+      "match": true
+    },
+    {
+      "check": "A:threshold_10s:value",
+      "against": "mart_revenue_gap_thresholds",
+      "independent": "66279.17",
+      "compared": "66279.17",
+      "match": true
+    },
+    {
+      "check": "A:threshold_30s:value",
+      "against": "mart_revenue_gap_thresholds",
+      "independent": "311699.50",
+      "compared": "311699.50",
+      "match": true
+    },
+    {
+      "check": "A:threshold_60s:value",
+      "against": "mart_revenue_gap_thresholds",
+      "independent": "4524129.84",
+      "compared": "4524129.84",
+      "match": true
+    },
+    {
+      "check": "A:threshold_300s:value",
+      "against": "mart_revenue_gap_thresholds",
+      "independent": "16442396.73",
+      "compared": "16442396.73",
+      "match": true
+    },
+    {
+      "check": "A:threshold_1800s:value",
+      "against": "mart_revenue_gap_thresholds",
+      "independent": "18227271.53",
+      "compared": "18227271.53",
+      "match": true
+    },
+    {
+      "check": "A:threshold_3600s:value",
+      "against": "mart_revenue_gap_thresholds",
+      "independent": "18358862.46",
+      "compared": "18358862.46",
+      "match": true
+    },
+    {
+      "check": "A-S1:cart:2:groups",
+      "against": "mart_duplicate_rows_breakdown",
+      "independent": "10956",
+      "compared": "10956",
+      "match": true
+    },
+    {
+      "check": "A-S1:cart:2:rows_removed",
+      "against": "mart_duplicate_rows_breakdown",
+      "independent": "10956",
+      "compared": "10956",
+      "match": true
+    },
+    {
+      "check": "A-S1:cart:3:groups",
+      "against": "mart_duplicate_rows_breakdown",
+      "independent": "2554",
+      "compared": "2554",
+      "match": true
+    },
+    {
+      "check": "A-S1:cart:3:rows_removed",
+      "against": "mart_duplicate_rows_breakdown",
+      "independent": "5108",
+      "compared": "5108",
+      "match": true
+    },
+    {
+      "check": "A-S1:cart:4_or_more:groups",
+      "against": "mart_duplicate_rows_breakdown",
+      "independent": "2484",
+      "compared": "2484",
+      "match": true
+    },
+    {
+      "check": "A-S1:cart:4_or_more:rows_removed",
+      "against": "mart_duplicate_rows_breakdown",
+      "independent": "12009",
+      "compared": "12009",
+      "match": true
+    },
+    {
+      "check": "A-S1:purchase:2:groups",
+      "against": "mart_duplicate_rows_breakdown",
+      "independent": "76",
+      "compared": "76",
+      "match": true
+    },
+    {
+      "check": "A-S1:purchase:2:rows_removed",
+      "against": "mart_duplicate_rows_breakdown",
+      "independent": "76",
+      "compared": "76",
+      "match": true
+    },
+    {
+      "check": "A-S1:view:2:groups",
+      "against": "mart_duplicate_rows_breakdown",
+      "independent": "1991",
+      "compared": "1991",
+      "match": true
+    },
+    {
+      "check": "A-S1:view:2:rows_removed",
+      "against": "mart_duplicate_rows_breakdown",
+      "independent": "1991",
+      "compared": "1991",
+      "match": true
+    },
+    {
+      "check": "A-S1:view:3:groups",
+      "against": "mart_duplicate_rows_breakdown",
+      "independent": "34",
+      "compared": "34",
+      "match": true
+    },
+    {
+      "check": "A-S1:view:3:rows_removed",
+      "against": "mart_duplicate_rows_breakdown",
+      "independent": "68",
+      "compared": "68",
+      "match": true
+    },
+    {
+      "check": "A-S1:view:4_or_more:groups",
+      "against": "mart_duplicate_rows_breakdown",
+      "independent": "4",
+      "compared": "4",
+      "match": true
+    },
+    {
+      "check": "A-S1:view:4_or_more:rows_removed",
+      "against": "mart_duplicate_rows_breakdown",
+      "independent": "12",
+      "compared": "12",
+      "match": true
+    },
+    {
+      "check": "A-S2:raw_basis_count",
+      "against": "mart_cart_no_view_reconciliation",
+      "independent": "4655",
+      "compared": "4655",
+      "match": true
+    },
+    {
+      "check": "A-S2:in_null_session_events",
+      "against": "mart_cart_no_view_reconciliation",
+      "independent": "0",
+      "compared": "0",
+      "match": true
+    },
+    {
+      "check": "A-S2:in_multi_user_sessions",
+      "against": "mart_cart_no_view_reconciliation",
+      "independent": "0",
+      "compared": "0",
+      "match": true
+    },
+    {
+      "check": "A-S2:removed_as_exact_duplicates",
+      "against": "mart_cart_no_view_reconciliation",
+      "independent": "510",
+      "compared": "510",
+      "match": true
+    },
+    {
+      "check": "A-S2:remaining_after_attribution equals the contract-basis count",
+      "against": "mart_cart_no_view_reconciliation",
+      "independent": "4145",
+      "compared": "4145",
+      "match": true
+    },
+    {
+      "check": "A-S2:remainder",
+      "against": "mart_cart_no_view_reconciliation",
+      "independent": "0",
+      "compared": "0",
+      "match": true
+    }
+  ]
+}
