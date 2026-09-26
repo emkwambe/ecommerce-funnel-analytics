@@ -395,6 +395,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the row now says the ordering was flagged by Claude Code and was not an owner decision (commit `311b4b5`, same branch; history not rewritten).
 - **Guard added:** none automated. Rows in the owner-decisions table state only what the owner's message said; anything Claude Code infers or flags is labeled as such.
 
+**2026-09-26 · Sprint 2 Step 7 · Final-report draft repeated the verification overstatement and miscounted the site's lag**
+- **Origin:** Claude Code (`ai-workflow/sprint-2-report.md`, first draft; and the session message that preceded it)
+- **What was produced:** "Every published figure was recomputed independently of the pipeline", and "the six entries logged since then are not on the site".
+- **What was wrong:** the first repeats the overstatement the owner had just had corrected on the later-purchases page (26 Kaplan–Meier points and the intervals were not independently recomputed). The second was a count stated without computing it. Code counts 40 entries on the live site against 47 in the log, a lag of seven.
+- **How it was caught:** Claude Code's review of the report draft against `verify.json` and a code count, before the commit.
+- **Fix:** the report uses the owner-approved description of the verification, and the code-computed count (seven). Ships in this commit.
+- **Guard added:** the same as the two earlier entries it repeats: verification is described from `verify.json` check names, and every count in a report comes from code output.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

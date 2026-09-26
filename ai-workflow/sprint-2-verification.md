@@ -113,9 +113,9 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 
 ## Tests
 
-`174 passed in 5.65s  (pytest_exit_code=0)`
+`174 passed in 5.91s  (pytest_exit_code=0)`
 
-## Correction log: 20 Sprint 2 entries
+## Correction log: 21 Sprint 2 entries
 
 - Sprint 2 Step 0 · `.env.example` left out of the last direct commit to main (Claude Code; Claude Code's own review)
 - Sprint 2 Step 3 · Export test pinned that no Changes entry touches decision D4 (Claude Code; Test or commit gate)
@@ -137,6 +137,7 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 - Sprint 2 Step 7 · Later-purchases page overstated its independent recomputation (Claude Code; Human review)
 - Sprint 2 Step 4 · Report quoted a hand-added total (28,152) for duplicate cart rows (Claude Code; Human review)
 - Sprint 2 Step 7 · Decision record attributed an ordering to the owner that the owner had not decided (Claude Code; Claude Code's own review)
+- Sprint 2 Step 7 · Final-report draft repeated the verification overstatement and miscounted the site's lag (Claude Code; Claude Code's own review)
 
 ## Sprint 2 commits on main (first parent)
 
@@ -151,3 +152,4 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 - `d2f17de` Merge pull request #8 from emkwambe/sprint-2/v110-evidence
 - `c153a16` Merge pull request #9 from emkwambe/sprint-2/verification-wording
 - `46bd249` Merge pull request #10 from emkwambe/sprint-2/v111-records
+- `fae815d` Claim ledger: owner H9 sign-off for C3-C15 (2026-09-26); H8 for PR #10
