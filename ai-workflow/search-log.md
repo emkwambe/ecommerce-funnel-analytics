@@ -17,6 +17,8 @@ Template: verified-analytics-project v2.1. Created in Sprint 2 Step 0 (2026-09-2
 | 9 | 2026-09-26 | A-S1: exact duplicate rows by event type and group size | pre-specified | synthetic only | code check | yes | this commit |
 | 10 | 2026-09-26 | A-S2: cart events with no view at or before them, raw basis to contract basis | pre-specified | synthetic only | code check | yes | this commit |
 
+| 11 | 2026-09-26 | Rows 1–10 run once on the real data: full `dbt build` at `e335f67` (PASS=149), `funnel.verify` (83 of 83 A checks match), export at `7e3d506` | pre-specified | October 2019 event log (dataset SHA-256 in `docs/data-source.md`), all valid sessions | all ten cuts computed; values in `web/public/data/investigation_revenue_gap.json`. No cut was dropped, re-specified, or selected | all reported | `0da0e2e` |
+
 Rows 1–10 fix every analysis A cut before the real data is used. Each real-data run is logged as a new row that references these numbers. A is descriptive, and it tests no hypothesis.
 
-**Running totals:** hypotheses 0; specifications 10 (analysis A, all pre-specified); uses of the evaluation data 0. These feed the false-discovery gate.
+**Running totals:** hypotheses 0; specifications 10 (analysis A, all pre-specified); uses of the evaluation data 1 (row 11). These feed the false-discovery gate.
