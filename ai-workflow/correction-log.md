@@ -243,6 +243,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** `.gitignore` gains `!.env.example`, and the file is committed on the Step 1 branch `sprint-2/governed-setup`, so it reaches `main` through the first PR. `03c1eed` is left as pushed; history is not rewritten.
 - **Guard added:** `test_env_example_is_committable_not_ignored` in `analysis/tests/test_env_drift.py` fails if git ignores `.env.example` (checked by running it against the old `.gitignore`: 1 failed). Commit sequences now check `git status --short` after staging, and every listed path must be staged before the commit.
 
+**2026-09-26 · Sprint 2 Step 3 · Export test pinned that no Changes entry touches decision D4**
+- **Origin:** Claude Code (Sprint 1 Step 5, `analysis/tests/test_export.py`)
+- **What was produced:** `test_decisions_link_to_the_changes_entries_that_apply` asserted `linked["D4"] == []`.
+- **What was wrong:** the assertion recorded the Sprint 1 state of the contract rather than the linking rule. The Sprint 2 Changes entry lists Section 4 in its heading because it decomposes the D4 revenue difference, so `/data` correctly links D4 to it, and the test failed on a correct contract.
+- **How it was caught:** the pytest commit gate before the Changes-entry commit (1 failed, 120 passed). Nothing was committed.
+- **Fix:** the test asserts that D4 links to exactly the Sprint 2 entry and that D1 still links to none. The owner-approved entry text is unchanged. Ships in this commit.
+- **Guard added:** none new; the test now checks the rule's output for the current contract.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.
