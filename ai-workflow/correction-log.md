@@ -355,6 +355,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the table omits the timing groups (the threshold line, which includes 0 s, carries timing), and the sentence says "by up to", at four decimals. Ships in this commit.
 - **Guard added:** none new; the claim ledger (C5) remains the reference for what timing may be published.
 
+**2026-09-26 · Sprint 2 Step 7 · README linked to a production page before it was deployed**
+- **Origin:** Claude Code (release PR #7, `README.md` site table)
+- **What was produced:** a site-table row linking to `https://ecommercefunnel-analytics.vercel.app/investigations`.
+- **What was wrong:** the page exists on `main` but is not deployed until after the release PR merges, so the link returned 404. The link check blocked the merge that would make it valid.
+- **How it was caught:** CI `docs-checks` (lychee) on PR #7: 31 links, 30 successful, 1 error (`[404] .../investigations`).
+- **Fix:** by the owner's decision (option (b), keeping the order merge, then deploy), the row names the page in plain text, noting that it is live after the v1.1.0 deploy. The link is restored in the post-deploy evidence PR. Ships in this commit.
+- **Guard added:** none new; the link check did its job. Links to new production pages are added only after the deploy that creates them.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.
