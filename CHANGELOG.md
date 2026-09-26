@@ -11,6 +11,7 @@ Entries up to v1.0.1 were reconstructed in Sprint 2 from the git history. Figure
 - `.env.example` listing every environment variable the code reads (names and descriptions only), guarded by an env-drift test.
 - This changelog.
 - CI (`.github/workflows/ci.yml`): pytest on committed exports and synthetic fixtures, web lint and build, and a link check of the README, changelog, and docs. A pull request template.
+- Method-selection records for the Sprint 2 investigations: A (the two revenue figures) and B (carted products purchased in a later session).
 
 ### Fixed
 - `.env.example` is committed: the `.env*` ignore rule had also matched it (correction log, Sprint 2 Step 0).
