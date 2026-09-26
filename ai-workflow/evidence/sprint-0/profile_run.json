@@ -1,26 +1,26 @@
 {
   "manifest": {
-    "git_commit_sha": "f1b03593dae6441e63725e19d5d35d1cce933dbb",
+    "git_commit_sha": "2eb8862b4fb157a7eb8ba81e47618b3ab26f0fce",
     "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-26T03:08:42+00:00",
+    "generated_at_utc": "2026-09-26T03:20:01+00:00",
     "script": "funnel.profile"
   },
-  "available_ram_gb_before_run": 4.54,
+  "available_ram_gb_before_run": 4.12,
   "duckdb_memory_limit": "2GB",
   "duckdb_threads": 4,
-  "elapsed_seconds": 473.8,
+  "elapsed_seconds": 469.4,
   "check_seconds": {
-    "schema": 12.4,
-    "time": 2.1,
+    "schema": 9.9,
+    "time": 1.6,
     "event_types": 0.1,
-    "duplicates": 315.2,
-    "price": 8.6,
-    "category_brand": 3.5,
-    "sessions_users": 31.8,
-    "ordering_anomalies": 67.5,
-    "order_reconstruction": 8.4
+    "duplicates": 296.5,
+    "price": 8.0,
+    "category_brand": 3.4,
+    "sessions_users": 36.7,
+    "ordering_anomalies": 81.8,
+    "order_reconstruction": 10.3
   },
-  "peak_spill_bytes": 6365184000,
+  "peak_spill_bytes": 6280216576,
   "spill_sample_interval_seconds": 1.0
 }

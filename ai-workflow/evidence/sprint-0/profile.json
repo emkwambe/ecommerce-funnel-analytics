@@ -1,9 +1,9 @@
 {
   "manifest": {
-    "git_commit_sha": "f1b03593dae6441e63725e19d5d35d1cce933dbb",
+    "git_commit_sha": "2eb8862b4fb157a7eb8ba81e47618b3ab26f0fce",
     "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-26T03:08:42+00:00",
+    "generated_at_utc": "2026-09-26T03:20:01+00:00",
     "script": "funnel.profile"
   },
   "schema": {
@@ -231,7 +231,7 @@
       "evidence": [
         "Products with more than one distinct price: 57550; maximum distinct prices for one product: 98."
       ],
-      "choice_forced": "Which price is the value of a purchase or of a lost cart.",
+      "choice_forced": "Which price is the value of a purchase, or of carted products with no observed purchase in the session.",
       "options": [
         "Use the price logged on each event.",
         "Use the price on the purchase event for purchases and on the cart event for cart events.",
