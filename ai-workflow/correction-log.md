@@ -307,6 +307,30 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** gaps are filtered to non-null before capping. The rerun's purchase gaps equal the D1 per-second counts exactly, from 1 to 300 s, with the same total.
 - **Guard added:** none automated (scratch code). The totals cross-check against an independently computed figure is kept in the diagnostic.
 
+**2026-09-26 · Sprint 2 Step 5 · Export opened DuckDB without the shared memory settings**
+- **Origin:** Claude Code (Sprint 1 Step 5, `funnel/export.py`)
+- **What was produced:** `main()` in `funnel/export.py` opened a bare `duckdb.connect()` to attach the warehouse.
+- **What was wrong:** every other package connection goes through `funnel.ingest.connect()`, which applies the shared settings in `funnel/common.py`: a 2 GB memory limit, 4 threads, insertion order off, spill to `data/duckdb_tmp`, and UTC. The export's connection ran with DuckDB's defaults (80% of RAM, all cores). Its queries are small reads of the marts, so no run was harmed and no exported value depends on it, but the memory rule did not hold for every connection. `funnel.verify`, whose run was stopped by the harness under system memory pressure, was checked and does use the shared settings.
+- **How it was caught:** Claude Code's check of every DuckDB connection in the package, requested by the project owner after the Step 5 verification run was stopped.
+- **Fix:** the export uses `connect()`. Ships in this commit, before the Step 5 exports are regenerated.
+- **Guard added:** `analysis/tests/test_duckdb_connections.py` parses `analysis/funnel/` and `analysis/explore/` and fails on any `duckdb.connect` call (direct, aliased, or imported by name) outside `funnel.ingest.connect`. It failed on the old `export.py` (line 506) and passes on the fix. It also checks at runtime that `connect()` applies each shared setting.
+
+**2026-09-26 · Sprint 2 Step 5 · Independent Kaplan–Meier SQL failed when a time step removed everyone at risk**
+- **Origin:** Claude Code (`funnel/verify.py`, `_km_sql`, the R2 extension after owner decision H4)
+- **What was produced:** the product-limit as `1 - exp(sum(ln(1 - d/n)))`, guarded by `CASE WHEN bool_or(d = n)` and later by `FILTER (WHERE d < n)`.
+- **What was wrong:** when every pair at risk has its event (d = n), the factor is 0. DuckDB evaluates `ln` before the `CASE` or `FILTER` applies, so the query raised "cannot take logarithm of zero" instead of returning 1.
+- **How it was caught:** the pytest commit gate on the hand-counted B log (`test_independent_all_specifications_kaplan_meier_and_diagnostics_match_hand_counts`: the late cohort's single pair is bought within 7 days), before any real-data run.
+- **Fix:** the argument of `ln` is clamped (`greatest(..., 1e-300)`); zero factors stay filtered out and are handled by the `bool_or` branch. `test_sql_kaplan_meier_agrees_with_the_numpy_one_under_censoring` also checks the SQL and numpy estimators against each other with censoring.
+- **Guard added:** the two tests above.
+
+**2026-09-26 · Sprint 2 Step 5 · Ledger row claimed an independent recomputation that did not exist**
+- **Origin:** Claude Code (claim-ledger row C15, first draft)
+- **What was produced:** C15's Reproduction cell stated that the `user_id` checks were "recomputed independently as part of the B-all population build".
+- **What was wrong:** `independent_later_purchases` did not recompute them, so the "shows" tier lacked the R2 the cell claimed.
+- **How it was caught:** Claude Code's review of each new ledger row against the verification code, before the commit.
+- **Fix:** the independent path now recomputes the three identity checks from deduplicated events before session exclusions, and `funnel.verify` compares them (`B-all:user_id_check:*`). The hand-counted test covers them. The row cites the real check names. Ships in this commit, before the verification run that backs it.
+- **Guard added:** none automated; each ledger row's Reproduction cell is checked against `verify.json` check names before export (the export requires every `B1:` and `B-all:` check to match).
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

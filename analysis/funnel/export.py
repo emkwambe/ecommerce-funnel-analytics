@@ -5,7 +5,8 @@ Run: python -m funnel.export
 Reads data/warehouse.duckdb (read-only) after a passing `python -m funnel.build`, and writes
 web/public/data/: kpis.json, funnel_category.json, purchase_paths.json, data_quality.json,
 metrics_index.json (parsed from docs/metrics.md), data_story.json (the /data page), and, from
-Sprint 2, investigation_revenue_gap.json (analysis A).
+Sprint 2, investigation_revenue_gap.json (analysis A) and investigation_later_purchases.json
+(analysis B; halts if a B stop rule fired).
 Halts if the dataset hash differs from docs/data-source.md, if the last full dbt build did not
 pass on this dataset, if the reconciliation chain in data_story.json does not sum, or if the
 independent verification of analysis A is missing, on another dataset, or has a mismatch.
@@ -35,7 +36,7 @@ from funnel.common import (
     require_dataset_hash_match,
     write_json,
 )
-from funnel.ingest import KAGGLE_LICENSE_FIELD, PUBLISHER_USAGE_STATEMENT, REES46_URL
+from funnel.ingest import KAGGLE_LICENSE_FIELD, PUBLISHER_USAGE_STATEMENT, REES46_URL, connect
 
 SCRIPT = "funnel.export"
 WAREHOUSE = DATA_DIR / "warehouse.duckdb"
@@ -461,12 +462,90 @@ def investigation_revenue_gap(con: duckdb.DuckDBPyConnection, dataset_sha: str) 
     }
 
 
+LATER_PURCHASES_JSON = CURRENT_EVIDENCE_DIR / "later_purchases.json"
+# A fired stop rule blocks the export unless the owner resolved it; each resolution names its record.
+RESOLVED_STOP_RULES = {
+    "R3 agreement: the B1 7-day count share lies inside the all-pairs KM 7-day 95% interval": (
+        "Owner decision H4, 2026-09-26 (option A): B1 kept at 'shows', scoped to its population; the "
+        "disagreement is disclosed and the late-October cohort difference reported as a finding. Records: "
+        "ai-workflow/escalations/2026-09-26-B-R3-agreement.md, ai-workflow/sprint-2-verification.md."),
+}
+
+
+def population_label(cutoff: str) -> str:
+    """'sessions starting October 1-D, 2019 UTC' from a specification's ISO cutoff (owner decision H4, item 1)."""
+    from datetime import datetime
+
+    day = datetime.fromisoformat(cutoff)
+    if (day.year, day.month) != (2019, 10):
+        sys.exit(f"HALT: cutoff {cutoff} is outside October 2019.")
+    return f"sessions starting October 1–{day.day}, 2019 UTC"
+
+
+def investigation_later_purchases(con: duckdb.DuckDBPyConnection, dataset_sha: str) -> dict[str, Any]:
+    """Analysis B (metrics.md Changes 2026-09-26, Sprint 2 investigations, B items 7-16). Point estimates and
+    counts from the marts; intervals, Kaplan-Meier, and seed stability from funnel.later_purchases."""
+    if not LATER_PURCHASES_JSON.exists():
+        sys.exit(f"HALT: {LATER_PURCHASES_JSON} missing; run python -m funnel.later_purchases.")
+    stats = json.loads(LATER_PURCHASES_JSON.read_text(encoding="utf-8"))
+    if stats["manifest"]["dataset_sha256"] != dataset_sha:
+        sys.exit("HALT: later_purchases.json was produced on a different dataset; rerun python -m funnel.later_purchases.")
+    unresolved = [r["rule"] for r in stats["stop_rules"] if r["fired"] and r["rule"] not in RESOLVED_STOP_RULES]
+    if unresolved:
+        sys.exit(f"HALT: analysis B stop rules fired without an owner resolution {unresolved}; escalate first.")
+    stop_rules = [{**r, "owner_resolution": RESOLVED_STOP_RULES.get(r["rule"]) if r["fired"] else None}
+                  for r in stats["stop_rules"]]
+    estimates = rows(con, "SELECT * FROM wh.main_marts.mart_later_purchase_estimates ORDER BY spec_key")
+    for row in estimates:
+        interval = stats["estimates"][row["spec_key"]]
+        if abs(interval["count_share"] - float(row["count_share"])) > 1e-12:
+            sys.exit(f"HALT: {row['spec_key']} intervals were computed on different point estimates.")
+        row.update({k: interval[k] for k in ("count_interval", "value_interval", "resamples", "seed")})
+        row["population"] = population_label(row["cutoff"])
+    checks = rows(con, "SELECT * FROM wh.main_marts.mart_later_purchase_checks ORDER BY sort_order")
+    check = {r["row_key"]: r["value"] for r in checks}
+    b1 = next(r for r in estimates if r["spec_key"] == "B1")
+    cohort = stats["cohort_diagnostic"]
+    return {
+        "question": "Were carted products purchased in a later session?",
+        "method_record": "ai-workflow/method-selection/B-later-purchases.md",
+        "contract": "docs/metrics.md, Changes 2026-09-26 (Sprint 2 investigations), B items 7-16",
+        "estimates": estimates,
+        "kaplan_meier": stats["kaplan_meier"],
+        "kaplan_meier_population": "every carted pair with no purchase in the session, all of October 2019 UTC "
+                                   "(no cutoff); censored at 2019-10-31 23:59:59 UTC",
+        # Owner decision H4, item 1: the late-October cohort difference, reported as a finding in its own right.
+        "cohort_difference": {
+            "b1_population": b1["population"],
+            "b1_count_share": b1["count_share"],
+            "b1_count_interval": b1["count_interval"],
+            "later_population": population_label(b1["cutoff"]).replace("October 1–", "after October "),
+            "later_km_7_day": cohort["after_7_day_cutoff"]["count"],
+            "later_km_7_day_interval": cohort["after_7_day_cutoff"]["count_interval"],
+            "matched_km_7_day": cohort["by_7_day_cutoff"]["count"],
+        },
+        # Owner decision H4, item 3: disclosed beside the estimate; may reflect technical session splits.
+        "within_1_hour_disclosure": {
+            "share_of_followed_pairs": check[
+                "diagnostic:share_of_followed_pairs_with_first_later_purchase_within_1_hour_of_latest_cart_event"],
+            "population": b1["population"],
+        },
+        "seed_stability": stats["seed_stability"],
+        "stop_rules": stop_rules,
+        "dominance": stats["dominance"],
+        "checks": checks,
+        "statistics_run": {"git_commit_sha": stats["manifest"]["git_commit_sha"],
+                           "generated_at_utc": stats["manifest"]["generated_at_utc"]},
+        "independent_verification": verification_summary(dataset_sha, ("B1:", "B-all:")),
+    }
+
+
 def main() -> None:
     sha = require_dataset_hash_match()
     build = last_full_build(sha)
     if not WAREHOUSE.exists():
         sys.exit(f"HALT: {WAREHOUSE} missing; run python -m funnel.build first.")
-    con = duckdb.connect()
+    con = connect()  # the shared settings (funnel.common): memory limit, threads, insertion order, spill dir
     con.execute(f"ATTACH '{WAREHOUSE.as_posix()}' AS wh (READ_ONLY)")
     metrics_text = METRICS_MD.read_text(encoding="utf-8")
 
@@ -507,6 +586,7 @@ def main() -> None:
         "data_story.json": data_story(con, metrics_text, dq),
         "workflow.json": workflow_record(),
         "investigation_revenue_gap.json": investigation_revenue_gap(con, sha),
+        "investigation_later_purchases.json": investigation_later_purchases(con, sha),
     }
     # One manifest for the whole run, taken before the first write: once a file is written the
     # tree is dirty, so a per-file manifest would misreport every file after the first.

@@ -10,7 +10,8 @@ from funnel import common
 from funnel.export import WEB_DATA
 
 EXPORTS = ("kpis.json", "funnel_category.json", "purchase_paths.json", "data_quality.json",
-           "metrics_index.json", "data_story.json", "workflow.json", "investigation_revenue_gap.json")
+           "metrics_index.json", "data_story.json", "workflow.json", "investigation_revenue_gap.json",
+           "investigation_later_purchases.json")
 MANIFEST_KEYS = {"git_commit_sha", "git_worktree_dirty", "dataset_sha256", "generated_at_utc", "script"}
 
 
@@ -101,6 +102,25 @@ def test_repeat_purchase_events_reconcile_with_the_sprint0_raw_basis():
     purchase_rows_removed = sum(d["rows_removed"] for d in gap["secondary_cases"]["exact_duplicate_rows"]
                                 if d["event_type"] == "purchase")
     assert raw_surplus - gap["totals"]["repeat_purchase_events"] == purchase_rows_removed
+
+
+def test_later_purchases_export_is_scoped_resolved_and_independently_verified():
+    """Analysis B, owner decision H4: every estimate names its population; every fired stop rule carries an owner
+    resolution; the cohort finding and the within-one-hour disclosure are present; R2 covers B1 and B-all."""
+    later = json.loads((WEB_DATA / "investigation_later_purchases.json").read_text(encoding="utf-8"))
+    for row in later["estimates"]:
+        assert row["population"].startswith("sessions starting October 1–") and row["population"].endswith("2019 UTC")
+        lo, hi = row["count_interval"]
+        assert lo <= row["count_share"] <= hi
+        assert row["followed_pairs"] <= row["eligible_pairs"]
+    assert {r["spec_key"] for r in later["estimates"]} == {"B1", "B2", "B3", "B5", "B6", "B7", "B8"}
+    for rule in later["stop_rules"]:
+        assert (rule["owner_resolution"] is not None) == rule["fired"], rule["rule"]
+    cohort = later["cohort_difference"]
+    assert cohort["later_population"].startswith("sessions starting after October ")
+    assert abs(cohort["matched_km_7_day"] - cohort["b1_count_share"]) < 1e-9
+    assert 0 <= later["within_1_hour_disclosure"]["share_of_followed_pairs"] <= 1
+    assert later["independent_verification"]["all_match"] is True
 
 
 def test_exports_share_one_clean_manifest():

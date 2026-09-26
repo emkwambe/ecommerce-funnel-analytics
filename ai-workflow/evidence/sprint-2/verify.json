@@ -1,14 +1,14 @@
 {
   "manifest": {
-    "git_commit_sha": "e335f67977579076aef48d2ca640c68f8526c9e3",
-    "git_worktree_dirty": true,
+    "git_commit_sha": "7bc7bb5c415aba3b6f9fd71d20a2827ab990e5db",
+    "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-26T11:45:34+00:00",
+    "generated_at_utc": "2026-09-26T17:05:31+00:00",
     "script": "funnel.verify"
   },
-  "available_ram_gb_before_run": 5.87,
-  "elapsed_seconds": 519.4,
-  "peak_spill_bytes": 16979853312,
+  "available_ram_gb_before_run": 7.63,
+  "elapsed_seconds": 858.7,
+  "peak_spill_bytes": 23016341504,
   "rate_tolerance": 1e-09,
   "all_match": true,
   "checks": [
@@ -83,20 +83,6 @@
       "match": true
     },
     {
-      "check": "revenue_share:Purchase with no observed same-session cart event",
-      "against": "mart",
-      "independent": "0.48078959947101524",
-      "compared": "0.48078959947101524",
-      "match": true
-    },
-    {
-      "check": "purchase_events:Purchase with no observed same-session cart event",
-      "against": "mart",
-      "independent": "406605",
-      "compared": "406605",
-      "match": true
-    },
-    {
       "check": "revenue_share:Purchase with an observed same-session cart event",
       "against": "mart",
       "independent": "0.5192104005289847",
@@ -108,6 +94,20 @@
       "against": "mart",
       "independent": "336166",
       "compared": "336166",
+      "match": true
+    },
+    {
+      "check": "revenue_share:Purchase with no observed same-session cart event",
+      "against": "mart",
+      "independent": "0.48078959947101524",
+      "compared": "0.48078959947101524",
+      "match": true
+    },
+    {
+      "check": "purchase_events:Purchase with no observed same-session cart event",
+      "against": "mart",
+      "independent": "406605",
+      "compared": "406605",
       "match": true
     },
     {
@@ -759,6 +759,321 @@
       "against": "mart_cart_no_view_reconciliation",
       "independent": "0",
       "compared": "0",
+      "match": true
+    },
+    {
+      "check": "B1:eligible_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "263018",
+      "compared": "263018",
+      "match": true
+    },
+    {
+      "check": "B1:followed_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "36786",
+      "compared": "36786",
+      "match": true
+    },
+    {
+      "check": "B1:eligible_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "88048782.56",
+      "compared": "88048782.56",
+      "match": true
+    },
+    {
+      "check": "B1:followed_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "11801790.22",
+      "compared": "11801790.22",
+      "match": true
+    },
+    {
+      "check": "B1:count_share",
+      "against": "mart_later_purchase_estimates",
+      "independent": "0.13986115018743964",
+      "compared": "0.13986115018743964",
+      "match": true
+    },
+    {
+      "check": "B1:value_share",
+      "against": "mart_later_purchase_estimates",
+      "independent": "0.13403694948260964",
+      "compared": "0.13403694948260964",
+      "match": true
+    },
+    {
+      "check": "B-all:B1:eligible_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "263018",
+      "compared": "263018",
+      "match": true
+    },
+    {
+      "check": "B-all:B1:followed_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "36786",
+      "compared": "36786",
+      "match": true
+    },
+    {
+      "check": "B-all:B1:eligible_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "88048782.56",
+      "compared": "88048782.56",
+      "match": true
+    },
+    {
+      "check": "B-all:B1:followed_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "11801790.22",
+      "compared": "11801790.22",
+      "match": true
+    },
+    {
+      "check": "B-all:B2:eligible_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "307551",
+      "compared": "307551",
+      "match": true
+    },
+    {
+      "check": "B-all:B2:followed_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "37330",
+      "compared": "37330",
+      "match": true
+    },
+    {
+      "check": "B-all:B2:eligible_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "102458618.48",
+      "compared": "102458618.48",
+      "match": true
+    },
+    {
+      "check": "B-all:B2:followed_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "11800753.24",
+      "compared": "11800753.24",
+      "match": true
+    },
+    {
+      "check": "B-all:B3:eligible_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "166694",
+      "compared": "166694",
+      "match": true
+    },
+    {
+      "check": "B-all:B3:followed_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "27057",
+      "compared": "27057",
+      "match": true
+    },
+    {
+      "check": "B-all:B3:eligible_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "56464689.52",
+      "compared": "56464689.52",
+      "match": true
+    },
+    {
+      "check": "B-all:B3:followed_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "8837705.94",
+      "compared": "8837705.94",
+      "match": true
+    },
+    {
+      "check": "B-all:B5:eligible_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "598482",
+      "compared": "598482",
+      "match": true
+    },
+    {
+      "check": "B-all:B5:followed_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "8236",
+      "compared": "8236",
+      "match": true
+    },
+    {
+      "check": "B-all:B5:eligible_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "187695473.79",
+      "compared": "187695473.79",
+      "match": true
+    },
+    {
+      "check": "B-all:B5:followed_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "2768908.01",
+      "compared": "2768908.01",
+      "match": true
+    },
+    {
+      "check": "B-all:B6:eligible_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "231758",
+      "compared": "231758",
+      "match": true
+    },
+    {
+      "check": "B-all:B6:followed_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "27611",
+      "compared": "27611",
+      "match": true
+    },
+    {
+      "check": "B-all:B6:eligible_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "77609870.15",
+      "compared": "77609870.15",
+      "match": true
+    },
+    {
+      "check": "B-all:B6:followed_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "8726435.15",
+      "compared": "8726435.15",
+      "match": true
+    },
+    {
+      "check": "B-all:B7:eligible_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "257433",
+      "compared": "257433",
+      "match": true
+    },
+    {
+      "check": "B-all:B7:followed_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "35591",
+      "compared": "35591",
+      "match": true
+    },
+    {
+      "check": "B-all:B7:eligible_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "86327061.22",
+      "compared": "86327061.22",
+      "match": true
+    },
+    {
+      "check": "B-all:B7:followed_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "11361369.40",
+      "compared": "11361369.40",
+      "match": true
+    },
+    {
+      "check": "B-all:B8:eligible_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "262781",
+      "compared": "262781",
+      "match": true
+    },
+    {
+      "check": "B-all:B8:followed_pairs",
+      "against": "mart_later_purchase_estimates",
+      "independent": "36780",
+      "compared": "36780",
+      "match": true
+    },
+    {
+      "check": "B-all:B8:eligible_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "87965160.44",
+      "compared": "87965160.44",
+      "match": true
+    },
+    {
+      "check": "B-all:B8:followed_value",
+      "against": "mart_later_purchase_estimates",
+      "independent": "11798981.11",
+      "compared": "11798981.11",
+      "match": true
+    },
+    {
+      "check": "B-all:user_id_check:events_in_eligible_sessions_with_null_user_id",
+      "against": "mart_later_purchase_checks",
+      "independent": "0.0",
+      "compared": "0.0",
+      "match": true
+    },
+    {
+      "check": "B-all:user_id_check:eligible_sessions_with_more_than_one_user_id",
+      "against": "mart_later_purchase_checks",
+      "independent": "0.0",
+      "compared": "0.0",
+      "match": true
+    },
+    {
+      "check": "B-all:user_id_check:share_of_eligible_pairs_with_non_null_user_id",
+      "against": "mart_later_purchase_checks",
+      "independent": "1.0",
+      "compared": "1.0",
+      "match": true
+    },
+    {
+      "check": "B-all:most_active_user_threshold_events",
+      "against": "mart_later_purchase_checks",
+      "independent": "368.0",
+      "compared": "368.0",
+      "match": true
+    },
+    {
+      "check": "B-all:within_1_hour_share",
+      "against": "mart_later_purchase_checks",
+      "independent": "0.3786223019627032",
+      "compared": "0.3786223019627032",
+      "match": true
+    },
+    {
+      "check": "B-all:km_all_pairs_3_days",
+      "against": "later_purchases.json",
+      "independent": "0.1221041828183057",
+      "compared": "0.12210418281830626",
+      "match": true
+    },
+    {
+      "check": "B-all:km_all_pairs_7_days",
+      "against": "later_purchases.json",
+      "independent": "0.1380604507908081",
+      "compared": "0.13806045079080853",
+      "match": true
+    },
+    {
+      "check": "B-all:km_all_pairs_14_days",
+      "against": "later_purchases.json",
+      "independent": "0.15104260137467662",
+      "compared": "0.15104260137467884",
+      "match": true
+    },
+    {
+      "check": "B-all:km_all_pairs_30_days",
+      "against": "later_purchases.json",
+      "independent": "0.16289717060433295",
+      "compared": "0.16289717060433484",
+      "match": true
+    },
+    {
+      "check": "B-all:km_by_7_day_cutoff_7_days",
+      "against": "later_purchases.json",
+      "independent": "0.13986115018744272",
+      "compared": "0.13986115018752898",
+      "match": true
+    },
+    {
+      "check": "B-all:km_after_7_day_cutoff_7_days",
+      "against": "later_purchases.json",
+      "independent": "0.12523668035237012",
+      "compared": "0.1252366803523719",
       "match": true
     }
   ]

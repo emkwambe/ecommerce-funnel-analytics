@@ -7,8 +7,8 @@ SQL that does not read any dbt model, then compares each with the marts in
 data/warehouse.duckdb: integers and DECIMAL sums exactly, rates to 1e-9. Data-quality overlaps
 with Sprint 0 are compared like with like: raw-basis figures recomputed here against Sprint 0's
 profile.json, and the contract-basis figures recomputed here against mart_data_quality.
-Sprint 2 adds R2 for analysis A: the revenue difference, its breakdown and thresholds, and the two
-secondary cases. Writes verify.json under the current sprint's evidence folder (CURRENT_EVIDENCE_DIR
+Sprint 2 adds R2 for analysis A (the revenue difference, its breakdown and thresholds, and the two
+secondary cases) and for analysis B (the B1 7-day count and value shares, with their counts and sums). Writes verify.json under the current sprint's evidence folder (CURRENT_EVIDENCE_DIR
 in funnel.common) and exits non-zero on any mismatch.
 """
 
@@ -391,6 +391,266 @@ def compare_investigation_a(independent: dict[str, Any], headline: dict[str, Any
     return checks
 
 
+# Sprint 2, analysis B (metrics.md Changes 2026-09-26, Sprint 2 investigations, B items 7-10).
+B1_CUTOFF = "2019-10-24 23:59:59"
+B1_WINDOW_DAYS = 7
+
+
+def independent_later_purchases_b1(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
+    """B1 (7 days) recomputed from vev without the dbt models: all four later-purchase conditions tested in
+    one correlated EXISTS per eligible pair, rather than a first-purchase minimum followed by a window."""
+    eligible, followed, eligible_value, followed_value = _one(con, f"""
+        WITH sess AS (
+            SELECT user_session, min(user_id) AS user_id, min(event_time) AS session_start
+            FROM vev GROUP BY user_session
+        ),
+        carts AS (
+            SELECT user_session, product_id, max(event_time) AS latest_cart_time
+            FROM vev WHERE event_type = 'cart' GROUP BY user_session, product_id
+        ),
+        bought AS (SELECT DISTINCT user_session, product_id FROM vev WHERE event_type = 'purchase'),
+        latest_nonzero AS (
+            SELECT user_session, product_id, CAST(price AS DECIMAL(18, 2)) AS value,
+                   row_number() OVER (PARTITION BY user_session, product_id ORDER BY event_time DESC) AS rn
+            FROM vev WHERE event_type = 'cart' AND price > 0
+        ),
+        eligible AS (
+            SELECT c.user_session, c.product_id, c.latest_cart_time, s.user_id, s.session_start, l.value
+            FROM carts AS c
+            JOIN sess AS s USING (user_session)
+            LEFT JOIN bought AS b USING (user_session, product_id)
+            LEFT JOIN (SELECT * FROM latest_nonzero WHERE rn = 1) AS l USING (user_session, product_id)
+            WHERE b.user_session IS NULL AND s.session_start <= TIMESTAMP '{B1_CUTOFF}'
+        ),
+        purchases AS (
+            SELECT p.user_session, p.product_id, p.event_time, s.user_id, s.session_start AS purchase_session_start
+            FROM vev AS p JOIN sess AS s USING (user_session)
+            WHERE p.event_type = 'purchase'
+        ),
+        flagged AS (
+            SELECT e.*, EXISTS (
+                SELECT 1 FROM purchases AS p
+                WHERE p.user_id = e.user_id AND p.product_id = e.product_id
+                  AND p.user_session <> e.user_session
+                  AND p.purchase_session_start > e.session_start
+                  AND p.event_time > e.latest_cart_time
+                  AND p.event_time >= e.session_start
+                  AND p.event_time < e.session_start + INTERVAL {B1_WINDOW_DAYS} DAY
+            ) AS is_followed
+            FROM eligible AS e
+        )
+        SELECT count(*), count(*) FILTER (WHERE is_followed),
+               coalesce(sum(value), 0), coalesce(sum(value) FILTER (WHERE is_followed), 0)
+        FROM flagged
+    """)
+    return {
+        "eligible_pairs": int(eligible),
+        "followed_pairs": int(followed),
+        "eligible_value": Decimal(eligible_value),
+        "followed_value": Decimal(followed_value),
+        "count_share": followed / eligible,
+        "value_share": float(Decimal(followed_value) / Decimal(eligible_value)),
+    }
+
+
+B_SPECS = {"B1": ("carted", 7, "2019-10-24 23:59:59"), "B2": ("carted", 3, "2019-10-28 23:59:59"),
+           "B3": ("carted", 14, "2019-10-17 23:59:59"), "B5": ("viewed", 7, "2019-10-24 23:59:59")}
+B_CENSOR = "2019-10-31 23:59:59"
+B_KM_DAYS = (3, 7, 14, 30)
+
+
+def _km_sql(con: duckdb.DuckDBPyConnection, where: str, days: int) -> float:
+    """Kaplan-Meier 1 - S(t) as a SQL product-limit (events strictly before t), independent of numpy."""
+    value = _one(con, f"""
+        WITH km AS (
+            SELECT CASE WHEN first_later IS NULL THEN epoch(TIMESTAMP '{B_CENSOR}') - epoch(session_start)
+                        ELSE epoch(first_later) - epoch(session_start) END AS dur,
+                   first_later IS NOT NULL AS ev
+            FROM b_pairs WHERE pair_type = 'carted' AND {where}
+        ),
+        g AS (SELECT dur, count(*) AS at_dur, count(*) FILTER (WHERE ev) AS d FROM km GROUP BY dur),
+        r AS (SELECT dur, d, sum(at_dur) OVER (ORDER BY dur DESC ROWS UNBOUNDED PRECEDING) AS n FROM g)
+        -- A factor of zero (every pair at risk has its event) sets S to 0. DuckDB evaluates ln before the FILTER
+        -- is applied, so the argument is clamped; the clamped zero factors are filtered out and never summed.
+        SELECT CASE WHEN bool_or(d = n) THEN 1.0
+                    ELSE 1 - exp(coalesce(sum(ln(greatest(1 - d::DOUBLE / n, 1e-300))) FILTER (WHERE d < n), 0)) END
+        FROM r WHERE d > 0 AND dur < {days * 86400}
+    """)[0]
+    return 0.0 if value is None else float(value)
+
+
+def independent_later_purchases(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
+    """Every published analysis B number recomputed from vev without the dbt models or funnel.later_purchases:
+    B1-B3, B5-B8 counts and value sums, KM points (all pairs; both cohorts at 7 days) as a SQL product-limit,
+    the most-active-user threshold, and the within-one-hour diagnostic. The first later purchase is a
+    correlated scalar subquery over conditions 1-3 (dbt uses a join and a filtered minimum)."""
+    con.execute("""
+        CREATE OR REPLACE TEMP TABLE b_sess AS
+        SELECT user_session, min(user_id) AS user_id, min(event_time) AS session_start,
+               max(event_time) - min(event_time) > INTERVAL 24 HOUR AS is_long
+        FROM vev GROUP BY user_session
+    """)
+    con.execute("""
+        CREATE OR REPLACE TEMP TABLE b_purch AS
+        SELECT p.user_session, p.product_id, p.event_time, s.user_id, s.session_start AS purchase_session_start
+        FROM vev AS p JOIN b_sess AS s USING (user_session) WHERE p.event_type = 'purchase'
+    """)
+    con.execute("""
+        CREATE OR REPLACE TEMP TABLE b_pairs AS
+        WITH per AS (
+            SELECT user_session, product_id,
+                   bool_or(event_type = 'cart') AS has_cart, bool_or(event_type = 'view') AS has_view,
+                   bool_or(event_type = 'purchase') AS has_purchase,
+                   max(event_time) FILTER (WHERE event_type = 'cart') AS latest_cart,
+                   max(event_time) FILTER (WHERE event_type = 'view') AS latest_view
+            FROM vev GROUP BY user_session, product_id
+        ),
+        nonzero AS (
+            SELECT user_session, product_id, event_type, CAST(price AS DECIMAL(18, 2)) AS value,
+                   row_number() OVER (PARTITION BY user_session, product_id, event_type ORDER BY event_time DESC) AS rn
+            FROM vev WHERE event_type IN ('cart', 'view') AND price > 0
+        ),
+        carted AS (
+            SELECT 'carted' AS pair_type, p.user_session, p.product_id, p.latest_cart AS anchor, n.value
+            FROM per AS p
+            LEFT JOIN nonzero AS n ON n.user_session = p.user_session AND n.product_id = p.product_id
+                                  AND n.event_type = 'cart' AND n.rn = 1
+            WHERE p.has_cart AND NOT p.has_purchase
+        ),
+        viewed AS (
+            SELECT 'viewed' AS pair_type, p.user_session, p.product_id, p.latest_view AS anchor, n.value
+            FROM per AS p
+            LEFT JOIN nonzero AS n ON n.user_session = p.user_session AND n.product_id = p.product_id
+                                  AND n.event_type = 'view' AND n.rn = 1
+            WHERE p.has_view AND NOT p.has_cart AND NOT p.has_purchase
+              AND p.user_session IN (SELECT user_session FROM carted)
+        ),
+        both_types AS (SELECT * FROM carted UNION ALL SELECT * FROM viewed)
+        SELECT x.*, s.user_id, s.session_start, s.is_long,
+               (SELECT min(q.event_time) FROM b_purch AS q
+                WHERE q.user_id = s.user_id AND q.product_id = x.product_id AND q.user_session <> x.user_session
+                  AND q.purchase_session_start > s.session_start AND q.event_time > x.anchor) AS first_later
+        FROM both_types AS x JOIN b_sess AS s USING (user_session)
+    """)
+    threshold = _one(con, """
+        SELECT quantile_disc(n, 0.999) FROM (SELECT s.user_id, count(*) AS n FROM vev JOIN b_sess AS s USING (user_session)
+                                             GROUP BY s.user_id)
+    """)[0]
+    con.execute(f"""
+        CREATE OR REPLACE TEMP TABLE b_active AS
+        SELECT s.user_id FROM vev JOIN b_sess AS s USING (user_session) GROUP BY s.user_id HAVING count(*) > {threshold}
+    """)
+
+    def spec(where: str, days: int) -> dict[str, Any]:
+        e, f, ev, fv = _one(con, f"""
+            WITH x AS (SELECT *, first_later IS NOT NULL
+                                 AND first_later < session_start + INTERVAL {days} DAY AS followed FROM b_pairs WHERE {where})
+            SELECT count(*), count(*) FILTER (WHERE followed), coalesce(sum(value), 0),
+                   coalesce(sum(value) FILTER (WHERE followed), 0) FROM x
+        """)
+        return {"eligible_pairs": int(e), "followed_pairs": int(f), "eligible_value": Decimal(ev),
+                "followed_value": Decimal(fv)}
+
+    b1 = f"pair_type = 'carted' AND session_start <= TIMESTAMP '{B_SPECS['B1'][2]}'"
+    out = {key: spec(f"pair_type = '{t}' AND session_start <= TIMESTAMP '{cutoff}'", days)
+           for key, (t, days, cutoff) in B_SPECS.items()}
+    out["B6"] = spec(f"""{b1} AND (user_session, product_id) IN (
+        SELECT (user_session, product_id) FROM (
+            SELECT user_session, product_id, row_number() OVER (PARTITION BY user_id, product_id
+                                                              ORDER BY session_start, user_session) AS k
+            FROM b_pairs WHERE {b1}) WHERE k = 1)""", 7)
+    out["B7"] = spec(f"{b1} AND user_id NOT IN (SELECT user_id FROM b_active)", 7)
+    out["B8"] = spec(f"{b1} AND NOT is_long", 7)
+    within_hour = _one(con, f"""
+        SELECT count(*) FILTER (WHERE first_later - anchor <= INTERVAL 1 HOUR)::DOUBLE / count(*)
+        FROM b_pairs WHERE {b1} AND first_later IS NOT NULL AND first_later < session_start + INTERVAL 7 DAY
+    """)[0]
+    cutoff7 = B_SPECS["B1"][2]
+    null_events, multi_sessions, usable_share = _one(con, f"""
+        WITH b1_sessions AS (SELECT DISTINCT user_session FROM b_pairs WHERE {b1}),
+        events AS (SELECT e.user_session, e.user_id FROM ev AS e JOIN b1_sessions USING (user_session))
+        SELECT (SELECT count(*) FROM events WHERE user_id IS NULL),
+               (SELECT count(*) FROM (SELECT user_session FROM events GROUP BY user_session
+                                      HAVING count(DISTINCT user_id) > 1)),
+               (SELECT count(user_id)::DOUBLE / count(*) FROM b_pairs WHERE {b1})
+    """)
+    return {
+        "identity": {"user_id_check:events_in_eligible_sessions_with_null_user_id": float(null_events),
+                     "user_id_check:eligible_sessions_with_more_than_one_user_id": float(multi_sessions),
+                     "user_id_check:share_of_eligible_pairs_with_non_null_user_id": float(usable_share)},
+        "specs": out,
+        "most_active_user_threshold_events": float(threshold),
+        "within_1_hour_share": float(within_hour),
+        "km_all_pairs": {d: _km_sql(con, "true", d) for d in B_KM_DAYS},
+        "km_cohort_7_day": {"by_7_day_cutoff": _km_sql(con, f"session_start <= TIMESTAMP '{cutoff7}'", 7),
+                            "after_7_day_cutoff": _km_sql(con, f"session_start > TIMESTAMP '{cutoff7}'", 7)},
+    }
+
+
+def mart_values_investigation_b_all(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
+    """All B specifications and checks from the marts, and the KM points from later_purchases.json."""
+    specs = {k: {"eligible_pairs": int(e), "followed_pairs": int(f), "eligible_value": Decimal(ev),
+                 "followed_value": Decimal(fv)}
+             for k, e, f, ev, fv in con.execute("""
+                 SELECT spec_key, eligible_pairs, followed_pairs, eligible_value, followed_value
+                 FROM wh.main_marts.mart_later_purchase_estimates""").fetchall()}
+    checks = dict(con.execute("SELECT row_key, value FROM wh.main_marts.mart_later_purchase_checks").fetchall())
+    stats = json.loads((CURRENT_EVIDENCE_DIR / "later_purchases.json").read_text(encoding="utf-8"))
+    curve = {r["days"]: r["count"] for r in stats["kaplan_meier"]["curve"]}
+    cohort = stats.get("cohort_diagnostic") or {}
+    return {
+        "identity": {k: v for k, v in checks.items() if k.startswith("user_id_check:")},
+        "specs": specs,
+        "most_active_user_threshold_events": checks["sensitivity_threshold:most_active_user_threshold_events"],
+        "within_1_hour_share": checks[
+            "diagnostic:share_of_followed_pairs_with_first_later_purchase_within_1_hour_of_latest_cart_event"],
+        "km_all_pairs": {d: curve[d] for d in B_KM_DAYS},
+        "km_cohort_7_day": {k: v["count"] for k, v in cohort.items()},
+    }
+
+
+def compare_investigation_b_all(independent: dict[str, Any], published: dict[str, Any]) -> list[dict[str, Any]]:
+    checks: list[dict[str, Any]] = []
+
+    def add(name: str, ind: Any, other: Any, against: str) -> None:
+        checks.append({"check": name, "against": against, "independent": str(ind), "compared": str(other),
+                       "match": other is not None and _match(ind, other)})
+
+    for key in sorted(independent["specs"]):
+        for field in ("eligible_pairs", "followed_pairs", "eligible_value", "followed_value"):
+            add(f"B-all:{key}:{field}", independent["specs"][key][field],
+                published["specs"].get(key, {}).get(field), "mart_later_purchase_estimates")
+    for key, value in independent["identity"].items():
+        add(f"B-all:{key}", value, published["identity"].get(key), "mart_later_purchase_checks")
+    add("B-all:most_active_user_threshold_events", independent["most_active_user_threshold_events"],
+        published["most_active_user_threshold_events"], "mart_later_purchase_checks")
+    add("B-all:within_1_hour_share", independent["within_1_hour_share"], published["within_1_hour_share"],
+        "mart_later_purchase_checks")
+    for days, value in independent["km_all_pairs"].items():
+        add(f"B-all:km_all_pairs_{days}_days", value, published["km_all_pairs"].get(days), "later_purchases.json")
+    for cohort, value in independent["km_cohort_7_day"].items():
+        add(f"B-all:km_{cohort}_7_days", value, published["km_cohort_7_day"].get(cohort), "later_purchases.json")
+    return checks
+
+
+def mart_values_investigation_b(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
+    """B1 from the marts; call after mart_values has attached the warehouse."""
+    row = con.execute("""
+        SELECT eligible_pairs, followed_pairs, eligible_value, followed_value, count_share, value_share
+        FROM wh.main_marts.mart_later_purchase_estimates WHERE spec_key = 'B1'
+    """).fetchone()
+    return {"eligible_pairs": int(row[0]), "followed_pairs": int(row[1]), "eligible_value": Decimal(row[2]),
+            "followed_value": Decimal(row[3]), "count_share": row[4], "value_share": row[5]}
+
+
+def compare_investigation_b(independent: dict[str, Any], mart: dict[str, Any]) -> list[dict[str, Any]]:
+    """R2 checks for B1: counts and DECIMAL sums exactly, shares within RATE_TOLERANCE."""
+    return [{"check": f"B1:{key}", "against": "mart_later_purchase_estimates", "independent": str(independent[key]),
+             "compared": str(mart[key]), "match": _match(independent[key], mart[key])}
+            for key in ("eligible_pairs", "followed_pairs", "eligible_value", "followed_value",
+                        "count_share", "value_share")]
+
+
 def mart_values(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
     con.execute(f"ATTACH '{WAREHOUSE.as_posix()}' AS wh (READ_ONLY)")
     m = con.execute("""
@@ -482,12 +742,20 @@ def main() -> None:
         investigation_a = {"revenue_gap": independent_revenue_gap(con),
                            "duplicates": independent_duplicate_breakdown(con),
                            "cart_no_view": independent_cart_no_view_attribution(con)}
+        print("Recomputing analysis B (B1, 7 days) ...", flush=True)
+        investigation_b = independent_later_purchases_b1(con)
+        print("Recomputing analysis B (all specifications, KM, diagnostics) ...", flush=True)
+        investigation_b_all = independent_later_purchases(con)
         mart = mart_values(con)
         mart_a = mart_values_investigation_a(con)
+        mart_b = mart_values_investigation_b(con)
+        mart_b_all = mart_values_investigation_b_all(con)
     finally:
         peak_spill = sampler.stop()
     sprint0 = json.loads((EVIDENCE_DIR / "profile.json").read_text(encoding="utf-8"))
-    checks = compare(independent, mart, dq, sprint0) + compare_investigation_a(investigation_a, independent, mart_a)
+    checks = (compare(independent, mart, dq, sprint0) + compare_investigation_a(investigation_a, independent, mart_a)
+              + compare_investigation_b(investigation_b, mart_b)
+              + compare_investigation_b_all(investigation_b_all, mart_b_all))
     elapsed = round(time.perf_counter() - started, 1)
     ok = all(c["match"] for c in checks)
     write_json(OUT, {
