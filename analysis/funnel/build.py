@@ -4,7 +4,8 @@ Run: python -m funnel.build [extra dbt build arguments, e.g. --select staging]
 
 Halts below the available-memory gate or if the raw file hash differs from
 docs/data-source.md. Records available memory, elapsed time, peak spill, and
-the dbt result in ai-workflow/evidence/sprint-1/dbt_build_runs.json.
+the dbt result in dbt_build_runs.json under the current sprint's evidence folder
+(CURRENT_EVIDENCE_DIR in funnel.common).
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ from pathlib import Path
 from typing import Any
 
 from funnel.common import (
+    CURRENT_EVIDENCE_DIR,
     DUCKDB_MEMORY_LIMIT,
     DUCKDB_THREADS,
     DUCKDB_TMP_DIR,
@@ -33,7 +35,7 @@ from funnel.profile import SpillSampler
 SCRIPT = "funnel.build"
 PIPELINE_DIR = REPO_ROOT / "pipeline"
 DBT_EXE = Path(sys.executable).with_name("dbt.exe" if sys.platform == "win32" else "dbt")
-RUNS_JSON = REPO_ROOT / "ai-workflow" / "evidence" / "sprint-1" / "dbt_build_runs.json"
+RUNS_JSON = CURRENT_EVIDENCE_DIR / "dbt_build_runs.json"
 SUMMARY_PREFIXES = ("Done. PASS=", "Finished running", "Completed with", "Completed successfully")
 
 

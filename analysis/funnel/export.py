@@ -4,9 +4,11 @@ Run: python -m funnel.export
 
 Reads data/warehouse.duckdb (read-only) after a passing `python -m funnel.build`, and writes
 web/public/data/: kpis.json, funnel_category.json, purchase_paths.json, data_quality.json,
-metrics_index.json (parsed from docs/metrics.md), and data_story.json (the /data page).
+metrics_index.json (parsed from docs/metrics.md), data_story.json (the /data page), and, from
+Sprint 2, investigation_revenue_gap.json (analysis A).
 Halts if the dataset hash differs from docs/data-source.md, if the last full dbt build did not
-pass on this dataset, or if the reconciliation chain in data_story.json does not sum.
+pass on this dataset, if the reconciliation chain in data_story.json does not sum, or if the
+independent verification of analysis A is missing, on another dataset, or has a mismatch.
 """
 
 from __future__ import annotations
@@ -23,6 +25,7 @@ from typing import Any
 import duckdb
 
 from funnel.common import (
+    CURRENT_EVIDENCE_DIR,
     DATA_DIR,
     DOCS_DIR,
     EVIDENCE_DIR,
@@ -38,7 +41,8 @@ SCRIPT = "funnel.export"
 WAREHOUSE = DATA_DIR / "warehouse.duckdb"
 WEB_DATA = REPO_ROOT / "web" / "public" / "data"
 METRICS_MD = DOCS_DIR / "metrics.md"
-BUILD_RUNS = REPO_ROOT / "ai-workflow" / "evidence" / "sprint-1" / "dbt_build_runs.json"
+BUILD_RUNS = CURRENT_EVIDENCE_DIR / "dbt_build_runs.json"
+VERIFY_JSON = CURRENT_EVIDENCE_DIR / "verify.json"
 REQUIREMENTS = REPO_ROOT / "analysis" / "requirements.txt"
 
 # Sections, beyond its home section, whose Changes entries apply to a decision: D5's same-session
@@ -388,6 +392,53 @@ def workflow_record() -> dict[str, Any]:
     }
 
 
+A_DIMENSION_ORDER = ("time_since_previous_purchase", "price_vs_first_purchase", "purchase_events_in_pair",
+                     "time_by_price", "category_top")
+
+
+def verification_summary(dataset_sha: str, prefixes: tuple[str, ...]) -> dict[str, Any]:
+    """The R2 checks for one analysis from verify.json; halts unless all of them ran and matched."""
+    if not VERIFY_JSON.exists():
+        sys.exit(f"HALT: {VERIFY_JSON} missing; run python -m funnel.verify.")
+    record = json.loads(VERIFY_JSON.read_text(encoding="utf-8"))
+    if record["manifest"]["dataset_sha256"] != dataset_sha:
+        sys.exit("HALT: verify.json was produced on a different dataset; rerun python -m funnel.verify.")
+    checks = [c for c in record["checks"] if c["check"].startswith(prefixes)]
+    if not checks or not all(c["match"] for c in checks):
+        sys.exit(f"HALT: independent verification for {prefixes} is missing or has a mismatch.")
+    return {"checks": len(checks), "all_match": True, "verify_git_commit_sha": record["manifest"]["git_commit_sha"],
+            "verify_generated_at_utc": record["manifest"]["generated_at_utc"]}
+
+
+def investigation_revenue_gap(con: duckdb.DuckDBPyConnection, dataset_sha: str) -> dict[str, Any]:
+    """Analysis A (metrics.md Changes 2026-09-26, Sprint 2 investigations, A items 1-6)."""
+    decomposition = rows(con, "SELECT * FROM wh.main_marts.mart_revenue_gap_decomposition")
+    total = next(r for r in decomposition if r["dimension"] == "total")
+
+    def dimension(name: str) -> list[dict[str, Any]]:
+        cells = [r for r in decomposition if r["dimension"] == name]
+        if name == "category_top":  # categories by value, largest first; others in the entry's order
+            return sorted(cells, key=lambda r: (-float(r["repeat_purchase_value"]), r["group_key"]))
+        return sorted(cells, key=lambda r: r["sort_order"])
+
+    return {
+        "question": "Why are there two revenue figures?",
+        "method_record": "ai-workflow/method-selection/A-revenue-gap.md",
+        "contract": "docs/metrics.md, Changes 2026-09-26 (Sprint 2 investigations), A items 1-6",
+        "totals": {k: total[k] for k in ("revenue", "revenue_repeat_collapsed", "revenue_difference",
+                                          "repeat_purchase_events", "pairs", "repeat_purchase_value")},
+        "dimensions": {name: dimension(name) for name in A_DIMENSION_ORDER},
+        "thresholds": rows(con, "SELECT * FROM wh.main_marts.mart_revenue_gap_thresholds ORDER BY threshold_seconds"),
+        "secondary_cases": {
+            "exact_duplicate_rows": rows(con, """
+                SELECT * FROM wh.main_marts.mart_duplicate_rows_breakdown ORDER BY event_type, group_size
+            """),
+            "cart_no_view_reconciliation": rows(con, "SELECT * FROM wh.main_marts.mart_cart_no_view_reconciliation")[0],
+        },
+        "independent_verification": verification_summary(dataset_sha, ("A:", "A-S1:", "A-S2:")),
+    }
+
+
 def main() -> None:
     sha = require_dataset_hash_match()
     build = last_full_build(sha)
@@ -432,6 +483,7 @@ def main() -> None:
         "metrics_index.json": {"metrics": parse_metrics_index(metrics_text)},
         "data_story.json": data_story(con, metrics_text, dq),
         "workflow.json": workflow_record(),
+        "investigation_revenue_gap.json": investigation_revenue_gap(con, sha),
     }
     # One manifest for the whole run, taken before the first write: once a file is written the
     # tree is dirty, so a per-file manifest would misreport every file after the first.

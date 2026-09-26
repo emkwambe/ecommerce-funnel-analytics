@@ -275,6 +275,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** `funnel/export.py` gains the origin "Project owner" (`ORIGINS`), with the displayed rule updated. The log's opening paragraph states that owner-specification errors are recorded. The entry's lines now read "Project owner" and "Claude Code's pre-commit check". Ships in this commit.
 - **Guard added:** none new; the existing classification test caught it.
 
+**2026-09-26 · Sprint 2 Step 4 · Commit message stated a test count before the gate reported it**
+- **Origin:** Claude Code
+- **What was produced:** the commit message of `35eba66`, which reads "pytest: 136 passed, 1 skipped".
+- **What was wrong:** the message was written before the gate's rerun finished, and the gate's own output was "134 passed, 1 skipped". The commit was gated correctly (it ran only after exit code 0); only the reported count was wrong.
+- **How it was caught:** Claude Code's review of the command output after the push.
+- **Fix:** recorded here. `35eba66` is pushed and history is not rewritten.
+- **Guard added:** commit messages quote the count from the gate's output in the same command, never a count typed in advance.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

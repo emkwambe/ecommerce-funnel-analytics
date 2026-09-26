@@ -7,7 +7,9 @@ SQL that does not read any dbt model, then compares each with the marts in
 data/warehouse.duckdb: integers and DECIMAL sums exactly, rates to 1e-9. Data-quality overlaps
 with Sprint 0 are compared like with like: raw-basis figures recomputed here against Sprint 0's
 profile.json, and the contract-basis figures recomputed here against mart_data_quality.
-Writes ai-workflow/evidence/sprint-1/verify.json and exits non-zero on any mismatch.
+Sprint 2 adds R2 for analysis A: the revenue difference, its breakdown and thresholds, and the two
+secondary cases. Writes verify.json under the current sprint's evidence folder (CURRENT_EVIDENCE_DIR
+in funnel.common) and exits non-zero on any mismatch.
 """
 
 from __future__ import annotations
@@ -21,6 +23,7 @@ from typing import Any
 import duckdb
 
 from funnel.common import (
+    CURRENT_EVIDENCE_DIR,
     DATA_DIR,
     DUCKDB_TMP_DIR,
     EVIDENCE_DIR,
@@ -36,7 +39,7 @@ from funnel.profile import SpillSampler
 
 SCRIPT = "funnel.verify"
 WAREHOUSE = DATA_DIR / "warehouse.duckdb"
-OUT = REPO_ROOT / "ai-workflow" / "evidence" / "sprint-1" / "verify.json"
+OUT = CURRENT_EVIDENCE_DIR / "verify.json"
 RATE_TOLERANCE = 1e-9
 
 
@@ -199,6 +202,195 @@ def independent_data_quality(con: duckdb.DuckDBPyConnection) -> dict[str, dict[s
     }
 
 
+# Sprint 2, analysis A (metrics.md Changes 2026-09-26, Sprint 2 investigations, A items 1-6).
+A_DIMENSIONS = ("time_since_previous_purchase", "price_vs_first_purchase", "category_top",
+                "purchase_events_in_pair", "time_by_price")
+A_THRESHOLDS_SECONDS = (0, 1, 5, 10, 30, 60, 300, 1800, 3600)
+
+
+def independent_revenue_gap(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
+    """Repeat purchase events and their breakdown, recomputed from vev without the dbt models.
+
+    The previous purchase time comes from a window frame over earlier timestamps plus a tie count,
+    not from the self-join int_repeat_purchase_events uses."""
+    con.execute("""
+        CREATE OR REPLACE TEMP TABLE repeat_purchases AS
+        WITH p AS (
+            SELECT
+                user_session, product_id, event_time,
+                CAST(price AS DECIMAL(18, 2)) AS amount,
+                CASE WHEN category_code IS NULL OR trim(category_code) = '' THEN 'unknown'
+                     ELSE split_part(trim(category_code), '.', 1) END AS top,
+                count(*) OVER (PARTITION BY user_session, product_id) AS n_in_pair,
+                count(*) OVER (PARTITION BY user_session, product_id, event_time) AS n_same_time,
+                max(event_time) OVER (
+                    PARTITION BY user_session, product_id ORDER BY event_time
+                    RANGE BETWEEN UNBOUNDED PRECEDING AND INTERVAL 1 SECOND PRECEDING
+                ) AS earlier_time,
+                min(event_time) OVER (PARTITION BY user_session, product_id) AS first_time,
+                row_number() OVER (PARTITION BY user_session, product_id ORDER BY event_time) AS k
+            FROM vev
+            WHERE event_type = 'purchase'
+        ),
+        first_prices AS (
+            SELECT DISTINCT user_session, product_id, amount AS first_amount
+            FROM p WHERE event_time = first_time
+        )
+        SELECT p.*, f.first_amount,
+               CASE WHEN p.n_same_time > 1 THEN 0
+                    ELSE CAST(epoch(p.event_time) - epoch(p.earlier_time) AS BIGINT) END AS gap_seconds
+        FROM p
+        JOIN first_prices AS f USING (user_session, product_id)
+        WHERE p.n_in_pair > 1 AND p.k > 1
+    """)
+    rows = con.execute("""
+        SELECT
+            CASE WHEN gap_seconds = 0 THEN 'same_second' WHEN gap_seconds < 60 THEN 'under_a_minute'
+                 ELSE 'a_minute_or_more' END AS t,
+            CASE WHEN amount = first_amount THEN 'same_price' ELSE 'different_price' END AS pr,
+            top,
+            CASE WHEN n_in_pair = 2 THEN '2' WHEN n_in_pair = 3 THEN '3' ELSE '4_or_more' END AS sz,
+            gap_seconds,
+            amount
+        FROM repeat_purchases
+    """).fetchall()
+    by: dict[str, dict[str, list[Any]]] = {d: {} for d in A_DIMENSIONS}
+    for t, pr, top, sz, _, amount in rows:
+        for dim, key in zip(A_DIMENSIONS, (t, pr, top, sz, f"{t}|{pr}")):
+            cell = by[dim].setdefault(key, [0, Decimal(0)])
+            cell[0] += 1
+            cell[1] += amount
+    return {
+        "repeat_purchase_events": len(rows),
+        "repeat_purchase_value": sum((r[5] for r in rows), Decimal(0)),
+        "by_dimension": {d: {k: (n, v) for k, (n, v) in cells.items()} for d, cells in by.items()},
+        "thresholds": {s: sum((r[5] for r in rows if r[4] <= s), Decimal(0)) for s in A_THRESHOLDS_SECONDS},
+    }
+
+
+def independent_duplicate_breakdown(con: duckdb.DuckDBPyConnection) -> dict[str, tuple[int, int]]:
+    """A-S1: identical raw rows by event type and group size -> (groups, rows removed)."""
+    rows = con.execute("""
+        SELECT event_type,
+               CASE WHEN n = 2 THEN '2' WHEN n = 3 THEN '3' ELSE '4_or_more' END AS size,
+               count(*), sum(n - 1)
+        FROM (SELECT event_type, count(*) AS n FROM raw_events
+              GROUP BY event_time, event_type, product_id, category_id, category_code, brand, price,
+                       user_id, user_session)
+        WHERE n > 1
+        GROUP BY 1, 2
+    """).fetchall()
+    return {f"{event_type}:{size}": (int(groups), int(removed)) for event_type, size, groups, removed in rows}
+
+
+def independent_cart_no_view_attribution(con: duckdb.DuckDBPyConnection) -> dict[str, int]:
+    """A-S2: raw-basis cart events with no view at or before them (first-view comparison, as in
+    independent_data_quality), attributed to null sessions, multi-user sessions, and duplicates."""
+    con.execute("""
+        CREATE OR REPLACE TEMP TABLE raw_basis_carts AS
+        WITH first_view AS (
+            SELECT user_session, product_id, min(event_time) AS first_view_time
+            FROM raw_events WHERE event_type = 'view' AND user_session IS NOT NULL
+            GROUP BY user_session, product_id
+        )
+        SELECT c.*
+        FROM raw_events AS c
+        LEFT JOIN first_view AS f USING (user_session, product_id)
+        WHERE c.event_type = 'cart' AND c.user_session IS NOT NULL AND c.product_id IS NOT NULL
+          AND (f.first_view_time IS NULL OR f.first_view_time > c.event_time)
+    """)
+    total, null_session, multi_user, in_valid, distinct_in_valid = _one(con, """
+        SELECT
+            count(*),
+            count(*) FILTER (WHERE user_session IS NULL),
+            count(*) FILTER (WHERE user_session IS NOT NULL
+                             AND user_session NOT IN (SELECT user_session FROM good_sessions)),
+            count(*) FILTER (WHERE user_session IN (SELECT user_session FROM good_sessions)),
+            (SELECT count(*) FROM (SELECT DISTINCT * FROM raw_basis_carts
+                                   WHERE user_session IN (SELECT user_session FROM good_sessions)))
+        FROM raw_basis_carts
+    """)
+    return {
+        "raw_basis_count": int(total),
+        "in_null_session_events": int(null_session),
+        "in_multi_user_sessions": int(multi_user),
+        "removed_as_exact_duplicates": int(in_valid - distinct_in_valid),
+        "remaining_after_attribution": int(distinct_in_valid),
+    }
+
+
+def mart_values_investigation_a(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
+    """Analysis A marts; call after mart_values has attached the warehouse."""
+    decomposition = con.execute("""
+        SELECT dimension, group_key, repeat_purchase_events, repeat_purchase_value, revenue_difference
+        FROM wh.main_marts.mart_revenue_gap_decomposition
+    """).fetchall()
+    thresholds = dict(con.execute("""
+        SELECT threshold_seconds, repeat_purchase_value_within FROM wh.main_marts.mart_revenue_gap_thresholds
+    """).fetchall())
+    duplicates = {k: (int(g), int(r)) for k, g, r in con.execute("""
+        SELECT row_key, duplicate_groups, rows_removed FROM wh.main_marts.mart_duplicate_rows_breakdown
+    """).fetchall()}
+    cart = con.execute("SELECT * FROM wh.main_marts.mart_cart_no_view_reconciliation").fetchdf().iloc[0].to_dict()
+    total = next(r for r in decomposition if r[0] == "total")
+    return {
+        "repeat_purchase_events": int(total[2]),
+        "repeat_purchase_value": Decimal(total[3]),
+        "revenue_difference": Decimal(total[4]),
+        "by_dimension": {d: {k: (int(n), Decimal(v)) for dim, k, n, v, _ in decomposition if dim == d}
+                         for d in A_DIMENSIONS},
+        "thresholds": {int(s): Decimal(v) for s, v in thresholds.items()},
+        "duplicates": duplicates,
+        "cart_no_view": {k: int(cart[k]) for k in ("raw_basis_count", "in_null_session_events",
+                                                   "in_multi_user_sessions", "removed_as_exact_duplicates",
+                                                   "contract_basis_count", "remainder")},
+    }
+
+
+def compare_investigation_a(independent: dict[str, Any], headline: dict[str, Any],
+                            mart: dict[str, Any]) -> list[dict[str, Any]]:
+    """R2 checks for analysis A; every count and DECIMAL sum must match exactly."""
+    checks: list[dict[str, Any]] = []
+
+    def add(name: str, ind: Any, other: Any, against: str) -> None:
+        checks.append({"check": name, "against": against, "independent": str(ind), "compared": str(other),
+                       "match": _match(ind, other)})
+
+    gap = independent["revenue_gap"]
+    add("A:revenue_difference (revenue - repeat collapsed, independent)",
+        headline["revenue"] - headline["revenue_repeat_collapsed"], mart["revenue_difference"],
+        "mart_revenue_gap_decomposition")
+    add("A:repeat_purchase_value equals the independent difference", gap["repeat_purchase_value"],
+        headline["revenue"] - headline["revenue_repeat_collapsed"], "independent headline")
+    add("A:repeat_purchase_value", gap["repeat_purchase_value"], mart["repeat_purchase_value"],
+        "mart_revenue_gap_decomposition")
+    add("A:repeat_purchase_events", gap["repeat_purchase_events"], mart["repeat_purchase_events"],
+        "mart_revenue_gap_decomposition")
+    for dim in A_DIMENSIONS:
+        keys = sorted(set(gap["by_dimension"][dim]) | set(mart["by_dimension"][dim]))
+        for key in keys:
+            ind = gap["by_dimension"][dim].get(key, (0, Decimal(0)))
+            mrt = mart["by_dimension"][dim].get(key, (0, Decimal(0)))
+            add(f"A:{dim}:{key}:events", ind[0], mrt[0], "mart_revenue_gap_decomposition")
+            add(f"A:{dim}:{key}:value", ind[1], mrt[1], "mart_revenue_gap_decomposition")
+    for seconds in A_THRESHOLDS_SECONDS:
+        add(f"A:threshold_{seconds}s:value", gap["thresholds"][seconds], mart["thresholds"].get(seconds),
+            "mart_revenue_gap_thresholds")
+    dups = independent["duplicates"]
+    for key in sorted(set(dups) | set(mart["duplicates"])):
+        ind, mrt = dups.get(key, (0, 0)), mart["duplicates"].get(key, (0, 0))
+        add(f"A-S1:{key}:groups", ind[0], mrt[0], "mart_duplicate_rows_breakdown")
+        add(f"A-S1:{key}:rows_removed", ind[1], mrt[1], "mart_duplicate_rows_breakdown")
+    cart = independent["cart_no_view"]
+    for key in ("raw_basis_count", "in_null_session_events", "in_multi_user_sessions",
+                "removed_as_exact_duplicates"):
+        add(f"A-S2:{key}", cart[key], mart["cart_no_view"][key], "mart_cart_no_view_reconciliation")
+    add("A-S2:remaining_after_attribution equals the contract-basis count", cart["remaining_after_attribution"],
+        mart["cart_no_view"]["contract_basis_count"], "mart_cart_no_view_reconciliation")
+    add("A-S2:remainder", 0, mart["cart_no_view"]["remainder"], "mart_cart_no_view_reconciliation")
+    return checks
+
+
 def mart_values(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
     con.execute(f"ATTACH '{WAREHOUSE.as_posix()}' AS wh (READ_ONLY)")
     m = con.execute("""
@@ -286,11 +478,16 @@ def main() -> None:
         independent = independent_headline(con)
         print("Recomputing data-quality overlaps ...", flush=True)
         dq = independent_data_quality(con)
+        print("Recomputing analysis A (revenue difference, secondary cases) ...", flush=True)
+        investigation_a = {"revenue_gap": independent_revenue_gap(con),
+                           "duplicates": independent_duplicate_breakdown(con),
+                           "cart_no_view": independent_cart_no_view_attribution(con)}
         mart = mart_values(con)
+        mart_a = mart_values_investigation_a(con)
     finally:
         peak_spill = sampler.stop()
     sprint0 = json.loads((EVIDENCE_DIR / "profile.json").read_text(encoding="utf-8"))
-    checks = compare(independent, mart, dq, sprint0)
+    checks = compare(independent, mart, dq, sprint0) + compare_investigation_a(investigation_a, independent, mart_a)
     elapsed = round(time.perf_counter() - started, 1)
     ok = all(c["match"] for c in checks)
     write_json(OUT, {

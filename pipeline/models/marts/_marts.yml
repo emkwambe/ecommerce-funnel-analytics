@@ -202,3 +202,134 @@ models:
         description: The Sprint 0 figure for the same check on raw rows, where one exists; shown alongside, never substituted.
       - name: sort_order
         description: Display order.
+  - name: mart_revenue_gap_decomposition
+    description: >
+      metrics.md Changes 2026-09-26 (Sprint 2 investigations), A items 2 and 3. The difference between revenue
+      (primary) and revenue with repeat purchase events collapsed, broken down over the repeat purchase events by
+      five dimensions, plus a 'total' row. Each dimension's groups sum exactly to the difference
+      (assert_revenue_gap_decomposition_reconciles).
+    columns:
+      - name: row_key
+        description: dimension and group_key (grain key).
+        data_tests: [unique, not_null]
+      - name: dimension
+        description: The breakdown dimension, or 'total'.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["total", "time_since_previous_purchase", "price_vs_first_purchase", "category_top",
+                         "purchase_events_in_pair", "time_by_price"]
+      - name: group_key
+        description: The group within the dimension.
+        data_tests: [not_null]
+      - name: group_label
+        description: Display label from the Changes entry (category groups use the category name).
+        data_tests: [not_null]
+      - name: sort_order
+        description: Display order; null for categories, which the export orders by value.
+      - name: repeat_purchase_events
+        description: Repeat purchase events in the group (A item 1).
+        data_tests: [not_null]
+      - name: pairs
+        description: (session, product) pairs with a repeat purchase event in the group; not additive across groups.
+        data_tests: [not_null]
+      - name: repeat_purchase_value
+        description: Price sum (DECIMAL) of the group's repeat purchase events.
+        data_tests: [not_null]
+      - name: share_of_difference
+        description: repeat_purchase_value ÷ revenue_difference.
+        data_tests: [not_null]
+      - name: top_10_pair_share
+        description: Concentration diagnostic (A item 3), the share of the group's value from its 10 largest pairs.
+      - name: revenue
+        description: Revenue (primary) for the month, from mart_kpis_daily (Section 4).
+      - name: revenue_repeat_collapsed
+        description: Revenue with repeat purchase events collapsed, from mart_kpis_daily (Section 4).
+      - name: revenue_difference
+        description: revenue − revenue_repeat_collapsed (A item 2).
+  - name: mart_revenue_gap_thresholds
+    description: >
+      metrics.md Changes 2026-09-26 (Sprint 2 investigations), A item 4. Threshold sensitivity, the share of the
+      revenue difference from repeat purchase events within T of the pair's previous purchase event, for the nine
+      thresholds fixed in the entry.
+    columns:
+      - name: threshold_seconds
+        description: T in seconds (grain key).
+        data_tests: [unique, not_null]
+      - name: threshold_label
+        description: T as written in the Changes entry.
+        data_tests: [not_null]
+      - name: repeat_purchase_events_within
+        description: Repeat purchase events with seconds_since_previous_purchase ≤ T.
+        data_tests: [not_null]
+      - name: repeat_purchase_value_within
+        description: Their price sum (DECIMAL).
+        data_tests: [not_null]
+      - name: share_of_difference
+        description: repeat_purchase_value_within ÷ revenue_difference.
+        data_tests: [not_null]
+      - name: repeat_purchase_events
+        description: All repeat purchase events (denominator count).
+      - name: revenue_difference
+        description: The revenue difference (denominator value).
+  - name: mart_duplicate_rows_breakdown
+    description: >
+      metrics.md Changes 2026-09-26 (Sprint 2 investigations), A item 5 (secondary case A-S1). Exact duplicate rows
+      removed by D1, by event type and group size, counted on raw rows. Sums to stg_dedup_audit
+      (assert_duplicate_rows_breakdown_reconciles).
+    columns:
+      - name: row_key
+        description: event_type and group_size (grain key).
+        data_tests: [unique, not_null]
+      - name: event_type
+        description: Event type of the identical rows.
+        data_tests: [not_null]
+      - name: group_size
+        description: Rows in the group of identical rows.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["2", "3", "4_or_more"]
+      - name: group_size_label
+        description: Display label ("2", "3", "4 or more").
+      - name: duplicate_groups
+        description: Groups of identical rows.
+        data_tests: [not_null]
+      - name: rows_removed
+        description: Surplus rows removed (group rows − 1, summed).
+        data_tests: [not_null]
+  - name: mart_cart_no_view_reconciliation
+    description: >
+      metrics.md Changes 2026-09-26 (Sprint 2 investigations), A item 6 (secondary case A-S2). From the Sprint 0
+      raw-basis count of cart events with no view at or before them to the Section 10 count, attributed in the
+      entry's order. The remainder must be zero (assert_cart_no_view_reconciliation).
+    columns:
+      - name: row_key
+        description: A single row (grain key).
+        data_tests: [unique, not_null]
+      - name: sprint0_raw_basis_count
+        description: The Sprint 0 figure, read from the committed profile.json.
+        data_tests: [not_null]
+      - name: raw_basis_count
+        description: The raw-basis count recomputed here as funnel.profile defined it; must equal the Sprint 0 figure.
+        data_tests: [not_null]
+      - name: in_null_session_events
+        description: Part (i), raw-basis rows with a null session; zero by the basis's definition, computed.
+        data_tests: [not_null]
+      - name: in_multi_user_sessions
+        description: Part (i), raw-basis rows in sessions with more than one user_id.
+        data_tests: [not_null]
+      - name: removed_as_exact_duplicates
+        description: Part (ii), of the rest, rows removed as exact duplicates by D1.
+        data_tests: [not_null]
+      - name: contract_basis_count
+        description: The Section 10 count, from mart_data_quality.
+        data_tests: [not_null]
+      - name: difference
+        description: raw_basis_count − contract_basis_count.
+        data_tests: [not_null]
+      - name: remainder
+        description: Part (iii); must be zero.
+        data_tests: [not_null]
