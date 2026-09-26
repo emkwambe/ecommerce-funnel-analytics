@@ -32,7 +32,8 @@ export function Sources({ fields }: { fields: string[] }) {
       {fields.map((f, i) => (
         <span key={f}>
           {i > 0 && "; "}
-          <code>{f}</code>
+          {/* Field paths can be long and have no spaces; let them wrap so they never widen a 390 px page. */}
+          <code className="[overflow-wrap:anywhere]">{f}</code>
         </span>
       ))}
     </p>

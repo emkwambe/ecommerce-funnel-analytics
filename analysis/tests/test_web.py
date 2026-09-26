@@ -38,6 +38,34 @@ def test_section_6_display_labels_are_read_from_metrics_index_not_typed():
             assert label not in text, f"{page.relative_to(REPO_ROOT)} types the label {label!r}; read it from metrics_index.json"
 
 
+def test_changes_item_labels_are_read_from_metrics_index_not_typed():
+    """Sprint 2: labels defined in numbered Changes-entry items (keys "<date>_item_<n>") are read with metricByKey(),
+    never typed into a page."""
+    from funnel.export import parse_metrics_index
+
+    labels = [e["display_label"] for e in parse_metrics_index(METRICS_MD.read_text(encoding="utf-8"))
+              if "_item_" in e["key"]]
+    labels += [e["short_label"] for e in parse_metrics_index(METRICS_MD.read_text(encoding="utf-8"))
+               if "_item_" in e["key"] and e["short_label"]]
+    assert len(labels) >= 7, "expected the Sprint 2 display labels to be indexed"
+    for page in (WEB / "app").rglob("*.tsx"):
+        text = page.read_text(encoding="utf-8")
+        for label in labels:
+            assert label not in text, f"{page.relative_to(REPO_ROOT)} types the label {label!r}; use metricByKey()"
+
+
+def test_investigation_pages_exist_and_are_linked():
+    """Sprint 2 Step 6: both investigation pages exist, the index links them, and the home page links the index."""
+    app = WEB / "app"
+    for route in ("investigations", "investigations/revenue-figures", "investigations/later-purchases"):
+        assert (app / route / "page.tsx").exists(), route
+    index = (app / "investigations" / "page.tsx").read_text(encoding="utf-8")
+    assert "/investigations/revenue-figures" in index and "/investigations/later-purchases" in index
+    home = (app / "page.tsx").read_text(encoding="utf-8")
+    where = re.search(r'title="Where to look next">(.*?)</Section>', home, re.DOTALL)
+    assert where and 'href="/investigations"' in where.group(1)
+
+
 def test_evidence_images_within_size_limit():
     """Committed evidence images are compressed WebP of at most 300 KB (full-resolution copies are gitignored)."""
     from funnel.row_guard import committable_files

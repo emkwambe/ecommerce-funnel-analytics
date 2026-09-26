@@ -1,9 +1,9 @@
 {
   "manifest": {
-    "git_commit_sha": "d3da4203273819ddf0166a65234f21753295e5d7",
+    "git_commit_sha": "ed7c7e4887e4adc6418f10ae3f15f82c3f631d1c",
     "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-26T17:06:27+00:00",
+    "generated_at_utc": "2026-09-26T17:31:00+00:00",
     "script": "funnel.export"
   },
   "pipeline_build": {
@@ -250,6 +250,69 @@
       "section": "Changes",
       "short_label": null,
       "note": null
+    },
+    {
+      "key": "2026-09-26_item_1",
+      "name": "Purchase events after the first of the same product in a session",
+      "definition": "Repeat purchase events",
+      "note": null,
+      "display_label": "Purchase events after the first of the same product in a session",
+      "section": "Changes",
+      "short_label": "Repeat purchase events"
+    },
+    {
+      "key": "2026-09-26_item_2",
+      "name": "Difference between revenue and revenue with repeat purchase events collapsed",
+      "definition": "Difference between the two revenue figures",
+      "note": null,
+      "display_label": "Difference between revenue and revenue with repeat purchase events collapsed",
+      "section": "Changes",
+      "short_label": "Revenue difference from repeat purchase events"
+    },
+    {
+      "key": "2026-09-26_item_4",
+      "name": "Share of the revenue difference from repeat purchase events within T of the previous purchase event of the same product",
+      "definition": "Threshold sensitivity",
+      "note": null,
+      "display_label": "Share of the revenue difference from repeat purchase events within T of the previous purchase event of the same product",
+      "section": "Changes",
+      "short_label": null
+    },
+    {
+      "key": "2026-09-26_item_9",
+      "name": "Carted products with no observed purchase in the session that the same user purchased in a later session within 7 days (%)",
+      "definition": "Count share (primary, N = 7)",
+      "note": null,
+      "display_label": "Carted products with no observed purchase in the session that the same user purchased in a later session within 7 days (%)",
+      "section": "Changes",
+      "short_label": "Purchased later by the same user, 7 days (%)"
+    },
+    {
+      "key": "2026-09-26_item_10",
+      "name": "Carted value with no observed purchase in the session that was followed by a purchase of the same product by the same user in a later session within 7 days (%)",
+      "definition": "Value share (primary, N = 7)",
+      "note": null,
+      "display_label": "Carted value with no observed purchase in the session that was followed by a purchase of the same product by the same user in a later session within 7 days (%)",
+      "section": "Changes",
+      "short_label": "Carted value purchased later by the same user, 7 days (%)"
+    },
+    {
+      "key": "2026-09-26_item_12",
+      "name": "Carted products with no observed purchase in the session that the same user purchased in a later session, by days since the cart session started (Kaplan–Meier estimate)",
+      "definition": "Kaplan–Meier estimate (R3)",
+      "note": null,
+      "display_label": "Carted products with no observed purchase in the session that the same user purchased in a later session, by days since the cart session started (Kaplan–Meier estimate)",
+      "section": "Changes",
+      "short_label": null
+    },
+    {
+      "key": "2026-09-26_item_13",
+      "name": "Viewed products with no observed cart event or purchase in the session that the same user purchased in a later session within 7 days (%) (comparison baseline)",
+      "definition": "Comparison baseline",
+      "note": null,
+      "display_label": "Viewed products with no observed cart event or purchase in the session that the same user purchased in a later session within 7 days (%) (comparison baseline)",
+      "section": "Changes",
+      "short_label": null
     }
   ]
 }

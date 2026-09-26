@@ -150,6 +150,96 @@ export type Workflow = Export & {
   workflow_files: string[];
 };
 
+export type GapCell = {
+  row_key: string;
+  dimension: string;
+  group_key: string;
+  group_label: string;
+  repeat_purchase_events: number;
+  pairs: number;
+  repeat_purchase_value: number;
+  share_of_difference: number;
+  top_10_pair_share: number | null;
+};
+
+export type RevenueGap = Export & {
+  question: string;
+  method_record: string;
+  contract: string;
+  totals: {
+    revenue: number;
+    revenue_repeat_collapsed: number;
+    revenue_difference: number;
+    repeat_purchase_events: number;
+    pairs: number;
+    repeat_purchase_value: number;
+  };
+  dimensions: Record<"time_since_previous_purchase" | "price_vs_first_purchase" | "purchase_events_in_pair" | "time_by_price" | "category_top", GapCell[]>;
+  thresholds: { threshold_seconds: number; threshold_label: string; repeat_purchase_events_within: number; repeat_purchase_value_within: number; share_of_difference: number }[];
+  secondary_cases: {
+    exact_duplicate_rows: { event_type: string; group_size: string; group_size_label: string; duplicate_groups: number; rows_removed: number }[];
+    cart_no_view_reconciliation: {
+      sprint0_raw_basis_count: number;
+      raw_basis_count: number;
+      in_null_session_events: number;
+      in_multi_user_sessions: number;
+      removed_as_exact_duplicates: number;
+      contract_basis_count: number;
+      difference: number;
+      remainder: number;
+    };
+  };
+  independent_verification: { checks: number; all_match: boolean; verify_git_commit_sha: string; verify_generated_at_utc: string };
+};
+
+export type LaterEstimate = {
+  spec_key: "B1" | "B2" | "B3" | "B5" | "B6" | "B7" | "B8";
+  pair_type: "carted" | "viewed";
+  window_days: number;
+  cutoff: string;
+  population: string;
+  eligible_pairs: number;
+  followed_pairs: number;
+  count_share: number;
+  count_interval: [number, number];
+  eligible_value: number;
+  followed_value: number;
+  value_share: number;
+  value_interval: [number, number];
+  users: number;
+};
+
+export type LaterPurchases = Export & {
+  question: string;
+  method_record: string;
+  contract: string;
+  estimates: LaterEstimate[];
+  kaplan_meier: {
+    curve: { days: number; count: number; count_interval: [number, number]; value_weighted: number; value_weighted_interval: [number, number] }[];
+    pairs: number;
+    events: number;
+    users: number;
+    resamples: number;
+    seed: number;
+  };
+  kaplan_meier_population: string;
+  cohort_difference: {
+    b1_population: string;
+    b1_count_share: number;
+    b1_count_interval: [number, number];
+    later_population: string;
+    later_km_7_day: number;
+    later_km_7_day_interval: [number, number];
+    matched_km_7_day: number;
+  };
+  within_1_hour_disclosure: { share_of_followed_pairs: number; population: string };
+  seed_stability: { seed: number; b1_count_interval: [number, number]; b1_value_interval: [number, number]; km_7_day_count_interval: [number, number] }[];
+  stop_rules: { rule: string; fired: boolean; owner_resolution: string | null }[];
+  dominance: { share_of_followed_pairs_held_by_top_0_1_pct_users: number; exceeds_limit: boolean; limit: number };
+  checks: { row_key: string; metric_group: string; metric_key: string; value: number }[];
+  independent_verification: { checks: number; all_match: boolean; verify_git_commit_sha: string; verify_generated_at_utc: string };
+};
+
 function read<T>(name: string): T {
   return JSON.parse(readFileSync(join(process.cwd(), "public", "data", name), "utf-8")) as T;
 }
@@ -167,6 +257,15 @@ export const getDataQuality = () => read<Export & { rows: QualityRow[] }>("data_
 export const getMetricsIndex = () => read<Export & { metrics: MetricEntry[] }>("metrics_index.json");
 export const getDataStory = () => read<DataStory>("data_story.json");
 export const getWorkflow = () => read<Workflow>("workflow.json");
+export const getRevenueGap = () => read<RevenueGap>("investigation_revenue_gap.json");
+export const getLaterPurchases = () => read<LaterPurchases>("investigation_later_purchases.json");
+
+/** A metric by its metrics_index key, e.g. "2026-09-26_item_9" for a numbered Changes-entry item. */
+export function metricByKey(key: string): MetricEntry {
+  const found = getMetricsIndex().metrics.find((m) => m.key === key);
+  if (!found) throw new Error(`metrics_index.json has no metric with key "${key}"`);
+  return found;
+}
 
 /** A metric's definition and display label by name, from metrics_index.json (parsed from docs/metrics.md). */
 export function metric(name: string): MetricEntry {

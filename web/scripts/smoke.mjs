@@ -7,7 +7,8 @@ const base = (process.env.SMOKE_URL || "https://ecommercefunnel-analytics.vercel
 const dataSourceDoc = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "docs", "data-source.md");
 const documentedSha = readFileSync(dataSourceDoc, "utf-8").match(/^- \*\*SHA-256:\*\* `([0-9a-f]{64})`/m)?.[1];
 
-const PAGES = ["/", "/funnel", "/data-quality", "/data", "/metrics", "/how-its-built"];
+const PAGES = ["/", "/funnel", "/data-quality", "/data", "/metrics", "/how-its-built", "/investigations",
+  "/investigations/revenue-figures", "/investigations/later-purchases"];
 const EXPORTS = [
   "kpis.json",
   "funnel_category.json",
@@ -16,6 +17,8 @@ const EXPORTS = [
   "metrics_index.json",
   "data_story.json",
   "workflow.json",
+  "investigation_revenue_gap.json",
+  "investigation_later_purchases.json",
 ];
 const ATTRIBUTION = [
   "https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store",

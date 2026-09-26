@@ -5,6 +5,8 @@ import { useRef, useState } from "react";
 export type LinePoint = { x: number; y: number };
 export type LineSeries = { key: string; name: string; color: string; dashed?: boolean; points: LinePoint[] };
 export type Marker = { x: number; label: string };
+/** A shaded interval around one series (for example a 95% band); the tooltip shows it beside the series value. */
+export type Band = { seriesKey: string; lower: LinePoint[]; upper: LinePoint[]; name: string };
 export type AxisFormat = "dollars" | "dollars0" | "percent" | "percent1" | "fraction" | "count" | "day";
 
 const fmt = (kind: AxisFormat, v: number, prefix = "") => {
@@ -43,6 +45,7 @@ export function LineChart({
   xLabel,
   yLabel,
   markers = [],
+  bands = [],
   xPrefix = "",
   height = 240,
 }: {
@@ -56,6 +59,7 @@ export function LineChart({
   xLabel: string;
   yLabel: string;
   markers?: Marker[];
+  bands?: Band[];
   /** Label text before a "day" tick, e.g. the month name read from the data. */
   xPrefix?: string;
   height?: number;
@@ -81,7 +85,7 @@ export function LineChart({
 
   return (
     <figure className="space-y-2">
-      {series.length > 1 && (
+      {(series.length > 1 || bands.length > 0) && (
         <ul className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted" aria-label="Legend">
           {series.map((s) => (
             <li key={s.key} className="flex items-center gap-2">
@@ -90,6 +94,15 @@ export function LineChart({
                   strokeDasharray={s.dashed ? "4 3" : undefined} />
               </svg>
               {s.name}
+            </li>
+          ))}
+          {bands.map((b) => (
+            <li key={`legend-band-${b.seriesKey}`} className="flex items-center gap-2">
+              <svg width="22" height="10" aria-hidden>
+                <rect x="1" y="1" width="20" height="8" rx="2"
+                  fill={series.find((s) => s.key === b.seriesKey)?.color ?? "var(--muted)"} fillOpacity={0.16} />
+              </svg>
+              {b.name}
             </li>
           ))}
         </ul>
@@ -127,6 +140,11 @@ export function LineChart({
                 <line key={`m${m.x}`} x1={px(m.x)} x2={px(m.x)} y1="0" y2="100" stroke="var(--zero)" strokeWidth="1"
                   strokeDasharray="3 3" vectorEffect="non-scaling-stroke" />
               ))}
+              {bands.map((b) => {
+                const color = series.find((s) => s.key === b.seriesKey)?.color ?? "var(--muted)";
+                const pts = [...b.upper, ...[...b.lower].reverse()].map((p) => `${px(p.x)},${py(p.y)}`).join(" ");
+                return <polygon key={`band-${b.seriesKey}`} points={pts} fill={color} fillOpacity={0.16} stroke="none" />;
+              })}
               {series.map((s) => (
                 <polyline key={s.key} fill="none" stroke={s.color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"
                   strokeDasharray={s.dashed ? "5 4" : undefined} vectorEffect="non-scaling-stroke"
@@ -160,6 +178,15 @@ export function LineChart({
                     </svg>
                     <span className="num font-semibold">{fmt(yFormat, s.points[hover]?.y ?? NaN)}</span>
                     <span className="text-muted">{s.name}</span>
+                    {(() => {
+                      const b = bands.find((x) => x.seriesKey === s.key);
+                      if (!b || hover === null) return null;
+                      return (
+                        <span className="num text-muted">
+                          [{fmt(yFormat, b.lower[hover]?.y ?? NaN)}, {fmt(yFormat, b.upper[hover]?.y ?? NaN)}]
+                        </span>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
