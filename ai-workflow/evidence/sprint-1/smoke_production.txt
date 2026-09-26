@@ -1,4 +1,4 @@
-# npm --prefix web run smoke  (captured 2026-09-26T07:25:25Z)
+# npm --prefix web run smoke  (captured 2026-09-26T09:37:30Z, v1.0.1 deploy)
 
 > ecommerce-funnel-analytics-web@0.1.0 smoke
 > node scripts/smoke.mjs

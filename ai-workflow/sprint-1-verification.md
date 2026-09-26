@@ -15,14 +15,14 @@
 
 ## dbt build (final, full, from a clean tree)
 
-- Commit `35256ed`, clean tree: True.
-- `Done. PASS=88 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=88`
-- Models built: 10; tests run 78 of 78 expected.
-- Elapsed 1018.7 s; peak spill 11,351,359,488 bytes; 6.58 GB available before the run.
+- Commit `4ec6095`, clean tree: True.
+- `Done. PASS=90 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=90`
+- Models built: 10; tests run 80 of 80 expected.
+- Elapsed 994.5 s; peak spill 11,329,536,000 bytes; 4.21 GB available before the run.
 
 ## Independent verification (`python -m funnel.verify`)
 
-All checks match: **True** (22 of 22; counts and DECIMAL sums exactly, rates within 1e-09).
+All checks match: **True** (24 of 24; counts and DECIMAL sums exactly, rates within 1e-09).
 
 | Check | Independent | Compared with | Match |
 |---|---|---|---|
@@ -34,6 +34,8 @@ All checks match: **True** (22 of 22; counts and DECIMAL sums exactly, rates wit
 | view_to_cart_session_rate | 0.061878719648399395 | mart: 0.061878719648399395 | True |
 | cart_session_purchase_rate | 0.4993334403551262 | mart: 0.4993334403551262 | True |
 | carted_value_with_no_observed_purchase | 107863336.42 | mart: 107863336.42 | True |
+| sessions_with_purchases_only_of_uncarted_products | 343394 | mart: 343394 | True |
+| cart_sessions_with_purchase_of_no_carted_product | 5696 | mart: 5696 | True |
 | revenue_share:Purchase with an observed same-session cart event | 0.5192104005289847 | mart: 0.5192104005289847 | True |
 | purchase_events:Purchase with an observed same-session cart event | 336166 | mart: 336166 | True |
 | revenue_share:Purchase with no observed same-session cart event | 0.48078959947101524 | mart: 0.48078959947101524 | True |
@@ -51,7 +53,7 @@ All checks match: **True** (22 of 22; counts and DECIMAL sums exactly, rates wit
 
 ## Tests
 
-`112 passed in 4.59s  (pytest_exit_code=0)`
+`114 passed in 5.39s  (pytest_exit_code=0)`
 
 ## Headline KPIs (from kpis.json)
 
@@ -63,6 +65,14 @@ All checks match: **True** (22 of 22; counts and DECIMAL sums exactly, rates wit
 - Session purchase rate: 6.81% (629,558 of 9,244,073)
 - View-to-cart session rate: 6.19% (571,902 of 9,242,305)
 - Cart-session purchase rate: 49.93% (286,164 of 573,092)
+
+Added in v1.0.1 (metrics.md Changes 2026-09-26, third entry):
+
+- Sessions with an observed purchase of a product with an observed same-session cart event: 286,164 (45.5% of purchasing sessions)
+- Sessions with observed purchases only of products with no observed same-session cart event: 343,394 (54.5%)
+- Sessions with an observed cart event and an observed purchase, none of a carted product: 5,696 (0.99% of 573,092 sessions with an observed cart event; with the cart-session purchase numerator and cart sessions with no observed purchase, the three sum to 573,092)
+
+Published claims and their evidence are in `ai-workflow/claim-ledger.md` (owner sign-off, H9, pending).
 
 ## Purchase paths (from purchase_paths.json)
 
@@ -132,6 +142,11 @@ Unknown-category context: the unknown category ranks 4 with $4,826,819.23 (4.5% 
 - Sprint 1 Step 6 · Delete command used unguarded variables in its path (Claude Code; Human review)
 - Sprint 1 Step 7 · Wide tables clipped at 390 px on the first production deploy (Claude Code; Screenshot or smoke check)
 
+## Correction log: 2 v1.0.1 entries
+
+- v1.0.1 · Patch item specified from a text rendering of the page (Claude Chat; Claude Code's own review)
+- v1.0.1 · Git Bash rewrote leading-slash arguments into Windows paths (Claude Code; Harness or shell)
+
 ## Sprint 1 commits
 
 - `907a7f9` Sprint 1 Step 0: UTC round-trip check, business question, wording fixes
@@ -163,3 +178,10 @@ Unknown-category context: the unknown category ranks 4 with $4,826,819.23 (4.5% 
 - `08c087b` Sprint 1 Step 7: exports regenerated from the clean tree at 7bb9ceb
 - `d9ddc65` Sprint 1 Step 7: classify screenshot and smoke catches in the log statistics
 - `9e45003` Sprint 1 Step 7: exports regenerated after the classification fix
+- `a96f7e0` Sprint 1 Step 7: production deploy evidence, verification file, README
+- `b8321eb` metrics.md Changes 2026-09-26: session-level purchase paths; cart sessions with a purchase of no carted product
+- `093f659` v1.0.1: funnel purchase split, cart-session partition, home findings, claim ledger
+- `4ec6095` v1.0.1: record of the targeted mart_kpis_daily build (PASS=10, 9 of 9 tests)
+- `7da5128` v1.0.1 evidence: full dbt build from clean tree at 4ec6095
+- `f6f5c28` v1.0.1 evidence: independent verification, 24 of 24 checks match
+- `4456bdb` v1.0.1: exports regenerated from the clean tree

@@ -85,6 +85,7 @@ def render() -> str:
 
     log = parse_correction_log(CORRECTION_LOG.read_text(encoding="utf-8"))
     sprint1_entries = [e for e in log["entries"] if e["phase"].startswith("Sprint 1")]
+    patch_entries = [e for e in log["entries"] if e["phase"].startswith("v1.0.1")]
 
     cov = build["test_coverage"]
     done = build["dbt_done_counts"]
@@ -155,6 +156,23 @@ def render() -> str:
         f"- Cart-session purchase rate: {pct(m['cart_session_purchase_rate'])}"
         f" ({m['cart_sessions_with_carted_product_purchase']:,} of {m['sessions_with_cart']:,})",
         "",
+        "Added in v1.0.1 (metrics.md Changes 2026-09-26, third entry):",
+        "",
+        f"- Sessions with an observed purchase of a product with an observed same-session cart event:"
+        f" {m['sessions_with_purchase_of_carted_product']:,}"
+        f" ({pct(m['sessions_with_purchase_of_carted_product'] / m['sessions_with_purchase'], 1)} of purchasing sessions)",
+        f"- Sessions with observed purchases only of products with no observed same-session cart event:"
+        f" {m['sessions_with_purchases_only_of_uncarted_products']:,}"
+        f" ({pct(m['sessions_with_purchases_only_of_uncarted_products'] / m['sessions_with_purchase'], 1)})",
+        f"- Sessions with an observed cart event and an observed purchase, none of a carted product:"
+        f" {m['cart_sessions_with_purchase_of_no_carted_product']:,}"
+        f" ({pct(m['cart_sessions_with_purchase_of_no_carted_product'] / m['sessions_with_cart'])} of"
+        f" {m['sessions_with_cart']:,} sessions with an observed cart event; with the cart-session purchase numerator"
+        f" and cart sessions with no observed purchase, the three sum to"
+        f" {m['cart_sessions_with_carted_product_purchase'] + m['cart_sessions_with_no_observed_purchase'] + m['cart_sessions_with_purchase_of_no_carted_product']:,})",
+        "",
+        "Published claims and their evidence are in `ai-workflow/claim-ledger.md` (owner sign-off, H9, pending).",
+        "",
         "## Purchase paths (from purchase_paths.json)",
         "",
         *[f"- {p['purchase_path']}: {pct(p['revenue_share'])} of revenue ({money(p['revenue'])},"
@@ -195,6 +213,10 @@ def render() -> str:
         f"## Correction log: {len(sprint1_entries)} Sprint 1 entries",
         "",
         *[f"- {e['phase']} · {e['title']} ({e['origin']}; {e['caught_by']})" for e in sprint1_entries],
+        "",
+        f"## Correction log: {len(patch_entries)} v1.0.1 entries",
+        "",
+        *[f"- {e['phase']} · {e['title']} ({e['origin']}; {e['caught_by']})" for e in patch_entries],
         "",
         "## Sprint 1 commits",
         "",
