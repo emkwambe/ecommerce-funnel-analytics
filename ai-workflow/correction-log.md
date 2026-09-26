@@ -138,6 +138,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the same values move to `config_options`, which dbt-duckdb passes once to `duckdb.connect(config=...)`.
 - **Guard added:** the reason is documented in `pipeline/profiles.yml`. Every build goes through `funnel.build`, which records the dbt exit code.
 
+**2026-09-26 · Sprint 1 Step 3 · Contract gave an impossible basis for two data-quality metrics**
+- **Origin:** Claude Chat (drafting of `docs/metrics.md`)
+- **What was produced:** Section 10 of the contract committed in `8d4093f` said that all data-quality metrics except exact duplicate rows are counted "on deduplicated events in valid sessions".
+- **What was wrong:** null-session events and multi-user sessions are excluded from valid sessions by definition (Section 3), so they cannot be counted on that basis. `mart_data_quality` could not be built as written.
+- **How it was caught:** Claude Code's review of the contract against the Step 3 model specs, before `mart_data_quality` was written, reported to the project owner.
+- **Fix:** a dated Changes entry in `docs/metrics.md` (2026-09-26) counts those two metrics on deduplicated events before session exclusions. The same entry records the project owner's decisions on two gaps: what the category funnel publishes (Section 9) and the timing reading of the cart-session purchase rate (Section 6). Ships in this commit, before either affected mart is built.
+- **Guard added:** Step 3 stops at any model whose logic the contract does not define clearly.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

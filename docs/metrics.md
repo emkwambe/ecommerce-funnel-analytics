@@ -116,4 +116,19 @@ Every data-quality metric states its basis. Exact duplicate rows removed are cou
 
 ## Changes
 
-*None at time of commit.*
+### 2026-09-26 · Clarifications before the first mart build (Sections 6, 9, 10)
+
+**Reason:** while building the dbt pipeline (Sprint 1 Step 3), Claude Code found one contradiction and two gaps in the text committed in `8d4093f`. The project owner decided each one. No business metric had been computed or published when this entry was made.
+
+1. **Section 10, basis for session exclusions.** Null-session events excluded and multi-user sessions excluded are counted on deduplicated events *before* session exclusions. By definition they are not part of any valid session, so the "deduplicated events in valid sessions" basis cannot apply to them. All other data-quality metrics except exact duplicate rows removed (raw rows) stay on deduplicated events in valid sessions.
+2. **Section 9, what the category funnel publishes.** Per top-level category, and per full `category_code` in drill-downs, it publishes:
+   - step counts: (session, category) pairs with a view in the category, those with a cart event in the category, and those with a purchase in the category;
+   - within-category step rates: view-to-cart (pairs with a cart event in the category ÷ pairs entering the funnel) and cart-to-purchase (pairs with a cart event and a purchase in the category ÷ pairs with a cart event in the category);
+   - category revenue: the sum of purchase price over all purchase events in the category, in valid sessions, whether or not the session entered that category's funnel. Category revenues therefore sum to total revenue.
+
+   The cart-to-purchase numerator requires both a cart event and a purchase in the category, so the rate cannot exceed 100% even though most purchases have no same-session cart event (Section 5).
+
+   Every category view states the unknown share of events and of revenue. It also discloses that one session can appear in several category funnels, so category counts do not sum to session totals. Carted value with no observed purchase in this session (Section 7) is grouped by the top-level category on the pair's latest cart event, and by the full code on that event in drill-downs.
+3. **Section 6, cart-session purchase rate.** "A purchase of a product carted in that session" means a purchase of a product that has a cart event anywhere in the same session, consistent with Section 5. There is no timing condition.
+
+**Effect on published numbers:** none; no numbers had been published. Items 1 and 3 fix how metrics already listed are computed. Item 2 defines the category funnel's published fields.
