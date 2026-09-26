@@ -145,3 +145,17 @@ Every data-quality metric states its basis. Exact duplicate rows removed are cou
 2. **Category revenue population.** Category revenue covers all purchase events in the category in valid sessions, so category revenues sum to total revenue; a reconciliation test asserts this. This population differs slightly from the category funnel's, which contains only (session, category) pairs entered by a view in the category. The funnel page discloses this difference alongside the carted-value population note (Section 7).
 
 **Effect on published numbers:** none; no numbers had been published.
+
+### 2026-09-26 · Session-level purchase paths and cart sessions with a purchase of no carted product (Sections 5, 6)
+
+**Reason:** the funnel page's purchase step reads as a widening funnel, because most purchases have no observed same-session cart event (Section 5). Showing that step split by path, and completing the cart-session breakdown, needs two session-level counts the contract did not define. The project owner approved this entry before either count was computed.
+
+1. **Section 5, session level.** A valid session with an observed purchase is classified by its purchase events:
+   - "Sessions with an observed purchase of a product with an observed same-session cart event" (legend label: "Purchase of a carted product"): at least one of its purchase events is on the path "Purchase with an observed same-session cart event". This equals the numerator of "Sessions with an observed cart event and an observed purchase of a carted product (%)" (Section 6).
+   - "Sessions with observed purchases only of products with no observed same-session cart event" (legend label: "Purchases only of products not carted in the session"): every one of its purchase events is on the path "Purchase with no observed same-session cart event".
+
+   The two sum to sessions with an observed purchase. Chart legends use the legend labels; tables and tooltips use the full labels.
+2. **Section 6, cart sessions with a purchase of no carted product.**
+   - "Sessions with an observed cart event and an observed purchase, none of a carted product" (display label): valid sessions with at least one cart event and at least one purchase event, none of them of a product carted in that session. With the numerator of "Sessions with an observed cart event and an observed purchase of a carted product (%)" and "Sessions with an observed cart event and no observed purchase in this session", it partitions sessions with an observed cart event; a reconciliation test asserts the three sum to sessions with an observed cart event.
+
+**Effect on published numbers:** no published number changes. Three counts are added to the funnel page: the two session-level purchase groups and the cart sessions with a purchase of no carted product.
