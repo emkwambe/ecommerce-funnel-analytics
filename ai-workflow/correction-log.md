@@ -121,6 +121,7 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **How it was caught:** the pytest commit gate (`test_committable_web_docs_and_exports_follow_naming_rules`), before the contract was first committed.
 - **Fix:** the project owner reworded Section 7 to "The raw count of deduplicated cart events, always labeled as cart events." The enforcement paragraph now bans the whole word "carts" anywhere outside Section 1, which covers "unique carts". No other occurrence of "carts" exists outside Section 1. Ships in this commit, the contract's first.
 - **Guard added:** `test_naming_rules.py` enforces the whole-word rule, and `test_guard_list_matches_contract_rule_3` keeps the guard's list equal to rule 3's.
+- **Public title:** Contract prose used a prohibited count label outside the naming rules
 
 **2026-09-26 · Sprint 1 Step 3 · Edit command used `cd` and a bare `python`, and hung**
 - **Origin:** Claude Code
@@ -177,6 +178,38 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **How it was caught:** Claude Code's review while diagnosing the ignore bug, before any export was committed.
 - **Fix:** one manifest is taken for the run before the first write. The exports from the first run were deleted and regenerated from a clean tree.
 - **Guard added:** `test_export_files.py` asserts that all exports share one manifest and that it records a clean tree.
+
+**2026-09-26 · Sprint 1 Step 6 · Site text stated facts not read from the exports**
+- **Origin:** Claude Code
+- **What was produced:** first drafts of three page sentences. `/data` said "It has no order or transaction ID" as fixed text. `/funnel` said the largest drop is between a view and a cart event as fixed text. `/data-quality` said long sessions do not change any headline figure "materially".
+- **What was wrong:** CLAUDE.md rule 2 requires interpretation to rest on exported fields. The first two would have stayed on the page if the data said otherwise, and "materially" was an unstated judgement.
+- **How it was caught:** Claude Code's own review of each page against rule 2, before the first render.
+- **Fix:** each sentence is now chosen by a condition on the exported fields (`contents.order_or_transaction_id_exists`, the two step rates, the largest relative sensitivity shift), and the sensitivity sentence states its 1% threshold.
+- **Guard added:** none automated; every interpretive sentence carries a Sources line naming its fields.
+
+**2026-09-26 · Sprint 1 Step 6 · Daily chart ticks ran past the data and overflowed at 390 px**
+- **Origin:** Claude Code
+- **What was produced:** the home page's daily charts took x-axis ticks from a rounded scale (0 to 40) over days 1 to 31, dropping day 1.
+- **What was wrong:** a "day 40" tick was drawn outside the plot, which pushed the page 47 px wider than a 390 px screen. The last tick label also wrapped onto the axis caption.
+- **How it was caught:** Claude Code's 390 px screenshot pass, which also measures horizontal overflow per page.
+- **Fix:** weekly ticks from the first day, kept inside the data range, and tick labels that do not wrap. Every page now measures 0 px overflow at 390 px and at desktop width.
+- **Guard added:** the screenshot pass reports overflow per page (Step 7 evidence).
+
+**2026-09-26 · Sprint 1 Step 6 · Correction-log titles exported to the site unscreened**
+- **Origin:** Claude Code
+- **What was produced:** `workflow.json` (for `/how-its-built`) exported every correction-log entry title as written.
+- **What was wrong:** one title quotes the whole word that metrics.md Section 1 prohibits in any web file or export, to describe the error it records.
+- **How it was caught:** the pytest commit gate (`test_committable_web_docs_and_exports_follow_naming_rules`) on the first development export of `workflow.json`.
+- **Fix:** the log stays append-only. The affected entry gains a `Public title` line, and the export uses an entry's Public title when present. The original title and body are unchanged, and the guard and contract are unchanged (project owner's decision).
+- **Guard added:** `test_correction_log_titles_safe_for_export` fails if any entry whose title would fail the naming guard lacks a Public title, or if a Public title would itself fail.
+
+**2026-09-26 · Sprint 1 Step 6 · Delete command used unguarded variables in its path**
+- **Origin:** Claude Code
+- **What was produced:** a commit sequence that removed the development `workflow.json` with `rm "$R/$D/workflow.json"`.
+- **What was wrong:** CLAUDE.md rule 10 requires a literal path or `${VAR:?}` guards for any delete on a variable path. With `R` or `D` unset, the command would have targeted a different path.
+- **How it was caught:** human review at the permission prompt; the project owner declined the command before it ran. Nothing was deleted.
+- **Fix:** the delete is written as a literal path, `rm "/c/Dev/ecommerce-funnel-analytics/web/public/data/workflow.json"`.
+- **Guard added:** none beyond CLAUDE.md rule 10 and the permission check.
 
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a

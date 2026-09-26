@@ -21,6 +21,8 @@ from funnel.row_guard import committable_files
 
 NAMING_GUARDED_DIRS = ("web", "docs")
 METRICS_MD = REPO_ROOT / "docs" / "metrics.md"
+# The /metrics page renders this copy; test_metrics_page_copy asserts it equals docs/metrics.md.
+WEB_METRICS_MD = REPO_ROOT / "web" / "content" / "metrics.md"
 
 # Section 1 rule 3, in the order the contract lists them.
 PROHIBITED_TERMS = (
@@ -51,13 +53,13 @@ def naming_findings(text: str) -> list[str]:
 
 
 def scan(paths: list[Path], metrics_md: Path | None = None) -> dict[str, list[str]]:
-    metrics_md = metrics_md or METRICS_MD
+    contract_copies = {p.resolve() for p in (metrics_md or METRICS_MD, WEB_METRICS_MD)}
     hits: dict[str, list[str]] = {}
     for path in paths:
         if not path.is_file():
             continue
         text = path.read_bytes().decode("utf-8", errors="ignore")
-        if path.resolve() == metrics_md.resolve():
+        if path.resolve() in contract_copies:
             text = strip_naming_rules_section(text)
         found = naming_findings(text)
         if found:

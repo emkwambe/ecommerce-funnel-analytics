@@ -12,7 +12,9 @@ pass on this dataset, or if the reconciliation chain in data_story.json does not
 from __future__ import annotations
 
 import json
+import os
 import re
+import subprocess
 import sys
 from decimal import Decimal
 from pathlib import Path
@@ -276,6 +278,99 @@ def data_story(con: duckdb.DuckDBPyConnection, metrics_text: str, dq: dict[str, 
     }
 
 
+# ---------- workflow record (/how-its-built) ----------
+
+CORRECTION_LOG = REPO_ROOT / "ai-workflow" / "correction-log.md"
+ENTRY_HEADING = re.compile(r"^\*\*(\d{4}-\d{2}-\d{2}) · (.+?) · (.+)\*\*$", re.MULTILINE)
+# First matching rule wins; exported with the counts so the classification is visible.
+CAUGHT_RULES = (
+    ("Harness or shell", ("harness", "timeout", "shell error")),
+    ("Human review", ("human review",)),
+    ("Test or commit gate", ("pytest", "commit gate")),
+    ("Pipeline run or generated output", ("dbt exit code", "generated column types")),
+    ("Claude Code's own review", ("review", "check")),
+)
+MILESTONES = (
+    ("conventions", "Conventions and preflight spec committed before data access",
+     "project conventions and data preflight spec"),
+    ("sprint0", "Sprint 0: ingest and structural profile", "Sprint 0: ingest"),
+    ("contract", "Metric contract committed before any business metric", "metric contract (before any business metric"),
+    ("changes", "Metric contract Changes entry", "metrics.md Changes"),
+    ("build", "Full dbt build from a clean tree", "Sprint 1 Step 3 evidence"),
+    ("verify", "Independent verification against the marts", "Sprint 1 Step 4 evidence"),
+    ("exports", "JSON exports with manifests", "Sprint 1 Step 5: JSON exports"),
+)
+WORKFLOW_FILES_DIRS = ("ai-workflow",)
+
+
+def caught_category(text: str) -> str:
+    lowered = text.lower()
+    return next((label for label, words in CAUGHT_RULES if any(w in lowered for w in words)), "Other")
+
+
+def parse_correction_log(text: str) -> dict[str, Any]:
+    entries = []
+    headings = list(ENTRY_HEADING.finditer(text))
+    for i, h in enumerate(headings):
+        body = text[h.end(): headings[i + 1].start() if i + 1 < len(headings) else len(text)]
+        origin = re.search(r"^- \*\*Origin:\*\* (.+)$", body, re.MULTILINE)
+        caught = re.search(r"^- \*\*How it was caught:\*\* (.+)$", body, re.MULTILINE)
+        # An entry may carry a Public title for the site when its own title quotes a prohibited
+        # term; the log itself stays as written (test_correction_log_titles_safe_for_export).
+        public_title = re.search(r"^- \*\*Public title:\*\* (.+)$", body, re.MULTILINE)
+        origin_text = origin.group(1) if origin else "n/a"
+        if origin_text.startswith("n/a"):
+            continue  # the "checks run with no error found" record is not an error
+        origin_label = next((o for o in ("Claude Code", "Claude Chat") if origin_text.startswith(o)), "Other")
+        title = public_title.group(1).strip() if public_title else h.group(3).strip()
+        entries.append({"date": h.group(1), "phase": h.group(2), "title": title,
+                        "origin": origin_label, "caught_by": caught_category(caught.group(1) if caught else "")})
+
+    def count(key: str) -> dict[str, int]:
+        out: dict[str, int] = {}
+        for e in entries:
+            out[e[key]] = out.get(e[key], 0) + 1
+        return out
+
+    return {
+        "source": "ai-workflow/correction-log.md",
+        "n_entries": len(entries),
+        "by_origin": count("origin"),
+        "by_caught": count("caught_by"),
+        "by_phase": count("phase"),
+        "origin_rule": "origin is the entry's Origin line (Claude Code or Claude Chat)",
+        "caught_rules": [{"category": label, "keywords": list(words)} for label, words in CAUGHT_RULES],
+        "entries": entries,
+    }
+
+
+def git_timeline() -> list[dict[str, str]]:
+    log = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "log", "--reverse", "--date=format-local:%Y-%m-%d %H:%M UTC",
+         "--format=%H%x09%ad%x09%s"],
+        capture_output=True, text=True, check=True, env={**os.environ, "TZ": "UTC"},
+    ).stdout.splitlines()
+    events = []
+    for line in log:
+        sha, date, subject = line.split("\t", 2)
+        for event, label, prefix in MILESTONES:
+            if subject.startswith(prefix):
+                events.append({"event": event, "label": label, "sha": sha, "short_sha": sha[:7],
+                               "date_utc": date, "subject": subject})
+                break
+    return events
+
+
+def workflow_record() -> dict[str, Any]:
+    files = subprocess.run(["git", "-C", str(REPO_ROOT), "ls-files", "--", *WORKFLOW_FILES_DIRS],
+                           capture_output=True, text=True, check=True).stdout.split()
+    return {
+        "timeline": git_timeline(),
+        "correction_log": parse_correction_log(CORRECTION_LOG.read_text(encoding="utf-8")),
+        "workflow_files": [f for f in files if f.endswith(".md")],
+    }
+
+
 def main() -> None:
     sha = require_dataset_hash_match()
     build = last_full_build(sha)
@@ -319,6 +414,7 @@ def main() -> None:
         "data_quality.json": {"rows": dq_rows},
         "metrics_index.json": {"metrics": parse_metrics_index(metrics_text)},
         "data_story.json": data_story(con, metrics_text, dq),
+        "workflow.json": workflow_record(),
     }
     # One manifest for the whole run, taken before the first write: once a file is written the
     # tree is dirty, so a per-file manifest would misreport every file after the first.

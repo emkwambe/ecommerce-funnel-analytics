@@ -52,3 +52,34 @@ def test_decisions_link_to_the_changes_entries_that_apply(metrics_text):
     first = entries[0]["title"]  # Sections 6, 9, 10
     assert first in linked["D5"] and first in linked["D7"] and first in linked["D8"]
     assert linked["D1"] == [] and linked["D4"] == []
+
+
+def test_correction_log_titles_safe_for_export():
+    """Any log entry whose title would fail the naming guard must carry a Public title that passes it."""
+    from funnel.export import CORRECTION_LOG, ENTRY_HEADING
+    from funnel.naming_guard import naming_findings
+
+    text = CORRECTION_LOG.read_text(encoding="utf-8")
+    headings = list(ENTRY_HEADING.finditer(text))
+    assert headings
+    for i, h in enumerate(headings):
+        body = text[h.end(): headings[i + 1].start() if i + 1 < len(headings) else len(text)]
+        public = re.search(r"^- \*\*Public title:\*\* (.+)$", body, re.MULTILINE)
+        if naming_findings(h.group(3)):
+            assert public, f"entry {h.group(3)!r} needs a '- **Public title:**' line for the site"
+        if public:
+            assert naming_findings(public.group(1)) == [], public.group(1)
+
+
+def test_export_uses_public_title_when_present():
+    from funnel.export import parse_correction_log
+
+    log = (
+        "**2026-01-01 · Sprint 9 · Original title**\n"
+        "- **Origin:** Claude Code\n- **How it was caught:** the pytest commit gate\n"
+        "- **Public title:** Title for the site\n\n"
+        "**2026-01-02 · Sprint 9 · Plain title**\n"
+        "- **Origin:** Claude Chat\n- **How it was caught:** human review\n"
+    )
+    titles = [e["title"] for e in parse_correction_log(log)["entries"]]
+    assert titles == ["Title for the site", "Plain title"]
