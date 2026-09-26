@@ -115,31 +115,32 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 
 ## Tests
 
-`174 passed in 5.91s  (pytest_exit_code=0)`
+`175 passed in 5.67s  (pytest_exit_code=0)`
 
-## Correction log: 21 Sprint 2 entries
+## Correction log: 22 Sprint 2 entries
 
-- Sprint 2 Step 0 · `.env.example` left out of the last direct commit to main (Claude Code; Claude Code's own review)
-- Sprint 2 Step 3 · Export test pinned that no Changes entry touches decision D4 (Claude Code; Test or commit gate)
+- Sprint 2 Step 0 · `.env.example` left out of the last direct commit to main (Claude Code; Executor self-review)
+- Sprint 2 Step 3 · Export test pinned that no Changes entry touches decision D4 (Claude Code; Local test)
 - Sprint 2 Step 4 · Wording guard could pass on nothing and did not check its injections (Claude Code; Human review)
-- Sprint 2 Step 4 · Added wording-guard term `prove\w*` was over-broad (Project owner; Claude Code's own review)
-- Sprint 2 Step 4 · Correction-log entry written outside the log's classification rules (Claude Code; Test or commit gate)
-- Sprint 2 Step 4 · Commit message stated a test count before the gate reported it (Claude Code; Claude Code's own review)
-- Sprint 2 Step 4 · Category export order was not fully determined (Claude Code; Test or commit gate)
-- Sprint 2 Step 4 · Report described a smooth timing hump as bunching below 60 seconds (Claude Code; Claude Code's own review)
-- Sprint 2 Step 4 · Exploratory gap histogram counted each pair's first event as a gap over 300 s (Claude Code; Claude Code's own review)
-- Sprint 2 Step 5 · Export opened DuckDB without the shared memory settings (Claude Code; Claude Code's own review)
-- Sprint 2 Step 5 · Independent Kaplan–Meier SQL failed when a time step removed everyone at risk (Claude Code; Test or commit gate)
-- Sprint 2 Step 5 · Ledger row claimed an independent recomputation that did not exist (Claude Code; Claude Code's own review)
-- Sprint 2 Step 6 · Legend-label test pinned the whole metrics index (Claude Code; Test or commit gate)
-- Sprint 2 Step 6 · Long field paths in Sources lines widened the investigation pages at 390 px (Claude Code; Screenshot or smoke check)
-- Sprint 2 Step 7 · Verification generator listed the timing groups that H4 kept unpublished (Claude Code; Claude Code's own review)
-- Sprint 2 Step 7 · README linked to a production page before it was deployed (Claude Code; Claude Code's own review)
-- Sprint 2 Step 7 · Screenshot script failed on nested routes when writing WebP evidence (Claude Code; Screenshot or smoke check)
+- Sprint 2 Step 4 · Added wording-guard term `prove\w*` was over-broad (Project owner; Executor self-review)
+- Sprint 2 Step 4 · Correction-log entry written outside the log's classification rules (Claude Code; Local test)
+- Sprint 2 Step 4 · Commit message stated a test count before the gate reported it (Claude Code; Executor self-review)
+- Sprint 2 Step 4 · Category export order was not fully determined (Claude Code; Local test)
+- Sprint 2 Step 4 · Report described a smooth timing hump as bunching below 60 seconds (Claude Code; Executor self-review)
+- Sprint 2 Step 4 · Exploratory gap histogram counted each pair's first event as a gap over 300 s (Claude Code; Executor self-review)
+- Sprint 2 Step 5 · Export opened DuckDB without the shared memory settings (Claude Code; Executor self-review)
+- Sprint 2 Step 5 · Independent Kaplan–Meier SQL failed when a time step removed everyone at risk (Claude Code; Local test)
+- Sprint 2 Step 5 · Ledger row claimed an independent recomputation that did not exist (Claude Code; Executor self-review)
+- Sprint 2 Step 6 · Legend-label test pinned the whole metrics index (Claude Code; Local test)
+- Sprint 2 Step 6 · Long field paths in Sources lines widened the investigation pages at 390 px (Claude Code; Smoke)
+- Sprint 2 Step 7 · Verification generator listed the timing groups that H4 kept unpublished (Claude Code; Executor self-review)
+- Sprint 2 Step 7 · README linked to a production page before it was deployed (Claude Code; CI)
+- Sprint 2 Step 7 · Screenshot script failed on nested routes when writing WebP evidence (Claude Code; Smoke)
 - Sprint 2 Step 7 · Later-purchases page overstated its independent recomputation (Claude Code; Human review)
 - Sprint 2 Step 4 · Report quoted a hand-added total (28,152) for duplicate cart rows (Claude Code; Human review)
-- Sprint 2 Step 7 · Decision record attributed an ordering to the owner that the owner had not decided (Claude Code; Claude Code's own review)
-- Sprint 2 Step 7 · Final-report draft repeated the verification overstatement and miscounted the site's lag (Claude Code; Claude Code's own review)
+- Sprint 2 Step 7 · Decision record attributed an ordering to the owner that the owner had not decided (Claude Code; Executor self-review)
+- Sprint 2 Step 7 · Final-report draft repeated the verification overstatement and miscounted the site's lag (Claude Code; Executor self-review)
+- Sprint 2 v1.1.2 · Correction-log classifier had no CI category (Claude Code; Executor self-review)
 
 ## Sprint 2 commits on main (first parent)
 
@@ -154,4 +155,6 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 - `d2f17de` Merge pull request #8 from emkwambe/sprint-2/v110-evidence
 - `c153a16` Merge pull request #9 from emkwambe/sprint-2/verification-wording
 - `46bd249` Merge pull request #10 from emkwambe/sprint-2/v111-records
-- `fae815d` Claim ledger: owner H9 sign-off for C3-C15 (2026-09-26); H8 for PR #10
+- `1e881ce` Merge pull request #11 from emkwambe/sprint-2/h9-signoff
+- `4cdf7f0` v1.1.2: correction-log classifier uses the trio template's categories; README link entry is CI
+- `2f3f9e2` v1.1.2: exports from the clean tree at 4cdf7f0 (workflow.json: 49 of 49 log entries, template categories)
