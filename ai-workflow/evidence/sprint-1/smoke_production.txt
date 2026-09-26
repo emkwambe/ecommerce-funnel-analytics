@@ -1,0 +1,30 @@
+# npm --prefix web run smoke  (captured 2026-09-26T07:25:25Z)
+
+> ecommerce-funnel-analytics-web@0.1.0 smoke
+> node scripts/smoke.mjs
+
+Smoke test against https://ecommercefunnel-analytics.vercel.app
+PASS  docs/data-source.md records a dataset SHA-256  (fedd938409b5)
+PASS  GET / returns 200  (status 200)
+PASS  GET /funnel returns 200  (status 200)
+PASS  GET /data-quality returns 200  (status 200)
+PASS  GET /data returns 200  (status 200)
+PASS  GET /metrics returns 200  (status 200)
+PASS  GET /how-its-built returns 200  (status 200)
+PASS  kpis.json loads  (status 200)
+PASS  kpis.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  funnel_category.json loads  (status 200)
+PASS  funnel_category.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  purchase_paths.json loads  (status 200)
+PASS  purchase_paths.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  data_quality.json loads  (status 200)
+PASS  data_quality.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  metrics_index.json loads  (status 200)
+PASS  metrics_index.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  data_story.json loads  (status 200)
+PASS  data_story.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  workflow.json loads  (status 200)
+PASS  workflow.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  footer attribution link on / : https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store
+PASS  footer attribution link on / : https://rees46.com
+23/23 checks passed
