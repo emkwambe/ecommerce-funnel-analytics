@@ -1,5 +1,8 @@
 # Python
 analysis/.venv/
+# Exploratory outputs are never committed; only the scripts are (analysis/tests/test_explore_outputs.py).
+analysis/explore/*
+!analysis/explore/*.py
 __pycache__/
 .pytest_cache/
 *.egg-info/
