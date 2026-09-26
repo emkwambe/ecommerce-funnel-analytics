@@ -199,8 +199,11 @@ export default function LaterPurchasesPage() {
       <Section n={7} title="How this was checked">
         <ul className="list-disc space-y-1 pl-5 text-sm">
           <li>
-            Two independent recomputations from the raw file, written separately from the pipeline, matched all{" "}
-            {fmtInt(b.independent_verification.checks)} checks (verification at commit{" "}
+            An independent recomputation from the source data, written separately from the pipeline, matched all{" "}
+            {fmtInt(b.independent_verification.checks)} checks: every count, value, and share on this page, the one-hour
+            share, the identity checks, and the Kaplan–Meier curve at 3, 7, 14, and 30 days. The main 7-day figures in
+            section 1 were recomputed a second time by a different method. The 95% intervals come from one bootstrap
+            implementation, rerun with three other seeds (verification at commit{" "}
             <code>{shortSha(b.independent_verification.verify_git_commit_sha)}</code>).
           </li>
           <li>

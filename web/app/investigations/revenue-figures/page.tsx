@@ -173,7 +173,7 @@ export default function RevenueFiguresPage() {
             the two published revenue figures&apos; gap.
           </li>
           <li>
-            An independent recomputation from the raw file, written separately from the pipeline, matched all{" "}
+            An independent recomputation from the source data, written separately from the pipeline, matched all{" "}
             {fmtInt(g.independent_verification.checks)} checks (verification at commit{" "}
             <code>{shortSha(g.independent_verification.verify_git_commit_sha)}</code>).
           </li>

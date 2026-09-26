@@ -371,6 +371,22 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** flat stems (`/` replaced by `-`). The 16 partial files were deleted by literal path, and the production run was repeated: 18 of 18 pass, 40 WebP files, the largest 204 KB. Ships in this commit.
 - **Guard added:** none new; the script's exit code already reports the failure. The local check now runs with WebP writing on before a release.
 
+**2026-09-26 · Sprint 2 Step 7 · Later-purchases page overstated its independent recomputation**
+- **Origin:** Claude Code (`web/app/investigations/later-purchases/page.tsx`, section 7; published in v1.1.0)
+- **What was produced:** "Two independent recomputations from the raw file, written separately from the pipeline, matched all 45 checks."
+- **What was wrong:** only B1's six figures were recomputed twice (the `B1:` and `B-all:` paths in `verify.json`); every other figure was recomputed once. Of the 30 published Kaplan–Meier points, only days 3, 7, 14, and 30 were recomputed. The 95% intervals were not independently recomputed. And "raw file" is loose: the recomputation reads the Parquet copy of the raw CSV. The claim ledger (C8, C12) was already accurate; the page sentence was not. The revenue-figures page said "from the raw file" too.
+- **How it was caught:** human review by the project owner before the H9 sign-off, then checked by Claude Code against the check names in `verify.json`.
+- **Fix:** the owner approved the corrected wording (both pages): one independent recomputation from the source data matched every count, value, and share, the one-hour share, the identity checks, and the Kaplan–Meier curve at 3, 7, 14, and 30 days; the main 7-day figures were recomputed a second time by a different method; the intervals come from one bootstrap implementation, rerun with three other seeds. Ships in this commit and in the next production deploy.
+- **Guard added:** none automated. A sentence describing verification is checked against the check names in `verify.json`, not against memory of what was run.
+
+**2026-09-26 · Sprint 2 Step 4 · Report quoted a hand-added total (28,152) for duplicate cart rows**
+- **Origin:** Claude Code (the analysis A results report to the owner, in the session; not in any committed file)
+- **What was produced:** "28,152 duplicate cart rows removed".
+- **What was wrong:** the figure was added by hand from the three group counts in the export instead of computed by code, and the addition was wrong. The correct total is 28,073. CLAUDE.md rule 1 forbids typed statistics, and a report is no exception.
+- **How it was caught:** human review by the project owner before the H9 sign-off. Claude Code then searched the committed files (`git grep`, every number format) and the history of every branch (`git log --all -G`): the figure never reached the repository. The published page computes the total from the export (28,073).
+- **Fix:** no file needed correcting. The owner decided to log it.
+- **Guard added:** any total or derived figure quoted in a report comes from code output shown with it, never mental arithmetic.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

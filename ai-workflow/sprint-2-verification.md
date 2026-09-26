@@ -29,6 +29,8 @@ Every decision below was made by the project owner (Eddy Mkwambe). Claude Code c
 | 2026-09-26 | H4 | Release PR #7 blocked by CI `docs-checks`: the README linked to the not-yet-deployed `/investigations` page (404). The owner chose option (b): keep the order (merge, then deploy); the README names the page in plain text in PR #7, and the link is restored in the post-deploy evidence PR. Options (a), deploying `main` before the merge, and (c), excluding the URL from the link check, were declined. | PR #7 CI run (lychee: 1 error, `[404] .../investigations`); correction log |
 | 2026-09-26 | H8 | Release PR #7 (Sprint 2 Step 7) merged by the owner via `gh`. | PR #7: state `MERGED`, merged by `emkwambe` at 2026-09-26T17:56:06Z, merge commit `243c8c7`, head `e917e0b`. CI on `main` at `243c8c7` (run 36260773056): all three jobs success |
 | 2026-09-26 | H8 (release) | On the owner's instruction after the merge: `main` at `243c8c7` (clean tree) deployed to production with `vercel deploy --prod` (deployment `dpl_DuBWWMFpVwAn2zTCnPNMRstamfsR`, READY, target production). Production smoke passed, then the annotated tag `v1.1.0` was created on `243c8c7` and pushed. | `ai-workflow/evidence/sprint-2/smoke_production.txt`; `git ls-remote --tags origin`: `refs/tags/v1.1.0` → tag object `d7c95bd`, peeled to `243c8c7` |
+| 2026-09-26 | H8 | PR #8 (v1.1.0 evidence) merged by the owner via `gh`. | PR #8: state `MERGED`, merged by `emkwambe` at 2026-09-26T18:07:37Z, merge commit `d2f17de`, head `a5fc228`. CI on `main` at `d2f17de`: all three jobs success |
+| 2026-09-26 | Owner review before H9 | (1) The later-purchases page's "two independent recomputations" was found not exactly accurate (only B1's figures were recomputed twice; only 4 of 30 Kaplan–Meier points and no intervals were independently recomputed). The owner approved the corrected wording on both pages. (2) The figure 28,152 appears in no committed file or commit on any branch (only in a session report); the owner decided to log it. | Correction log (two entries); `verify.json` check names; `git grep` and `git log --all -G` |
 
 The seed-stability check (H3-D5) is reported in the generated section below.
 
@@ -107,9 +109,9 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 
 ## Tests
 
-`174 passed in 6.71s  (pytest_exit_code=0)`
+`174 passed in 5.95s  (pytest_exit_code=0)`
 
-## Correction log: 17 Sprint 2 entries
+## Correction log: 19 Sprint 2 entries
 
 - Sprint 2 Step 0 · `.env.example` left out of the last direct commit to main (Claude Code; Claude Code's own review)
 - Sprint 2 Step 3 · Export test pinned that no Changes entry touches decision D4 (Claude Code; Test or commit gate)
@@ -128,6 +130,8 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 - Sprint 2 Step 7 · Verification generator listed the timing groups that H4 kept unpublished (Claude Code; Claude Code's own review)
 - Sprint 2 Step 7 · README linked to a production page before it was deployed (Claude Code; Claude Code's own review)
 - Sprint 2 Step 7 · Screenshot script failed on nested routes when writing WebP evidence (Claude Code; Screenshot or smoke check)
+- Sprint 2 Step 7 · Later-purchases page overstated its independent recomputation (Claude Code; Human review)
+- Sprint 2 Step 4 · Report quoted a hand-added total (28,152) for duplicate cart rows (Claude Code; Human review)
 
 ## Sprint 2 commits on main (first parent)
 
@@ -139,3 +143,4 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 - `a091952` Merge pull request #5 from emkwambe/sprint-2/analysis-b
 - `cb3d76d` Merge pull request #6 from emkwambe/sprint-2/site
 - `243c8c7` Merge pull request #7 from emkwambe/sprint-2/release
+- `d2f17de` Merge pull request #8 from emkwambe/sprint-2/v110-evidence

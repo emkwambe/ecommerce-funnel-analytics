@@ -9,6 +9,7 @@ Entries up to v1.0.1 were reconstructed in Sprint 2 from the git history. Figure
 ### Fixed
 - The screenshot script writes flat file names for nested routes (`investigations-revenue-figures-390-light.webp`); nested names had failed the WebP step (correction log, Sprint 2 Step 7).
 - The README links the live `/investigations` page, restored after the v1.1.0 deploy (owner decision (b)).
+- The investigation pages describe their independent verification exactly: what was recomputed once, what twice (the main 7-day figures), which Kaplan–Meier points were covered, and that the intervals come from one bootstrap implementation (owner review before H9; correction log).
 
 ## [1.1.0] — 2026-09-26
 
