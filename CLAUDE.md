@@ -48,7 +48,12 @@ C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m pip insta
 C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m pytest C:\Dev\ecommerce-funnel-analytics\analysis\tests -q
 C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.ingest
 C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.profile
+C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.ramcheck
+C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.build
+C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.verify
 ```
+
+`funnel.build` runs `dbt build` on `pipeline\` behind the RAM and dataset-hash gates (extra arguments pass through to dbt). `funnel.verify` recomputes the headline metrics from the Parquet file without dbt and compares them with the marts.
 
 Web and deploy commands are added in Sprint 1. All file writes are UTF-8 without BOM. Never write commands that require `cd` first.
 
