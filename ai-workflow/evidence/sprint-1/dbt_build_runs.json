@@ -1,0 +1,79 @@
+{
+  "runs": [
+    {
+      "manifest": {
+        "git_commit_sha": "6547481624fd20743f550f57f9d69d6fd66127c5",
+        "git_worktree_dirty": true,
+        "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+        "generated_at_utc": "2026-09-26T04:23:54+00:00",
+        "script": "funnel.build"
+      },
+      "dbt_args": [
+        "build",
+        "--select",
+        "staging",
+        "--indirect-selection",
+        "cautious"
+      ],
+      "available_ram_gb_before_run": 3.05,
+      "duckdb_memory_limit": "2GB",
+      "duckdb_threads": 4,
+      "dbt_threads": 1,
+      "elapsed_seconds": 122.5,
+      "peak_spill_bytes": 11208851456,
+      "spill_sample_interval_seconds": 1.0,
+      "dbt_exit_code": 2,
+      "dbt_summary": []
+    },
+    {
+      "manifest": {
+        "git_commit_sha": "6547481624fd20743f550f57f9d69d6fd66127c5",
+        "git_worktree_dirty": true,
+        "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+        "generated_at_utc": "2026-09-26T04:30:31+00:00",
+        "script": "funnel.build"
+      },
+      "dbt_args": [
+        "build",
+        "--select",
+        "staging",
+        "--indirect-selection",
+        "cautious"
+      ],
+      "available_ram_gb_before_run": 3.84,
+      "duckdb_memory_limit": "2GB",
+      "duckdb_threads": 4,
+      "dbt_threads": 1,
+      "elapsed_seconds": 325.8,
+      "peak_spill_bytes": 11340972032,
+      "spill_sample_interval_seconds": 1.0,
+      "dbt_exit_code": 0,
+      "dbt_summary": []
+    },
+    {
+      "manifest": {
+        "git_commit_sha": "6547481624fd20743f550f57f9d69d6fd66127c5",
+        "git_worktree_dirty": true,
+        "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+        "generated_at_utc": "2026-09-26T05:15:20+00:00",
+        "script": "funnel.build"
+      },
+      "dbt_args": [
+        "build",
+        "--select",
+        "staging",
+        "--indirect-selection",
+        "cautious"
+      ],
+      "available_ram_gb_before_run": 3.68,
+      "duckdb_memory_limit": "2GB",
+      "duckdb_threads": 4,
+      "dbt_threads": 1,
+      "elapsed_seconds": 314.1,
+      "peak_spill_bytes": 10804428800,
+      "spill_sample_interval_seconds": 1.0,
+      "dbt_exit_code": 0,
+      "dbt_summary": []
+    }
+  ]
+}

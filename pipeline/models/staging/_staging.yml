@@ -1,0 +1,69 @@
+version: 2
+
+models:
+  - name: stg_events
+    description: >
+      One row per deduplicated event (metrics.md Section 2, D1). Exact duplicate rows are
+      removed; the near-duplicate group whose rows differ in another column is kept as logged.
+      No session rules are applied here; see int_sessions (Section 3).
+    columns:
+      - name: event_id
+        description: Surrogate key for the deduplicated event. Assigned per build; not stable across builds.
+        data_tests: [unique, not_null]
+      - name: event_time
+        description: Event timestamp, UTC (Section 1 rule 5; Section 2, D10).
+        data_tests: [not_null]
+      - name: event_type
+        description: view, cart, or purchase (Section 2, D9).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["view", "cart", "purchase"]
+      - name: product_id
+        description: Product identifier.
+        data_tests: [not_null]
+      - name: category_id
+        description: Category identifier.
+      - name: category_code
+        description: Category code as logged; null when missing.
+      - name: brand
+        description: Brand as logged; null when missing.
+      - name: price
+        description: Price logged on this event (Section 2, D3).
+        data_tests: [not_null]
+      - name: price_amount
+        description: price as DECIMAL(18, 2), so value sums are exact. assert_price_amount_is_exact checks that no price loses precision.
+        data_tests: [not_null]
+      - name: user_id
+        description: User identifier.
+      - name: user_session
+        description: Session identifier as logged; null-session events are excluded in int_sessions (Section 3).
+      - name: is_zero_price
+        description: True when price = 0 (Section 2, D2). Zero-price events count as events but are excluded from every value.
+        data_tests: [not_null]
+      - name: category_top
+        description: Text of category_code before the first dot, or "unknown" when missing (Section 9, Category).
+        data_tests: [not_null]
+      - name: category_code_label
+        description: Full category_code, or "unknown" when missing (Section 9, drill-downs).
+        data_tests: [not_null]
+      - name: brand_label
+        description: Brand, or "unknown" when missing (Section 9, Brand).
+        data_tests: [not_null]
+
+  - name: stg_dedup_audit
+    description: >
+      One row. The raw row count and the exact duplicate rows removed, counted on raw rows
+      (Section 2, D1; Section 10 basis for this metric). Computed by grouping identical rows,
+      independently of the DISTINCT in stg_events, so the reconciliation test compares two methods.
+    columns:
+      - name: raw_rows
+        description: Rows in the source file.
+        data_tests: [not_null]
+      - name: exact_duplicate_rows_removed
+        description: Rows beyond the first in each group of identical rows (data-quality metric, raw-row basis).
+        data_tests: [not_null]
+      - name: exact_duplicate_groups
+        description: Groups of identical rows with more than one row.
+        data_tests: [not_null]

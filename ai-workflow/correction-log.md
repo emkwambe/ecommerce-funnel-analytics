@@ -122,6 +122,22 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the project owner reworded Section 7 to "The raw count of deduplicated cart events, always labeled as cart events." The enforcement paragraph now bans the whole word "carts" anywhere outside Section 1, which covers "unique carts". No other occurrence of "carts" exists outside Section 1. Ships in this commit, the contract's first.
 - **Guard added:** `test_naming_rules.py` enforces the whole-word rule, and `test_guard_list_matches_contract_rule_3` keeps the guard's list equal to rule 3's.
 
+**2026-09-26 · Sprint 1 Step 3 · Edit command used `cd` and a bare `python`, and hung**
+- **Origin:** Claude Code
+- **What was produced:** a shell command to add `price_amount` to the dbt models. It began with `cd` into `pipeline/`, in breach of the CLAUDE.md absolute-paths rule, and ran an inline script through a bare `python` with an ill-formed heredoc fallback, instead of the project venv or the Edit tool.
+- **What was wrong:** the bare `python` did not return, so the command hung until the harness timeout and was stopped. It changed no files (checked afterwards).
+- **How it was caught:** the harness's 120-second command timeout, then Claude Code's review of the stopped command.
+- **Fix:** the edits were made with the Edit tool. Nothing was committed from the failed command.
+- **Guard added:** none beyond the existing CLAUDE.md rules (absolute paths, no `cd`, temporary scripts only in the scratchpad).
+
+**2026-09-26 · Sprint 1 Step 3 · DuckDB settings in the dbt profile were re-applied per cursor**
+- **Origin:** Claude Code
+- **What was produced:** `pipeline/profiles.yml` set memory_limit, threads, preserve_insertion_order, temp_directory, and TimeZone under dbt-duckdb `settings`.
+- **What was wrong:** dbt-duckdb applies `settings` as `SET` statements on every new cursor. After `stg_dedup_audit` spilled, the next cursor's `SET temp_directory` failed with "Cannot switch temporary directory after the current one has been used". `stg_events` and every later node errored.
+- **How it was caught:** the first `python -m funnel.build --select staging` run (dbt exit code 2, recorded in `ai-workflow/evidence/sprint-1/dbt_build_runs.json`).
+- **Fix:** the same values move to `config_options`, which dbt-duckdb passes once to `duckdb.connect(config=...)`.
+- **Guard added:** the reason is documented in `pipeline/profiles.yml`. Every build goes through `funnel.build`, which records the dbt exit code.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

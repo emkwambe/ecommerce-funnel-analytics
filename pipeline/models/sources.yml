@@ -1,0 +1,32 @@
+version: 2
+
+sources:
+  - name: raw
+    description: >
+      The October 2019 event log as ingested by `python -m funnel.ingest` (docs/data-source.md).
+      Read directly from the Parquet file; the raw CSV hash is checked by `python -m funnel.build`
+      before any build.
+    meta:
+      external_location: "read_parquet('{{ env_var('FUNNEL_REPO_ROOT', 'C:/Dev/ecommerce-funnel-analytics') }}/data/parquet/2019-Oct.parquet')"
+    tables:
+      - name: events_oct_2019
+        description: One row per logged event, as published (duplicates included).
+        columns:
+          - name: event_time
+            description: Event timestamp, UTC clock time stored as TIMESTAMP (docs/data-source.md, UTC round trip).
+          - name: event_type
+            description: view, cart, or purchase (metrics.md Section 2, D9).
+          - name: product_id
+            description: Product identifier.
+          - name: category_id
+            description: Category identifier.
+          - name: category_code
+            description: Dotted category path; null when missing.
+          - name: brand
+            description: Brand; null when missing.
+          - name: price
+            description: Price logged on the event.
+          - name: user_id
+            description: User identifier.
+          - name: user_session
+            description: Session identifier as logged; null on 2 raw rows.

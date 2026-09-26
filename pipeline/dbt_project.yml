@@ -1,0 +1,22 @@
+name: funnel
+version: "0.1.0"
+config-version: 2
+profile: funnel
+
+model-paths: ["models"]
+test-paths: ["tests"]
+target-path: "target"
+clean-targets: ["target"]
+
+models:
+  funnel:
+    +materialized: table
+    staging:
+      +schema: staging
+    intermediate:
+      +schema: intermediate
+    marts:
+      +schema: marts
+
+flags:
+  send_anonymous_usage_stats: false

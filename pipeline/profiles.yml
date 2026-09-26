@@ -1,0 +1,21 @@
+# DuckDB settings match analysis/funnel/common.py (DUCKDB_MEMORY_LIMIT, DUCKDB_THREADS).
+# 2 GB: a 4 GB limit left too little headroom on the project machine, with available
+# memory near or below the 3 GB run gate (ai-workflow/correction-log.md). Heavy
+# queries spill to data/duckdb_tmp instead. dbt threads: 1 builds models one at a
+# time, so only one model's query holds the 2 GB at once.
+# Run through `python -m funnel.build`, which applies the RAM and dataset-hash gates.
+# config_options are passed once to duckdb.connect(). Profile `settings` are re-applied
+# as SET on every cursor, and DuckDB refuses to change temp_directory once it has spilled.
+funnel:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('FUNNEL_REPO_ROOT', 'C:/Dev/ecommerce-funnel-analytics') }}/data/warehouse.duckdb"
+      threads: 1
+      config_options:
+        memory_limit: "2GB"
+        threads: 4
+        preserve_insertion_order: false
+        temp_directory: "{{ env_var('FUNNEL_REPO_ROOT', 'C:/Dev/ecommerce-funnel-analytics') }}/data/duckdb_tmp"
+        TimeZone: "UTC"
