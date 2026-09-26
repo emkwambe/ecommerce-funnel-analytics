@@ -166,3 +166,16 @@ No open critical item.
 1. **The live "How it's built" page lags the correction log.** `workflow.json` was last exported at `ed7c7e4` (Step 6). It holds 40 entries against 47 in the log (counted by code), so seven Sprint 2 entries are not on the site. The first is "Long field paths in Sources lines widened the investigation pages at 390 px". Refreshing it needs an export, a PR, a deploy, and a tag (v1.1.2). **Decision:** refresh now, or at the start of Sprint 3?
 2. **One correction-log entry is filed under the wrong "how caught" category.** The README link error was caught by the CI link check, but the classifier (`CAUGHT_RULES` in `funnel/export.py`) has no CI category, so it counts as "Claude Code's own review". **Decision:** add a "CI check" category (a small code change, ideally together with item 1)?
 3. **Local branches** `sprint-2/governed-setup`, `method-selection`, `metrics-changes`, `analysis-a`, `analysis-b`, `site`, `release`, `v110-evidence`, `verification-wording`, `v111-records`, and `h9-signoff` remain on this machine. Their work is merged. Deleting them, and their remote copies, is the owner's call.
+
+## Note added 2026-09-26 (Sprint 3 Step 0)
+
+This report is kept as written; this note annotates it. The Correction log section above counts 21 Sprint 2 entries. Two were added later, in the v1.1.2 records ("Correction-log classifier had no CI category" and "First STATE.md cut decision lines at colons"), and the v1.1.2 change to the trio template's "how caught" categories reclassified the README link error as CI. The current counts, computed by the project's parser (`funnel.export.parse_correction_log`, the parser that `funnel.verification_sprint2` uses) on the log at `720bb50`:
+
+```
+sprint2_entries 23
+by_origin {'Claude Code': 22, 'Project owner': 1}
+by_caught {'Executor self-review': 12, 'Local test': 5, 'Human review': 3, 'Smoke': 2, 'CI': 1}
+all_entries 50
+```
+
+The three open items above were settled later: items 1 and 2 in v1.1.2 (owner decisions recorded in `ai-workflow/sprint-2-verification.md`), and item 3 by the owner's H6 branch deletions recorded in the same file.

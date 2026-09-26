@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from funnel import state
 
 
@@ -37,7 +39,8 @@ def test_one_line_keeps_colons_and_semicolons():
 def test_uncertainty_lines_are_whole():
     for item in state.open_uncertainties():
         assert not item.rstrip(")").endswith(":"), item
-        assert "(material; open" in item or "(critical; open" in item, item
+        # Accepted limitations (H5) stay listed, under their own status, never shown as "open".
+        assert re.search(r"\((material|critical); (open|accepted limitation)\)$", item), item
 
 
 def test_open_prs_become_waiting_rows():

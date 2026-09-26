@@ -1,0 +1,15 @@
+# Sprint 3 verification
+
+Started in Sprint 3 Step 0 to record owner decisions as they are made. The evidence sections (rankings, R2, R3, the negative control, the Tableau publishing check, and smoke) are added as the sprint produces them.
+
+## Owner decisions
+
+Every decision below was made by the project owner (Eddy Mkwambe). Claude Code carried out the actions and recorded the evidence. The three planning decisions are copied as written in the owner-decisions table of `ai-workflow/sprint-3.md`.
+
+| Date | Checkpoint | Decision (owner-decided) | Artifact / evidence |
+|---|---|---|---|
+| 2026-09-26 | H1 | Sprint 3 scope: carryover PR, then size-adjusted category rankings end to end. **The test recommendation (the business question's "what should the team test first?")**, product recommendations, and the agent get framing documents only, with no code. Tableau is deferred until a publishing check (Step 3) confirms that aggregates can be published without exposing row-level data. | Decided in the Project chat planning session, 2026-09-26 (`ai-workflow/sprint-3.md`, "Owner decisions taken at planning"). The owner confirmed in the Claude Code session on 2026-09-26: "Owner decisions at planning are as stated in its table; record them only as written, citing the planning session." |
+| 2026-09-26 | H1 | Primary ranking metric: **session conversion**, meaning the share of category-sessions that include a purchase in that category, shrunk toward the pooled rate for small categories. Revenue per category-session is secondary and always shows both U1 figures. | As above: Project chat planning session, 2026-09-26; owner confirmation in the Claude Code session, 2026-09-26 |
+| 2026-09-26 | H5 | U1 and U2 are reclassified from *open* to **accepted limitation**, with binding constraints: (a) every revenue-based figure shows both the primary and the repeat-collapsed value (U1); (b) every metric that links events across sessions carries the U2 caveat on the page and in its claim row. Both stay in the register and on the pages. | As above: Project chat planning session, 2026-09-26; owner confirmation in the Claude Code session, 2026-09-26. `ai-workflow/uncertainty-register.md` rows U1 and U2 updated in Sprint 3 Step 0 |
+| 2026-09-26 | H1 (plan) | The owner adopted `ai-workflow/sprint-3.md` as the Sprint 3 plan: "the merged plan; it replaces any earlier draft". Execute from Preflight. Step 0 is a PR from `sprint-3/carryover` to `main` that includes `sprint-3.md` itself; stop at every checkpoint. | Owner message in the Claude Code session, 2026-09-26; `ai-workflow/sprint-3.md` committed in the Step 0 PR |
+| 2026-09-26 | Owner decision | "From now on, you're the command center for this project." From Sprint 3 on, the Claude Code session holds the command-center role (plan, challenge, verify) as well as the executor role; the owner keeps every H1–H10 decision. | Owner message in the Claude Code session, 2026-09-26 |

@@ -419,6 +419,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** split only at sentence ends (`.`, `?`); cut uncertainty status at its parenthetical; ignore `ai-workflow/STATE.md` in the working-tree check. Ships in this commit.
 - **Guard added:** `test_one_line_keeps_colons_and_semicolons` and `test_uncertainty_lines_are_whole` (test_state.py).
 
+**2026-09-26 · Sprint 3 Step 0 · Register update would have listed accepted limitations as open uncertainties**
+- **Origin:** Claude Code (Sprint 3 Step 0, the U1 and U2 update in `ai-workflow/uncertainty-register.md`, made without updating `analysis/funnel/state.py`)
+- **What was produced:** U1 and U2 reclassified to "accepted limitation" (owner decision H5), while the STATE.md generator still listed every unresolved register row under the heading "Open uncertainties".
+- **What was wrong:** STATE.md would have shown two accepted limitations under a heading that calls them open, and the generator's own test assumed every listed item had the status "open".
+- **How it was caught:** the pytest commit gate: `test_uncertainty_lines_are_whole` failed before the commit (`1 failed, 185 passed`).
+- **Fix:** the section is headed "Open uncertainties and accepted limitations (material or critical)", and each line keeps its own status. U1 and U2 stay visible, as H5 requires. Ships in this commit.
+- **Guard added:** `test_uncertainty_lines_are_whole` accepts only the statuses "open" and "accepted limitation", so any other unresolved status fails the test.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

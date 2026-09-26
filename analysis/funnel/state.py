@@ -12,7 +12,7 @@ Two modes (trio-sprint-workflow v2.4.1, state sync §2a, Governed tier):
 
 Derived from code and git: mode and tier (CLAUDE.md), live release (latest tag and the production URL in the
 latest smoke evidence), last merged and open PRs (`gh`), working tree (`git status`), open uncertainties
-(`ai-workflow/uncertainty-register.md`), and the last five owner decisions (the owner-decisions table of the latest
+and accepted limitations (`ai-workflow/uncertainty-register.md`), and the last five owner decisions (the owner-decisions table of the latest
 `ai-workflow/sprint-*-verification.md`). The working-context fields that only the executor knows at a stop (--now,
 --waiting, --next, --discrepancy) are passed in explicitly, never guessed. The repo wins over this file.
 """
@@ -143,7 +143,7 @@ def render(now: str, waiting: list[str], next_action: str, discrepancies: list[s
         "|---|---|---|",
         *([f"| {h} | {q} | {link} |" for h, q, link in waiting_rows] or ["| — | nothing waiting | — |"]),
         "",
-        "## Open uncertainties (material or critical)",
+        "## Open uncertainties and accepted limitations (material or critical)",
         *([f"- {u}" for u in open_uncertainties()] or ["- none"]),
         "",
         "## Recent owner decisions",
