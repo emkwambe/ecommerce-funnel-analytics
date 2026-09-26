@@ -44,7 +44,9 @@ for (const theme of themes) {
       innerOverflow: [...document.querySelectorAll(".overflow-x-auto")].filter((el) => el.scrollWidth > el.clientWidth + 1)
         .length,
     }));
-    const stem = `${path === "/" ? "home" : path.slice(1)}-390-${theme}`;
+    // Flat file names: nested routes (/investigations/...) would otherwise need subfolders the WebP writer
+    // does not create.
+    const stem = `${path === "/" ? "home" : path.slice(1).replaceAll("/", "-")}-390-${theme}`;
     const png = join(fullDir, `${stem}.png`);
     await page.screenshot({ path: png, fullPage: true });
     if (writeWebp) await toWebp(png, join(webpDir, `${stem}.webp`));

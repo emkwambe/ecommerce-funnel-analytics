@@ -27,7 +27,7 @@ This repository publishes aggregates and findings only. It contains no raw data 
 | [Data](https://ecommercefunnel-analytics.vercel.app/data) | Source, contents, the structural profile's findings, decisions D1 to D10, and the reconciliation from raw rows to orders |
 | [Metrics](https://ecommercefunnel-analytics.vercel.app/metrics) | The metric contract, rendered from `docs/metrics.md` |
 | [How it's built](https://ecommercefunnel-analytics.vercel.app/how-its-built) | The git timeline and the correction log, by the numbers |
-| Investigations (live after the v1.1.0 deploy; link added then) | Why there are two revenue figures; whether carted products were purchased by the same user in a later session. Each gives its answer, how it was checked, and what it cannot show |
+| [Investigations](https://ecommercefunnel-analytics.vercel.app/investigations) | Why there are two revenue figures; whether carted products were purchased by the same user in a later session. Each gives its answer, how it was checked, and what it cannot show |
 
 Every number on the site is read from JSON exports written by code, each carrying a provenance manifest (git commit, dataset SHA-256, UTC timestamp, script).
 

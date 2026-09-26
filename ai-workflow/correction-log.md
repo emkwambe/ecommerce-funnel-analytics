@@ -363,6 +363,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** by the owner's decision (option (b), keeping the order merge, then deploy), the row names the page in plain text, noting that it is live after the v1.1.0 deploy. The link is restored in the post-deploy evidence PR. Ships in this commit.
 - **Guard added:** none new; the link check did its job. Links to new production pages are added only after the deploy that creates them.
 
+**2026-09-26 · Sprint 2 Step 7 · Screenshot script failed on nested routes when writing WebP evidence**
+- **Origin:** Claude Code (Sprint 1, `web/scripts/screenshots.mjs`; first exercised on nested routes in Sprint 2)
+- **What was produced:** file stems taken from the route path, so `/investigations/revenue-figures` became `investigations/revenue-figures-390-light`.
+- **What was wrong:** Playwright creates the subfolder for the full-size PNG, but the WebP writer (`sharp.toFile`) does not, so the production run stopped at the first nested route (7 checks reported, exit 1, partial WebP files written). The local Step 6 checks ran with WebP writing off, so they never reached that step.
+- **How it was caught:** the production screenshot run's exit code and missing results, then a rerun with WebP off, which passed all 18 combinations and located the fault in the WebP step.
+- **Fix:** flat stems (`/` replaced by `-`). The 16 partial files were deleted by literal path, and the production run was repeated: 18 of 18 pass, 40 WebP files, the largest 204 KB. Ships in this commit.
+- **Guard added:** none new; the script's exit code already reports the failure. The local check now runs with WebP writing on before a release.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

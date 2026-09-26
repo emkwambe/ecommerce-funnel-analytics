@@ -6,9 +6,13 @@ Entries up to v1.0.1 were reconstructed in Sprint 2 from the git history. Figure
 
 ## [Unreleased]
 
+### Fixed
+- The screenshot script writes flat file names for nested routes (`investigations-revenue-figures-390-light.webp`); nested names had failed the WebP step (correction log, Sprint 2 Step 7).
+- The README links the live `/investigations` page, restored after the v1.1.0 deploy (owner decision (b)).
+
 ## [1.1.0] — 2026-09-26
 
-Sprint 2: Governed tier, two investigations, and a verification file (`ai-workflow/sprint-2-verification.md`). Tag `v1.1.0` is created after the production smoke test passes.
+Sprint 2: Governed tier, two investigations, and a verification file (`ai-workflow/sprint-2-verification.md`). Tag `v1.1.0` (commit `243c8c7`), deployed to production from `main`, where the production smoke test passed before tagging.
 
 ### Added
 - `ai-workflow/tools.md` (tool inventory and machine constraints), `ai-workflow/uncertainty-register.md`, `ai-workflow/search-log.md`, and `ai-workflow/method-selection/`.
