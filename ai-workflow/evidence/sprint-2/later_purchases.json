@@ -1,0 +1,657 @@
+{
+  "manifest": {
+    "git_commit_sha": "a013affca3deb70f8ed7a46d93dabce77b57ea15",
+    "git_worktree_dirty": false,
+    "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+    "generated_at_utc": "2026-09-26T15:55:12+00:00",
+    "script": "funnel.later_purchases"
+  },
+  "available_ram_gb_before_run": 7.69,
+  "elapsed_seconds": 540.3,
+  "peak_spill_bytes": 0,
+  "estimates": {
+    "B1": {
+      "count_share": 0.13986115018743964,
+      "count_interval": [
+        0.138090989408837,
+        0.14162743272705827
+      ],
+      "value_share": 0.1340369494826096,
+      "value_interval": [
+        0.13141595309614382,
+        0.1366320216501882
+      ],
+      "resamples": 2000,
+      "seed": 20260926,
+      "eligible_pairs": 263018,
+      "followed_pairs": 36786
+    },
+    "B2": {
+      "count_share": 0.1213782429580785,
+      "count_interval": [
+        0.11982526208004712,
+        0.122907915583591
+      ],
+      "value_share": 0.1151757989231869,
+      "value_interval": [
+        0.11292245697660619,
+        0.1173231053176914
+      ],
+      "resamples": 2000,
+      "seed": 20260926,
+      "eligible_pairs": 307551,
+      "followed_pairs": 37330
+    },
+    "B3": {
+      "count_share": 0.16231538027763448,
+      "count_interval": [
+        0.16001723294613512,
+        0.16464408114846907
+      ],
+      "value_share": 0.15651739193340738,
+      "value_interval": [
+        0.1530318644398923,
+        0.15985681389910278
+      ],
+      "resamples": 2000,
+      "seed": 20260926,
+      "eligible_pairs": 166694,
+      "followed_pairs": 27057
+    },
+    "B5": {
+      "count_share": 0.01376148321921127,
+      "count_interval": [
+        0.013406354048559733,
+        0.014125158461555608
+      ],
+      "value_share": 0.014752129894714177,
+      "value_interval": [
+        0.014159753327590525,
+        0.015335599373115075
+      ],
+      "resamples": 2000,
+      "seed": 20260926,
+      "eligible_pairs": 598482,
+      "followed_pairs": 8236
+    },
+    "B6": {
+      "count_share": 0.11913720346223215,
+      "count_interval": [
+        0.11784887738499612,
+        0.12045327496133158
+      ],
+      "value_share": 0.11243975969981701,
+      "value_interval": [
+        0.11053722255096672,
+        0.11438212162046586
+      ],
+      "resamples": 2000,
+      "seed": 20260926,
+      "eligible_pairs": 231758,
+      "followed_pairs": 27611
+    },
+    "B7": {
+      "count_share": 0.13825344847008736,
+      "count_interval": [
+        0.1365016860164439,
+        0.14001735502648358
+      ],
+      "value_share": 0.1316084347067734,
+      "value_interval": [
+        0.1289482675956394,
+        0.1341471824148805
+      ],
+      "resamples": 2000,
+      "seed": 20260926,
+      "eligible_pairs": 257433,
+      "followed_pairs": 35591
+    },
+    "B8": {
+      "count_share": 0.1399644570954521,
+      "count_interval": [
+        0.13806629477067675,
+        0.14176777694463066
+      ],
+      "value_share": 0.13413243437494718,
+      "value_interval": [
+        0.13140989287653726,
+        0.1367546470897267
+      ],
+      "resamples": 2000,
+      "seed": 20260926,
+      "eligible_pairs": 262781,
+      "followed_pairs": 36780
+    }
+  },
+  "kaplan_meier": {
+    "curve": [
+      {
+        "days": 1,
+        "count": 0.10013345902472082,
+        "count_interval": [
+          0.09883304323940231,
+          0.10143316591681459
+        ],
+        "value_weighted": 0.09437464513744065,
+        "value_weighted_interval": [
+          0.09251314941233947,
+          0.09621563015860202
+        ]
+      },
+      {
+        "days": 2,
+        "count": 0.1141967678940824,
+        "count_interval": [
+          0.11279931804174048,
+          0.11559929905008869
+        ],
+        "value_weighted": 0.1079847814170265,
+        "value_weighted_interval": [
+          0.1059175968748979,
+          0.1100182958909523
+        ]
+      },
+      {
+        "days": 3,
+        "count": 0.12210418281830626,
+        "count_interval": [
+          0.12061630807114183,
+          0.12358004953558811
+        ],
+        "value_weighted": 0.11577915027348074,
+        "value_weighted_interval": [
+          0.11364234408729144,
+          0.11787998462104175
+        ]
+      },
+      {
+        "days": 4,
+        "count": 0.1274419188096506,
+        "count_interval": [
+          0.1259042626354993,
+          0.1289528302364481
+        ],
+        "value_weighted": 0.12102189413730602,
+        "value_weighted_interval": [
+          0.11879551065480094,
+          0.12323938967730962
+        ]
+      },
+      {
+        "days": 5,
+        "count": 0.1314255651587808,
+        "count_interval": [
+          0.12986308834983262,
+          0.13300807985135865
+        ],
+        "value_weighted": 0.1252007197468965,
+        "value_weighted_interval": [
+          0.12289999781372084,
+          0.12757203171741463
+        ]
+      },
+      {
+        "days": 6,
+        "count": 0.1349379330510616,
+        "count_interval": [
+          0.13332864211775117,
+          0.13651023058181605
+        ],
+        "value_weighted": 0.12915891906098453,
+        "value_weighted_interval": [
+          0.1267751870308009,
+          0.13148139598820283
+        ]
+      },
+      {
+        "days": 7,
+        "count": 0.13806045079080853,
+        "count_interval": [
+          0.13641360674309275,
+          0.13967834470657928
+        ],
+        "value_weighted": 0.13245550020242802,
+        "value_weighted_interval": [
+          0.13001703650769214,
+          0.13485719316056785
+        ]
+      },
+      {
+        "days": 8,
+        "count": 0.1407196093212265,
+        "count_interval": [
+          0.13907806515003193,
+          0.14239548461130355
+        ],
+        "value_weighted": 0.1352291728022591,
+        "value_weighted_interval": [
+          0.13271816362212177,
+          0.13766844251696211
+        ]
+      },
+      {
+        "days": 9,
+        "count": 0.1428467276431502,
+        "count_interval": [
+          0.14116262071335497,
+          0.14452896494560197
+        ],
+        "value_weighted": 0.13744028384993612,
+        "value_weighted_interval": [
+          0.13484453221728598,
+          0.13991850398330208
+        ]
+      },
+      {
+        "days": 10,
+        "count": 0.144757705230401,
+        "count_interval": [
+          0.14307245047103834,
+          0.14650650226196812
+        ],
+        "value_weighted": 0.13943791162423458,
+        "value_weighted_interval": [
+          0.13678740965332842,
+          0.14190270401486949
+        ]
+      },
+      {
+        "days": 11,
+        "count": 0.1465773470820364,
+        "count_interval": [
+          0.1448482663127814,
+          0.14834586529044733
+        ],
+        "value_weighted": 0.1415190729994893,
+        "value_weighted_interval": [
+          0.13881033249250205,
+          0.14411881935339582
+        ]
+      },
+      {
+        "days": 12,
+        "count": 0.14817195815182826,
+        "count_interval": [
+          0.14641485917479055,
+          0.14993090443590182
+        ],
+        "value_weighted": 0.14334871584643427,
+        "value_weighted_interval": [
+          0.14067466834434747,
+          0.1459254616287869
+        ]
+      },
+      {
+        "days": 13,
+        "count": 0.1496837073790117,
+        "count_interval": [
+          0.147880015720331,
+          0.1514379199027023
+        ],
+        "value_weighted": 0.14501713573115615,
+        "value_weighted_interval": [
+          0.14233842040508474,
+          0.14761599864758682
+        ]
+      },
+      {
+        "days": 14,
+        "count": 0.15104260137467884,
+        "count_interval": [
+          0.1492401666006399,
+          0.15284244756723175
+        ],
+        "value_weighted": 0.14652006057774192,
+        "value_weighted_interval": [
+          0.14382538690098517,
+          0.14914738121397358
+        ]
+      },
+      {
+        "days": 15,
+        "count": 0.15231299437230272,
+        "count_interval": [
+          0.1504973021366851,
+          0.15412668724555487
+        ],
+        "value_weighted": 0.1479062874487873,
+        "value_weighted_interval": [
+          0.14514044302958323,
+          0.15054768271767624
+        ]
+      },
+      {
+        "days": 16,
+        "count": 0.15348105894175812,
+        "count_interval": [
+          0.15163104075239786,
+          0.1552929376742927
+        ],
+        "value_weighted": 0.14920799052789313,
+        "value_weighted_interval": [
+          0.14641101258386893,
+          0.15193812696852785
+        ]
+      },
+      {
+        "days": 17,
+        "count": 0.1543934964132202,
+        "count_interval": [
+          0.15251013366385577,
+          0.15620935554473853
+        ],
+        "value_weighted": 0.1502535164284139,
+        "value_weighted_interval": [
+          0.14745032301138344,
+          0.15299657108967224
+        ]
+      },
+      {
+        "days": 18,
+        "count": 0.15543703475909953,
+        "count_interval": [
+          0.1535659014354262,
+          0.15726310267566807
+        ],
+        "value_weighted": 0.15132163977628232,
+        "value_weighted_interval": [
+          0.14850314872733014,
+          0.15408191912515998
+        ]
+      },
+      {
+        "days": 19,
+        "count": 0.15618645750572246,
+        "count_interval": [
+          0.1542829614384482,
+          0.1580308834347421
+        ],
+        "value_weighted": 0.1521039986133963,
+        "value_weighted_interval": [
+          0.14922671032557863,
+          0.15484168912467686
+        ]
+      },
+      {
+        "days": 20,
+        "count": 0.1570201471982573,
+        "count_interval": [
+          0.15509671748684295,
+          0.15891098060337935
+        ],
+        "value_weighted": 0.1529459725051795,
+        "value_weighted_interval": [
+          0.15009680371949305,
+          0.15569377314322264
+        ]
+      },
+      {
+        "days": 21,
+        "count": 0.15784951624965826,
+        "count_interval": [
+          0.15593133095621398,
+          0.15978575517043755
+        ],
+        "value_weighted": 0.1539392140154292,
+        "value_weighted_interval": [
+          0.15108329094335848,
+          0.1567208639236451
+        ]
+      },
+      {
+        "days": 22,
+        "count": 0.15856366420384138,
+        "count_interval": [
+          0.15662526394531384,
+          0.160512084764281
+        ],
+        "value_weighted": 0.15479496948042404,
+        "value_weighted_interval": [
+          0.15185465862618464,
+          0.1576043315194697
+        ]
+      },
+      {
+        "days": 23,
+        "count": 0.1590903407698261,
+        "count_interval": [
+          0.15716530580201601,
+          0.161015261132863
+        ],
+        "value_weighted": 0.15523542756291342,
+        "value_weighted_interval": [
+          0.15229765612125667,
+          0.1580614628200522
+        ]
+      },
+      {
+        "days": 24,
+        "count": 0.15976537613306774,
+        "count_interval": [
+          0.1578162529422812,
+          0.16169230403921972
+        ],
+        "value_weighted": 0.1561810743279871,
+        "value_weighted_interval": [
+          0.15323792818381662,
+          0.15901328941825113
+        ]
+      },
+      {
+        "days": 25,
+        "count": 0.16036489974358026,
+        "count_interval": [
+          0.15844194137789874,
+          0.16227259360251703
+        ],
+        "value_weighted": 0.15694633357554444,
+        "value_weighted_interval": [
+          0.15400839480788397,
+          0.15978525699436305
+        ]
+      },
+      {
+        "days": 26,
+        "count": 0.16082868299990138,
+        "count_interval": [
+          0.15894244863474388,
+          0.16274066661999684
+        ],
+        "value_weighted": 0.15744067089626734,
+        "value_weighted_interval": [
+          0.15448595245401014,
+          0.16033353847377044
+        ]
+      },
+      {
+        "days": 27,
+        "count": 0.1612677951614534,
+        "count_interval": [
+          0.15935858628001812,
+          0.16320180700387252
+        ],
+        "value_weighted": 0.1580718681349207,
+        "value_weighted_interval": [
+          0.1550838246647272,
+          0.16099776918555173
+        ]
+      },
+      {
+        "days": 28,
+        "count": 0.1617122362218406,
+        "count_interval": [
+          0.15975665177637483,
+          0.1637023940107605
+        ],
+        "value_weighted": 0.1583573299754566,
+        "value_weighted_interval": [
+          0.15534267690715495,
+          0.16130204299107734
+        ]
+      },
+      {
+        "days": 29,
+        "count": 0.1623994908418881,
+        "count_interval": [
+          0.16038265072324903,
+          0.16444079483642493
+        ],
+        "value_weighted": 0.15946081863755235,
+        "value_weighted_interval": [
+          0.15631510784868233,
+          0.16279178874775077
+        ]
+      },
+      {
+        "days": 30,
+        "count": 0.16289717060433484,
+        "count_interval": [
+          0.16083411110088358,
+          0.16501685286573942
+        ],
+        "value_weighted": 0.16022660369447095,
+        "value_weighted_interval": [
+          0.15692571728215043,
+          0.1636956877486115
+        ]
+      }
+    ],
+    "pairs": 323263,
+    "events": 47736,
+    "users": 219081,
+    "resamples": 2000,
+    "seed": 20260926
+  },
+  "seed_stability": [
+    {
+      "seed": 20260926,
+      "b1_count_interval": [
+        0.138090989408837,
+        0.14162743272705827
+      ],
+      "b1_value_interval": [
+        0.13141595309614382,
+        0.1366320216501882
+      ],
+      "km_7_day_count_interval": [
+        0.13641360674309275,
+        0.13967834470657928
+      ]
+    },
+    {
+      "seed": 20260927,
+      "b1_count_interval": [
+        0.13813583287671732,
+        0.14163683930794876
+      ],
+      "b1_value_interval": [
+        0.1314840965322999,
+        0.13660009081621147
+      ],
+      "km_7_day_count_interval": [
+        0.13645126140429095,
+        0.13973304834606512
+      ]
+    },
+    {
+      "seed": 20260928,
+      "b1_count_interval": [
+        0.13809254109705438,
+        0.14160492625157145
+      ],
+      "b1_value_interval": [
+        0.13145353424346745,
+        0.136670879320529
+      ],
+      "km_7_day_count_interval": [
+        0.1364470482195665,
+        0.13970835761754039
+      ]
+    },
+    {
+      "seed": 20260929,
+      "b1_count_interval": [
+        0.1381493666494002,
+        0.14156684340220824
+      ],
+      "b1_value_interval": [
+        0.13143885860363155,
+        0.13667386991373812
+      ],
+      "km_7_day_count_interval": [
+        0.13651188021867847,
+        0.13960904927822354
+      ]
+    }
+  ],
+  "stop_rules": [
+    {
+      "rule": "identity: user_id checks 1-2 are zero and check 3 is 100%",
+      "fired": false
+    },
+    {
+      "rule": "R3 agreement: the B1 7-day count share lies inside the all-pairs KM 7-day 95% interval",
+      "fired": true,
+      "b1_count_share": 0.13986115018743964,
+      "km_7_day_interval": [
+        0.13641360674309275,
+        0.13967834470657928
+      ]
+    },
+    {
+      "rule": "comparison baseline: the B1 count share is above the B5 count share",
+      "fired": false,
+      "b1_count_share": 0.13986115018743964,
+      "b5_count_share": 0.01376148321921127
+    }
+  ],
+  "cohort_diagnostic": {
+    "by_7_day_cutoff": {
+      "days": 7,
+      "count": 0.13986115018752898,
+      "count_interval": [
+        0.1380909894088628,
+        0.14162743272705858
+      ],
+      "value_weighted": 0.13403694948261258,
+      "value_weighted_interval": [
+        0.131415953096135,
+        0.13663202165018898
+      ]
+    },
+    "after_7_day_cutoff": {
+      "days": 7,
+      "count": 0.1252366803523719,
+      "count_interval": [
+        0.1218179664597529,
+        0.12879349504171178
+      ],
+      "value_weighted": 0.11994988083162172,
+      "value_weighted_interval": [
+        0.11494250261168563,
+        0.12487901084382382
+      ]
+    }
+  },
+  "dominance": {
+    "share_of_followed_pairs_held_by_top_0_1_pct_users": 0.019110531180340347,
+    "exceeds_limit": false,
+    "limit": 0.1
+  },
+  "checks": {
+    "user_id_check:events_in_eligible_sessions_with_null_user_id": 0.0,
+    "user_id_check:eligible_sessions_with_more_than_one_user_id": 0.0,
+    "user_id_check:share_of_eligible_pairs_with_non_null_user_id": 1.0,
+    "sensitivity_threshold:most_active_user_threshold_events": 368.0,
+    "sensitivity_threshold:most_active_users_excluded": 3015.0,
+    "diagnostic:eligible_pairs_followed": 36786.0,
+    "diagnostic:eligible_pairs_followed_without_session_start_condition": 36793.0,
+    "diagnostic:share_of_followed_pairs_with_first_later_purchase_within_1_hour_of_latest_cart_event": 0.3786223019627032,
+    "diagnostic:share_of_followed_pairs_held_by_top_0_1_pct_users_by_eligible_pairs": 0.019110531180340347,
+    "diagnostic:top_0_1_pct_users_by_eligible_pairs": 181.0,
+    "diagnostic:valid_sessions_per_user_p50": 2.0,
+    "diagnostic:valid_sessions_per_user_p90": 7.0,
+    "diagnostic:valid_sessions_per_user_p99": 21.0,
+    "diagnostic:valid_sessions_per_user_p100": 7400.0
+  }
+}
