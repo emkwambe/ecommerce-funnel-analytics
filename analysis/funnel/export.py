@@ -39,6 +39,11 @@ METRICS_MD = DOCS_DIR / "metrics.md"
 BUILD_RUNS = REPO_ROOT / "ai-workflow" / "evidence" / "sprint-1" / "dbt_build_runs.json"
 REQUIREMENTS = REPO_ROOT / "analysis" / "requirements.txt"
 
+# Sections, beyond its home section, whose Changes entries apply to a decision: D5's same-session
+# cart reading is applied in the Section 6 cart-session purchase rate, and D8's exclusions are
+# counted under Section 10.
+RELATED_SECTIONS = {"D5": ("6",), "D8": ("10",)}
+
 # One line per decision (no figures: figures come from the exports). Each links to the
 # metrics.md section that records it; test_export checks the section names the decision.
 DECISIONS = (
@@ -257,7 +262,9 @@ def data_story(con: duckdb.DuckDBPyConnection, metrics_text: str, dq: dict[str, 
         ],
         "decisions": [
             {"id": did, "title": title, "summary": summary, "metrics_section": section,
-             "changes": [c["title"] for c in changes if section in c["sections"]]}
+             "related_sections": list(RELATED_SECTIONS.get(did, ())),
+             "changes": [c["title"] for c in changes
+                         if {section, *RELATED_SECTIONS.get(did, ())} & set(c["sections"])]}
             for did, title, summary, section in DECISIONS
         ],
         "changes_entries": changes,

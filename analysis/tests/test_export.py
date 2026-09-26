@@ -41,3 +41,14 @@ def test_every_decision_links_to_the_section_that_records_it(metrics_text):
                                 if h.startswith(f"## {section}."))
         assert re.search(rf"\b{did}\b", heading_and_body + sections[section]), (did, section)
         assert not re.search(r"\d", summary), f"{did} summary must carry no figures"
+
+
+def test_decisions_link_to_the_changes_entries_that_apply(metrics_text):
+    from funnel.export import RELATED_SECTIONS
+
+    entries = changes_entries(metrics_text)
+    linked = {did: [c["title"] for c in entries if {section, *RELATED_SECTIONS.get(did, ())} & set(c["sections"])]
+              for did, _, _, section in DECISIONS}
+    first = entries[0]["title"]  # Sections 6, 9, 10
+    assert first in linked["D5"] and first in linked["D7"] and first in linked["D8"]
+    assert linked["D1"] == [] and linked["D4"] == []
