@@ -1,14 +1,14 @@
 {
   "manifest": {
-    "git_commit_sha": "e234c3468d9e585c28de060b61cc9833b390561b",
+    "git_commit_sha": "7da5128182f3b68cc6e79d19ddcf8b6c5e91eb87",
     "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-26T06:33:27+00:00",
+    "generated_at_utc": "2026-09-26T09:33:20+00:00",
     "script": "funnel.verify"
   },
-  "available_ram_gb_before_run": 6.28,
-  "elapsed_seconds": 420.1,
-  "peak_spill_bytes": 14528643072,
+  "available_ram_gb_before_run": 4.11,
+  "elapsed_seconds": 521.0,
+  "peak_spill_bytes": 14732525568,
   "rate_tolerance": 1e-09,
   "all_match": true,
   "checks": [
@@ -66,6 +66,20 @@
       "against": "mart",
       "independent": "107863336.42",
       "compared": "107863336.42",
+      "match": true
+    },
+    {
+      "check": "sessions_with_purchases_only_of_uncarted_products",
+      "against": "mart",
+      "independent": "343394",
+      "compared": "343394",
+      "match": true
+    },
+    {
+      "check": "cart_sessions_with_purchase_of_no_carted_product",
+      "against": "mart",
+      "independent": "5696",
+      "compared": "5696",
       "match": true
     },
     {
