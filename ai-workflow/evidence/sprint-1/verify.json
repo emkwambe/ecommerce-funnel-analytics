@@ -1,0 +1,156 @@
+{
+  "manifest": {
+    "git_commit_sha": "29caa7e384b6491b5c82c3c3569fb9d92de28470",
+    "git_worktree_dirty": false,
+    "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+    "generated_at_utc": "2026-09-26T06:22:04+00:00",
+    "script": "funnel.verify"
+  },
+  "available_ram_gb_before_run": 6.7,
+  "elapsed_seconds": 358.9,
+  "peak_spill_bytes": 14600437760,
+  "rate_tolerance": 1e-09,
+  "all_match": true,
+  "checks": [
+    {
+      "check": "valid_sessions",
+      "against": "mart",
+      "independent": "9244073",
+      "compared": "9244073",
+      "match": true
+    },
+    {
+      "check": "orders",
+      "against": "mart",
+      "independent": "629558",
+      "compared": "629558",
+      "match": true
+    },
+    {
+      "check": "revenue",
+      "against": "mart",
+      "independent": "229932953.94",
+      "compared": "229932953.94",
+      "match": true
+    },
+    {
+      "check": "revenue_repeat_collapsed",
+      "against": "mart",
+      "independent": "211426365.64",
+      "compared": "211426365.64",
+      "match": true
+    },
+    {
+      "check": "session_purchase_rate",
+      "against": "mart",
+      "independent": "0.068103962398393",
+      "compared": "0.068103962398393",
+      "match": true
+    },
+    {
+      "check": "view_to_cart_session_rate",
+      "against": "mart",
+      "independent": "0.061878719648399395",
+      "compared": "0.061878719648399395",
+      "match": true
+    },
+    {
+      "check": "cart_session_purchase_rate",
+      "against": "mart",
+      "independent": "0.4993334403551262",
+      "compared": "0.4993334403551262",
+      "match": true
+    },
+    {
+      "check": "carted_value_with_no_observed_purchase",
+      "against": "mart",
+      "independent": "107863336.42",
+      "compared": "107863336.42",
+      "match": true
+    },
+    {
+      "check": "revenue_share:Purchase with no observed same-session cart event",
+      "against": "mart",
+      "independent": "0.48078959947101524",
+      "compared": "0.48078959947101524",
+      "match": true
+    },
+    {
+      "check": "purchase_events:Purchase with no observed same-session cart event",
+      "against": "mart",
+      "independent": "406605",
+      "compared": "406605",
+      "match": true
+    },
+    {
+      "check": "revenue_share:Purchase with an observed same-session cart event",
+      "against": "mart",
+      "independent": "0.5192104005289847",
+      "compared": "0.5192104005289847",
+      "match": true
+    },
+    {
+      "check": "purchase_events:Purchase with an observed same-session cart event",
+      "against": "mart",
+      "independent": "336166",
+      "compared": "336166",
+      "match": true
+    },
+    {
+      "check": "data_quality:exact_duplicate_rows_removed",
+      "against": "mart_data_quality (same basis)",
+      "independent": "30220",
+      "compared": "30220",
+      "match": true
+    },
+    {
+      "check": "data_quality:null_session_events_excluded",
+      "against": "mart_data_quality (same basis)",
+      "independent": "2",
+      "compared": "2",
+      "match": true
+    },
+    {
+      "check": "data_quality:multi_user_sessions_excluded",
+      "against": "mart_data_quality (same basis)",
+      "independent": "348",
+      "compared": "348",
+      "match": true
+    },
+    {
+      "check": "data_quality:zero_price_events",
+      "against": "mart_data_quality (same basis)",
+      "independent": "68670",
+      "compared": "68670",
+      "match": true
+    },
+    {
+      "check": "sprint0_raw_basis:exact_duplicate_rows_removed",
+      "against": "Sprint 0 profile.json (raw basis)",
+      "independent": "30220",
+      "compared": "30220",
+      "match": true
+    },
+    {
+      "check": "sprint0_raw_basis:zero_price_events",
+      "against": "Sprint 0 profile.json (raw basis)",
+      "independent": "68673",
+      "compared": "68673",
+      "match": true
+    },
+    {
+      "check": "sprint0_raw_basis:null_session_events",
+      "against": "Sprint 0 profile.json (raw basis)",
+      "independent": "2",
+      "compared": "2",
+      "match": true
+    },
+    {
+      "check": "sprint0_raw_basis:multi_user_sessions",
+      "against": "Sprint 0 profile.json (raw basis)",
+      "independent": "348",
+      "compared": "348",
+      "match": true
+    }
+  ]
+}
