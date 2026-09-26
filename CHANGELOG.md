@@ -15,12 +15,15 @@ Entries up to v1.0.1 were reconstructed in Sprint 2 from the git history. Figure
 - `docs/metrics.md` Changes entry (2026-09-26) defining every Sprint 2 investigation quantity, approved by the owner before any was computed.
 - Wording guard test (`analysis/tests/test_wording_guard.py`) on the investigation pages and the exports they render from, the metric contract and its `/metrics` copy, and the README. Every surface must find its files, and causal and proof wording is included.
 - Analysis A pipeline: `int_repeat_purchase_events`, and the marts `mart_revenue_gap_decomposition`, `mart_revenue_gap_thresholds`, `mart_duplicate_rows_breakdown`, and `mart_cart_no_view_reconciliation`, with four reconciliation tests. Also an independent recomputation (R2) in `funnel.verify`, the export `investigation_revenue_gap.json`, and a test that every dbt model is documented and tested.
+- Analysis B pipeline: `int_later_purchase_pairs` and `int_later_purchase_spec_pairs`, and the marts for estimates, bootstrap user sums, Kaplan–Meier pairs, and checks, with reconciliation tests. `funnel.later_purchases` adds user-level cluster bootstrap intervals, Kaplan–Meier with bands, seed stability, and the pre-committed stop rules. `funnel.verify` gains R2 for every B number. The export `investigation_later_purchases.json` is scoped to its populations (owner decision H4). There is an escalation brief and an adversarial review for B.
+- Guard tests: no bare DuckDB connections (`test_duckdb_connections.py`); no extrapolation of B value shares (`test_b_no_extrapolation.py`); exploratory outputs never committed (`test_explore_outputs.py`).
 
 ### Changed (tooling)
 - `funnel.build` and `funnel.verify` write their evidence to `ai-workflow/evidence/sprint-2/` (`CURRENT_EVIDENCE_DIR`). Sprint 1 evidence stays as committed.
 
 ### Fixed
 - `.env.example` is committed: the `.env*` ignore rule had also matched it (correction log, Sprint 2 Step 0).
+- The export uses the shared DuckDB connection settings; the category export order is fully determined (correction log, Sprint 2 Steps 4–5).
 
 ### Changed
 - The README's "How Claude Code was used" section points to where the owner's decisions are recorded.
