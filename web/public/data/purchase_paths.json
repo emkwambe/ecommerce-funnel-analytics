@@ -1,0 +1,42 @@
+{
+  "manifest": {
+    "git_commit_sha": "9942217acad5dd220fb02bc9c1db22ddf3343150",
+    "git_worktree_dirty": false,
+    "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+    "generated_at_utc": "2026-09-26T06:38:18+00:00",
+    "script": "funnel.export"
+  },
+  "pipeline_build": {
+    "git_commit_sha": "35256ed8eb526bf7c9dcdb043f5160920269b985",
+    "generated_at_utc": "2026-09-26T06:15:02+00:00",
+    "dbt_done_counts": {
+      "pass": 88,
+      "warn": 0,
+      "error": 0,
+      "skip": 0,
+      "no_op": 0,
+      "reused": 0,
+      "total": 88
+    },
+    "test_coverage": {
+      "models_built": 10,
+      "tests_expected": 78,
+      "tests_run": 78,
+      "tests_expected_not_run": []
+    }
+  },
+  "rows": [
+    {
+      "purchase_path": "Purchase with an observed same-session cart event",
+      "purchase_events": 336166,
+      "revenue": 119383581.11,
+      "revenue_share": 0.5192104005289847
+    },
+    {
+      "purchase_path": "Purchase with no observed same-session cart event",
+      "purchase_events": 406605,
+      "revenue": 110549372.83,
+      "revenue_share": 0.48078959947101524
+    }
+  ]
+}

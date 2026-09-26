@@ -1,0 +1,220 @@
+{
+  "manifest": {
+    "git_commit_sha": "9942217acad5dd220fb02bc9c1db22ddf3343150",
+    "git_worktree_dirty": false,
+    "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+    "generated_at_utc": "2026-09-26T06:38:18+00:00",
+    "script": "funnel.export"
+  },
+  "pipeline_build": {
+    "git_commit_sha": "35256ed8eb526bf7c9dcdb043f5160920269b985",
+    "generated_at_utc": "2026-09-26T06:15:02+00:00",
+    "dbt_done_counts": {
+      "pass": 88,
+      "warn": 0,
+      "error": 0,
+      "skip": 0,
+      "no_op": 0,
+      "reused": 0,
+      "total": 88
+    },
+    "test_coverage": {
+      "models_built": 10,
+      "tests_expected": 78,
+      "tests_run": 78,
+      "tests_expected_not_run": []
+    }
+  },
+  "rows": [
+    {
+      "metric_key": "exact_duplicate_rows_removed",
+      "metric_group": "data_quality",
+      "metric_label": "Exact duplicate rows removed",
+      "basis": "raw rows",
+      "value": 30220.0,
+      "value_excluding_long_sessions": null,
+      "sprint0_raw_basis_value": 30220.0,
+      "sort_order": 1
+    },
+    {
+      "metric_key": "null_session_events_excluded",
+      "metric_group": "data_quality",
+      "metric_label": "Events with a null session, excluded",
+      "basis": "deduplicated events before session exclusions",
+      "value": 2.0,
+      "value_excluding_long_sessions": null,
+      "sprint0_raw_basis_value": 2.0,
+      "sort_order": 2
+    },
+    {
+      "metric_key": "multi_user_sessions_excluded",
+      "metric_group": "data_quality",
+      "metric_label": "Sessions with more than one user_id, excluded",
+      "basis": "deduplicated events before session exclusions",
+      "value": 348.0,
+      "value_excluding_long_sessions": null,
+      "sprint0_raw_basis_value": 348.0,
+      "sort_order": 3
+    },
+    {
+      "metric_key": "zero_price_events",
+      "metric_group": "data_quality",
+      "metric_label": "Zero-price events",
+      "basis": "deduplicated events in valid sessions",
+      "value": 68670.0,
+      "value_excluding_long_sessions": null,
+      "sprint0_raw_basis_value": 68673.0,
+      "sort_order": 4
+    },
+    {
+      "metric_key": "cart_events_with_no_view_at_or_before",
+      "metric_group": "data_quality",
+      "metric_label": "Cart events with no view at or before them in the session",
+      "basis": "deduplicated events in valid sessions",
+      "value": 4145.0,
+      "value_excluding_long_sessions": null,
+      "sprint0_raw_basis_value": 4655.0,
+      "sort_order": 5
+    },
+    {
+      "metric_key": "sessions_longer_than_24_hours",
+      "metric_group": "data_quality",
+      "metric_label": "Sessions longer than 24 hours (kept)",
+      "basis": "deduplicated events in valid sessions",
+      "value": 17086.0,
+      "value_excluding_long_sessions": null,
+      "sprint0_raw_basis_value": 17086.0,
+      "sort_order": 6
+    },
+    {
+      "metric_key": "unknown_category_events",
+      "metric_group": "data_quality",
+      "metric_label": "Events with an unknown category",
+      "basis": "deduplicated events in valid sessions",
+      "value": 13511888.0,
+      "value_excluding_long_sessions": null,
+      "sprint0_raw_basis_value": 13515609.0,
+      "sort_order": 7
+    },
+    {
+      "metric_key": "unknown_category_event_share",
+      "metric_group": "data_quality",
+      "metric_label": "Unknown category share of events",
+      "basis": "deduplicated events in valid sessions",
+      "value": 0.3185461876586895,
+      "value_excluding_long_sessions": null,
+      "sprint0_raw_basis_value": null,
+      "sort_order": 8
+    },
+    {
+      "metric_key": "unknown_category_revenue_share",
+      "metric_group": "data_quality",
+      "metric_label": "Unknown category share of revenue",
+      "basis": "deduplicated events in valid sessions",
+      "value": 0.09969022220269223,
+      "value_excluding_long_sessions": null,
+      "sprint0_raw_basis_value": null,
+      "sort_order": 9
+    },
+    {
+      "metric_key": "unknown_brand_events",
+      "metric_group": "data_quality",
+      "metric_label": "Events with an unknown brand",
+      "basis": "deduplicated events in valid sessions",
+      "value": 6112013.0,
+      "value_excluding_long_sessions": null,
+      "sprint0_raw_basis_value": 6113008.0,
+      "sort_order": 10
+    },
+    {
+      "metric_key": "unknown_brand_event_share",
+      "metric_group": "data_quality",
+      "metric_label": "Unknown brand share of events",
+      "basis": "deduplicated events in valid sessions",
+      "value": 0.14409225713463208,
+      "value_excluding_long_sessions": null,
+      "sprint0_raw_basis_value": null,
+      "sort_order": 11
+    },
+    {
+      "metric_key": "unknown_brand_revenue_share",
+      "metric_group": "data_quality",
+      "metric_label": "Unknown brand share of revenue",
+      "basis": "deduplicated events in valid sessions",
+      "value": 0.037140161658726,
+      "value_excluding_long_sessions": null,
+      "sprint0_raw_basis_value": null,
+      "sort_order": 12
+    },
+    {
+      "metric_key": "category_codes_with_multiple_ids",
+      "metric_group": "data_quality",
+      "metric_label": "Category codes mapping to more than one category_id",
+      "basis": "deduplicated events in valid sessions",
+      "value": 55.0,
+      "value_excluding_long_sessions": null,
+      "sprint0_raw_basis_value": 55.0,
+      "sort_order": 13
+    },
+    {
+      "metric_key": "zero_price_carted_pairs",
+      "metric_group": "data_quality",
+      "metric_label": "Carted pairs whose cart events are all zero-price (in pair counts, not in value)",
+      "basis": "deduplicated events in valid sessions",
+      "value": 98.0,
+      "value_excluding_long_sessions": null,
+      "sprint0_raw_basis_value": null,
+      "sort_order": 14
+    },
+    {
+      "metric_key": "long_session_sensitivity:session_purchase_rate",
+      "metric_group": "long_session_sensitivity",
+      "metric_label": "Session purchase rate, long-session sensitivity",
+      "basis": "deduplicated events in valid sessions",
+      "value": 0.068103962398393,
+      "value_excluding_long_sessions": 0.06820655540102094,
+      "sprint0_raw_basis_value": null,
+      "sort_order": 101
+    },
+    {
+      "metric_key": "long_session_sensitivity:view_to_cart_session_rate",
+      "metric_group": "long_session_sensitivity",
+      "metric_label": "View-to-cart session rate, long-session sensitivity",
+      "basis": "deduplicated events in valid sessions",
+      "value": 0.061878719648399395,
+      "value_excluding_long_sessions": 0.06195787872352949,
+      "sprint0_raw_basis_value": null,
+      "sort_order": 102
+    },
+    {
+      "metric_key": "long_session_sensitivity:cart_session_purchase_rate",
+      "metric_group": "long_session_sensitivity",
+      "metric_label": "Cart-session purchase rate, long-session sensitivity",
+      "basis": "deduplicated events in valid sessions",
+      "value": 0.4993334403551262,
+      "value_excluding_long_sessions": 0.4994334500187686,
+      "sprint0_raw_basis_value": null,
+      "sort_order": 103
+    },
+    {
+      "metric_key": "long_session_sensitivity:revenue_per_session",
+      "metric_group": "long_session_sensitivity",
+      "metric_label": "Revenue per session, long-session sensitivity",
+      "basis": "deduplicated events in valid sessions",
+      "value": 24.873554540298414,
+      "value_excluding_long_sessions": 24.901469506784824,
+      "sprint0_raw_basis_value": null,
+      "sort_order": 104
+    },
+    {
+      "metric_key": "long_session_sensitivity:average_order_value",
+      "metric_group": "long_session_sensitivity",
+      "metric_label": "Average order value, long-session sensitivity",
+      "basis": "deduplicated events in valid sessions",
+      "value": 365.2291829188097,
+      "value_excluding_long_sessions": 365.0890938616743,
+      "sprint0_raw_basis_value": null,
+      "sort_order": 105
+    }
+  ]
+}

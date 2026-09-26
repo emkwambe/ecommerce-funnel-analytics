@@ -1,0 +1,325 @@
+{
+  "manifest": {
+    "git_commit_sha": "9942217acad5dd220fb02bc9c1db22ddf3343150",
+    "git_worktree_dirty": false,
+    "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+    "generated_at_utc": "2026-09-26T06:38:18+00:00",
+    "script": "funnel.export"
+  },
+  "pipeline_build": {
+    "git_commit_sha": "35256ed8eb526bf7c9dcdb043f5160920269b985",
+    "generated_at_utc": "2026-09-26T06:15:02+00:00",
+    "dbt_done_counts": {
+      "pass": 88,
+      "warn": 0,
+      "error": 0,
+      "skip": 0,
+      "no_op": 0,
+      "reused": 0,
+      "total": 88
+    },
+    "test_coverage": {
+      "models_built": 10,
+      "tests_expected": 78,
+      "tests_run": 78,
+      "tests_expected_not_run": []
+    }
+  },
+  "source": {
+    "title": "eCommerce behavior data from multi category store",
+    "publisher": "REES46 (Kaggle owner mkechinov), collected by the Open CDP project",
+    "kaggle_slug": "mkechinov/ecommerce-behavior-data-from-multi-category-store",
+    "kaggle_url": "https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store",
+    "rees46_url": "https://rees46.com",
+    "obtained_with": "Kaggle API through the kaggle Python package (kaggle==2.2.4), October 2019 file only (python -m funnel.ingest)",
+    "file_name": "2019-Oct.csv",
+    "size_bytes": 5668612855,
+    "retrieved_at_utc": "2026-09-24T06:37:16+00:00",
+    "sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+    "license_field": "copyright-authors",
+    "publisher_usage_statement": "You can use this dataset for free. Just mention the source of it: link to this page and link to [REES46 Marketing Platform](https://rees46.com).",
+    "attribution_links": [
+      "https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store",
+      "https://rees46.com"
+    ]
+  },
+  "contents": {
+    "grain": "One row is one logged event.",
+    "raw_rows": 42448764,
+    "columns": [
+      "event_time",
+      "event_type",
+      "product_id",
+      "category_id",
+      "category_code",
+      "brand",
+      "price",
+      "user_id",
+      "user_session"
+    ],
+    "event_type_counts": {
+      "view": 40779399,
+      "cart": 926516,
+      "purchase": 742849
+    },
+    "min_event_time_utc": "2019-10-01 00:00:00",
+    "max_event_time_utc": "2019-10-31 23:59:59",
+    "distinct_counts": {
+      "product_id": 166794,
+      "category_id": 624,
+      "user_id": 3022290,
+      "user_session": 9244421
+    },
+    "order_or_transaction_id_exists": false
+  },
+  "pre_analysis_findings": [
+    {
+      "finding": "Exact duplicate rows (surplus)",
+      "count": 30220,
+      "profile_field": "duplicates.exact_duplicate_rows.surplus_rows"
+    },
+    {
+      "finding": "Zero-price events",
+      "count": 68673,
+      "profile_field": "price.zero_price_events"
+    },
+    {
+      "finding": "Products with more than one distinct price",
+      "count": 57550,
+      "profile_field": "price.products_with_more_than_one_distinct_price"
+    },
+    {
+      "finding": "Events with no category code",
+      "count": 13515609,
+      "profile_field": "category_brand.category_code.null_or_empty_count"
+    },
+    {
+      "finding": "Events with no brand",
+      "count": 6113008,
+      "profile_field": "category_brand.brand.null_or_empty_count"
+    },
+    {
+      "finding": "Category codes mapping to more than one category_id",
+      "count": 55,
+      "profile_field": "category_brand.category_codes_mapping_to_more_than_one_category_id"
+    },
+    {
+      "finding": "Events with a null session",
+      "count": 2,
+      "profile_field": "sessions_users.null_user_session_events"
+    },
+    {
+      "finding": "Sessions with more than one user_id",
+      "count": 348,
+      "profile_field": "sessions_users.sessions_with_more_than_one_user_id"
+    },
+    {
+      "finding": "Sessions spanning more than 24 hours",
+      "count": 17086,
+      "profile_field": "sessions_users.sessions_spanning_more_than_24_hours"
+    },
+    {
+      "finding": "Purchase events with no cart event of the product in the session",
+      "count": 406639,
+      "profile_field": "ordering_anomalies.purchase_events_with_no_cart_of_product_in_session"
+    },
+    {
+      "finding": "Cart events with no view at or before them in the session",
+      "count": 4655,
+      "profile_field": "ordering_anomalies.cart_events_with_no_view_at_or_before_in_session"
+    },
+    {
+      "finding": "Sessions with more than one purchase event",
+      "count": 80261,
+      "profile_field": "order_reconstruction.sessions_with_more_than_one_purchase_event"
+    },
+    {
+      "finding": "(session, product) pairs with repeated purchase events",
+      "count": 41406,
+      "profile_field": "order_reconstruction.session_product_pairs_with_more_than_one_purchase_event"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D1",
+      "title": "Deduplication",
+      "summary": "Exact duplicate rows are removed; rows that differ in any column are kept.",
+      "metrics_section": "2",
+      "related_sections": [],
+      "changes": []
+    },
+    {
+      "id": "D2",
+      "title": "Zero prices",
+      "summary": "Zero-price events count as events but are excluded from every value.",
+      "metrics_section": "2",
+      "related_sections": [],
+      "changes": []
+    },
+    {
+      "id": "D3",
+      "title": "Price",
+      "summary": "Revenue uses the purchase price; carted value uses each pair's latest non-zero cart price.",
+      "metrics_section": "2",
+      "related_sections": [],
+      "changes": []
+    },
+    {
+      "id": "D4",
+      "title": "Order and revenue",
+      "summary": "One order is one valid session with an observed purchase.",
+      "metrics_section": "4",
+      "related_sections": [],
+      "changes": []
+    },
+    {
+      "id": "D5",
+      "title": "Purchase paths",
+      "summary": "Purchases are split by whether the product has a cart event in the same session.",
+      "metrics_section": "5",
+      "related_sections": [
+        "6"
+      ],
+      "changes": [
+        "2026-09-26 · Clarifications before the first mart build (Sections 6, 9, 10)"
+      ]
+    },
+    {
+      "id": "D6",
+      "title": "Cart event order",
+      "summary": "Cart events count whether or not a view preceded them.",
+      "metrics_section": "2",
+      "related_sections": [],
+      "changes": []
+    },
+    {
+      "id": "D7",
+      "title": "Breakdowns",
+      "summary": "Missing category and brand form an explicit unknown level, with its share stated.",
+      "metrics_section": "9",
+      "related_sections": [],
+      "changes": [
+        "2026-09-26 · Clarifications before the first mart build (Sections 6, 9, 10)",
+        "2026-09-26 · Category cart-to-purchase rate and category revenue population (Section 9)"
+      ]
+    },
+    {
+      "id": "D8",
+      "title": "Session rules",
+      "summary": "Sessions as logged; null-session events and multi-user sessions are excluded.",
+      "metrics_section": "3",
+      "related_sections": [
+        "10"
+      ],
+      "changes": [
+        "2026-09-26 · Clarifications before the first mart build (Sections 6, 9, 10)"
+      ]
+    },
+    {
+      "id": "D9",
+      "title": "Event types",
+      "summary": "Only view, cart, and purchase exist, and all three are used.",
+      "metrics_section": "2",
+      "related_sections": [],
+      "changes": []
+    },
+    {
+      "id": "D10",
+      "title": "Time",
+      "summary": "Timestamps are UTC as logged; the store's local time zone is unknown.",
+      "metrics_section": "2",
+      "related_sections": [],
+      "changes": []
+    }
+  ],
+  "changes_entries": [
+    {
+      "title": "2026-09-26 · Clarifications before the first mart build (Sections 6, 9, 10)",
+      "date": "2026-09-26",
+      "sections": [
+        "6",
+        "9",
+        "10"
+      ]
+    },
+    {
+      "title": "2026-09-26 · Category cart-to-purchase rate and category revenue population (Section 9)",
+      "date": "2026-09-26",
+      "sections": [
+        "9"
+      ]
+    }
+  ],
+  "reconciliation": {
+    "raw_rows": 42448764,
+    "exact_duplicate_rows_removed": 30220,
+    "deduplicated_events": 42418544,
+    "null_session_events_excluded": 2,
+    "multi_user_sessions_excluded": 348,
+    "events_in_multi_user_sessions_excluded": 1183,
+    "valid_session_events": 42417359,
+    "valid_sessions": 9244073,
+    "orders": 629558
+  },
+  "data_quality_shares": {
+    "unknown_category_event_share": 0.3185461876586895,
+    "unknown_category_revenue_share": 0.09969022220269223,
+    "unknown_brand_event_share": 0.14409225713463208,
+    "unknown_brand_revenue_share": 0.037140161658726
+  },
+  "limitations": [
+    {
+      "text": "There is no order or transaction ID, so an order is defined as a session with an observed purchase.",
+      "supporting_fields": [
+        "contents.order_or_transaction_id_exists",
+        "reconciliation.orders"
+      ]
+    },
+    {
+      "text": "Repeated purchase events of one product in a session may be extra units or repeated logging; both revenue figures are shown where the difference matters.",
+      "supporting_fields": [
+        "kpis.month.revenue",
+        "kpis.month.revenue_repeat_collapsed"
+      ]
+    },
+    {
+      "text": "A session is the logged user_session. Purchases in other sessions or on other devices are not linked, so no observed purchase in a session does not mean no purchase.",
+      "supporting_fields": [
+        "reconciliation.valid_sessions"
+      ]
+    },
+    {
+      "text": "Most purchase events have no cart event for that product in the same session.",
+      "supporting_fields": [
+        "purchase_paths.rows"
+      ]
+    },
+    {
+      "text": "Category and brand are missing on part of the log and form an explicit unknown level.",
+      "supporting_fields": [
+        "data_quality.unknown_category_event_share",
+        "data_quality.unknown_brand_event_share"
+      ]
+    },
+    {
+      "text": "Times are UTC. The store's local time zone is unknown, so no hour-of-day result describes local behavior.",
+      "supporting_fields": [
+        "contents.min_event_time_utc",
+        "contents.max_event_time_utc"
+      ]
+    },
+    {
+      "text": "The log covers one month, so results say nothing about seasonality or longer-term trends.",
+      "supporting_fields": [
+        "contents.min_event_time_utc",
+        "contents.max_event_time_utc"
+      ]
+    },
+    {
+      "text": "Observed means logged: an event absent from this log is not evidence that it did not happen.",
+      "supporting_fields": [
+        "contents.raw_rows"
+      ]
+    }
+  ]
+}

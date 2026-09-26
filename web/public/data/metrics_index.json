@@ -1,0 +1,170 @@
+{
+  "manifest": {
+    "git_commit_sha": "9942217acad5dd220fb02bc9c1db22ddf3343150",
+    "git_worktree_dirty": false,
+    "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+    "generated_at_utc": "2026-09-26T06:38:18+00:00",
+    "script": "funnel.export"
+  },
+  "pipeline_build": {
+    "git_commit_sha": "35256ed8eb526bf7c9dcdb043f5160920269b985",
+    "generated_at_utc": "2026-09-26T06:15:02+00:00",
+    "dbt_done_counts": {
+      "pass": 88,
+      "warn": 0,
+      "error": 0,
+      "skip": 0,
+      "no_op": 0,
+      "reused": 0,
+      "total": 88
+    },
+    "test_coverage": {
+      "models_built": 10,
+      "tests_expected": 78,
+      "tests_run": 78,
+      "tests_expected_not_run": []
+    }
+  },
+  "metrics": [
+    {
+      "key": "order",
+      "name": "Order",
+      "definition": "One valid session with at least one purchase event. This follows the publisher's statement that multiple purchase events in a session form a single order. Orders = sessions with an observed purchase.",
+      "display_label": "Order",
+      "section": "4"
+    },
+    {
+      "key": "revenue_primary",
+      "name": "Revenue (primary)",
+      "definition": "The sum of `price` over deduplicated purchase events in valid sessions.",
+      "display_label": "Revenue (primary)",
+      "section": "4"
+    },
+    {
+      "key": "revenue_repeat_purchase_events_collapsed_secondary",
+      "name": "Revenue, repeat purchase events collapsed (secondary)",
+      "definition": "The sum over distinct (session, product) purchase pairs of the price on the earliest purchase event of each pair. Repeated purchase events of the same product in a session may be extra units or repeated logging, and the data can't tell which. The evidence is 41,406 pairs with repeats and 52,477 surplus events. The primary and secondary figures are always shown together wherever the difference is discussed.",
+      "display_label": "Revenue, repeat purchase events collapsed (secondary)",
+      "section": "4"
+    },
+    {
+      "key": "average_order_value",
+      "name": "Average order value",
+      "definition": "Revenue ÷ orders.",
+      "display_label": "Average order value",
+      "section": "4"
+    },
+    {
+      "key": "revenue_per_session",
+      "name": "Revenue per session",
+      "definition": "Revenue ÷ valid sessions.",
+      "display_label": "Revenue per session",
+      "section": "4"
+    },
+    {
+      "key": "carted_pairs",
+      "name": "Carted pairs",
+      "definition": "Distinct (session, product) pairs with ≥1 cart event in a valid session.",
+      "display_label": "Carted pairs",
+      "section": "7"
+    },
+    {
+      "key": "carted_value_with_no_observed_purchase_in_this_session",
+      "name": "Carted value with no observed purchase in this session",
+      "definition": "The sum, over carted pairs with no purchase event for that product in the session, of the pair's latest non-zero cart price: the price on the latest cart event of the pair whose price is above zero.",
+      "display_label": "Carted value with no observed purchase in this session",
+      "section": "7"
+    },
+    {
+      "key": "zero_price_carted_pairs",
+      "name": "Zero-price carted pairs",
+      "definition": "Carted pairs whose cart events are all zero-price count in pair counts but are excluded from every value. Their count is published as a data-quality metric.",
+      "display_label": "Zero-price carted pairs",
+      "section": "7"
+    },
+    {
+      "key": "population_and_category",
+      "name": "Population and category",
+      "definition": "Carted value with no observed purchase in this session covers all carted pairs in valid sessions, with no view requirement. It is grouped by the category on the pair's latest cart event. This population differs from the category funnel's (Section 9), and the funnel page discloses the difference.",
+      "display_label": "Population and category",
+      "section": "7"
+    },
+    {
+      "key": "observed_cart_event_count",
+      "name": "Observed cart event count",
+      "definition": "The raw count of deduplicated cart events, always labeled as cart events.",
+      "display_label": "Observed cart event count",
+      "section": "7"
+    },
+    {
+      "key": "sessions",
+      "name": "Sessions",
+      "definition": "Count of valid sessions",
+      "display_label": "Sessions",
+      "section": "6"
+    },
+    {
+      "key": "sessions_with_a_view",
+      "name": "Sessions with a view",
+      "definition": "Valid sessions with ≥1 view event",
+      "display_label": "Sessions with an observed view",
+      "section": "6"
+    },
+    {
+      "key": "sessions_with_an_observed_cart_event",
+      "name": "Sessions with an observed cart event",
+      "definition": "Valid sessions with ≥1 cart event",
+      "display_label": "Sessions with an observed cart event",
+      "section": "6"
+    },
+    {
+      "key": "sessions_with_a_purchase",
+      "name": "Sessions with a purchase",
+      "definition": "Valid sessions with ≥1 purchase event",
+      "display_label": "Sessions with an observed purchase",
+      "section": "6"
+    },
+    {
+      "key": "session_purchase_rate",
+      "name": "Session purchase rate",
+      "definition": "Sessions with a purchase ÷ sessions",
+      "display_label": "Sessions with an observed purchase (%)",
+      "section": "6"
+    },
+    {
+      "key": "view_to_cart_session_rate",
+      "name": "View-to-cart session rate",
+      "definition": "Sessions with a view and ≥1 cart event ÷ sessions with a view",
+      "display_label": "Viewing sessions with an observed cart event (%)",
+      "section": "6"
+    },
+    {
+      "key": "cart_session_purchase_rate",
+      "name": "Cart-session purchase rate",
+      "definition": "Sessions with ≥1 cart event and ≥1 purchase of a product carted in that session ÷ sessions with ≥1 cart event",
+      "display_label": "Sessions with an observed cart event and an observed purchase of a carted product (%)",
+      "section": "6"
+    },
+    {
+      "key": "cart_sessions_with_no_observed_purchase",
+      "name": "Cart sessions with no observed purchase",
+      "definition": "Sessions with ≥1 cart event and no purchase event of any product",
+      "display_label": "Sessions with an observed cart event and no observed purchase in this session",
+      "section": "6"
+    },
+    {
+      "key": "changes_2026_09_26_clarifications_before_the_first_mart_build_sections_6_9_10",
+      "name": "2026-09-26 · Clarifications before the first mart build (Sections 6, 9, 10)",
+      "definition": "**Reason:** while building the dbt pipeline (Sprint 1 Step 3), Claude Code found one contradiction and two gaps in the text committed in `8d4093f`. The project owner decided each one. No business metric had been computed or published when this entry was made. 1. **Section 10, basis for session exclusions.** Null-session events excluded and multi-user sessions excluded are counted on deduplicated events *before* session exclusions. By definition they are not part of any valid session, so the \"deduplicated events in valid sessions\" basis cannot apply to them. All other data-quality metrics except exact duplicate rows removed (raw rows) stay on deduplicated events in valid sessions. 2. **Section 9, what the category funnel publishes.** Per top-level category, and per full `category_code` in drill-downs, it publishes: - step counts: (session, category) pairs with a view in the category, those with a cart event in the category, and those with a purchase in the category; - within-category step rates: view-to-cart (pairs with a cart event in the category ÷ pairs entering the funnel) and cart-to-purchase (pairs with a cart event and a purchase in the category ÷ pairs with a cart event in the category); - category revenue: the sum of purchase price over all purchase events in the category, in valid sessions, whether or not the session entered that category's funnel. Category revenues therefore sum to total revenue. The cart-to-purchase numerator requires both a cart event and a purchase in the category, so the rate cannot exceed 100% even though most purchases have no same-session cart event (Section 5). Every category view states the unknown share of events and of revenue. It also discloses that one session can appear in several category funnels, so category counts do not sum to session totals. Carted value with no observed purchase in this session (Section 7) is grouped by the top-level category on the pair's latest cart event, and by the full code on that event in drill-downs. 3. **Section 6, cart-session purchase rate.** \"A purchase of a product carted in that session\" means a purchase of a product that has a cart event anywhere in the same session, consistent with Section 5. There is no timing condition. **Effect on published numbers:** none; no numbers had been published. Items 1 and 3 fix how metrics already listed are computed. Item 2 defines the category funnel's published fields.",
+      "display_label": "2026-09-26 · Clarifications before the first mart build (Sections 6, 9, 10)",
+      "section": "Changes"
+    },
+    {
+      "key": "changes_2026_09_26_category_cart_to_purchase_rate_and_category_revenue_population_section_9",
+      "name": "2026-09-26 · Category cart-to-purchase rate and category revenue population (Section 9)",
+      "definition": "**Reason:** the project owner tightened item 2 of the previous entry so the category rate mirrors the Section 6 cart-session purchase rate exactly. That decision came after the previous entry was committed, so it is recorded here rather than by editing that entry. 1. **Within-category cart-to-purchase rate** (supersedes the numerator in the previous entry, item 2): - numerator: (session, top-level category) pairs with at least one purchase of a product in that category that has a cart event anywhere in the same session; - denominator: (session, top-level category) pairs with at least one cart event in the category. The same definition applies per full `category_code` in drill-downs. The rate is always at most 100%. 2. **Category revenue population.** Category revenue covers all purchase events in the category in valid sessions, so category revenues sum to total revenue; a reconciliation test asserts this. This population differs slightly from the category funnel's, which contains only (session, category) pairs entered by a view in the category. The funnel page discloses this difference alongside the carted-value population note (Section 7). **Effect on published numbers:** none; no numbers had been published.",
+      "display_label": "2026-09-26 · Category cart-to-purchase rate and category revenue population (Section 9)",
+      "section": "Changes"
+    }
+  ]
+}
