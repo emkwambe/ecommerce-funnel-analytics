@@ -1,6 +1,6 @@
 # Method Selection — A. Why are there two revenue figures?
 
-Template: verified-analytics-project v2.1 (`assets/templates/method-selection.md`). Written in Sprint 2 Step 2 (2026-09-26), before any Sprint 2 quantity is computed. No outcome in this record comes from a new query: the structural facts cited are from the committed Sprint 0 profile (`docs/data-profile.md`) and the Sprint 1 tests. **Status: draft for the owner's decision (H2).**
+Template: verified-analytics-project v2.1 (`assets/templates/method-selection.md`). Written in Sprint 2 Step 2 (2026-09-26), before any Sprint 2 quantity is computed. No outcome in this record comes from a new query: the structural facts cited are from the committed Sprint 0 profile (`docs/data-profile.md`) and the Sprint 1 tests. **Status: approved by the owner at H2 on 2026-09-26, as written (A-D1 to A-D5).**
 
 **Question:** "Why are there two revenue figures?" (the site shows revenue, primary, and revenue with repeat purchase events collapsed, `docs/metrics.md` §4).
 
@@ -73,3 +73,13 @@ The brief lists (1) and (2) as the candidates and asks which is rejected. **This
 | A-D3 | Candidate methods | (a) keep (1) as primary and (2) as supporting, reject (3) and (4); (b) use (1) only and reject (2) | **(a)** |
 | A-D4 | Secondary case list | Approve A-S1 and A-S2; include or drop A-S1v (a new revenue-like quantity, which then needs its own Changes entry) | **Approve A-S1 and A-S2; drop A-S1v.** It widens the question from two revenue figures to three |
 | A-D5 | Claim ceiling | As written above | **Approve** |
+
+## Owner decisions (H2, 2026-09-26, owner-decided)
+
+All recommendations approved as written:
+
+- A-D1: (a) the pair's earliest purchase price;
+- A-D2: (a) bins of 0 s, 1–59 s, and 60 s or more;
+- A-D3: (a) keep (1) and (2), and reject (3) and (4);
+- A-D4: approve A-S1 and A-S2, and drop A-S1v;
+- A-D5: the claim ceiling as written.

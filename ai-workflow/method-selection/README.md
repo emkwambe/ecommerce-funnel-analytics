@@ -4,5 +4,5 @@ One record per analysis, written from the verified-analytics-project template (`
 
 | Record | Analysis | Status |
 |---|---|---|
-| [A-revenue-gap.md](A-revenue-gap.md) | A. Why are there two revenue figures? | draft, awaiting H2 |
-| [B-later-purchases.md](B-later-purchases.md) | B. Were carted products purchased in a later session? | draft, awaiting H2 |
+| [A-revenue-gap.md](A-revenue-gap.md) | A. Why are there two revenue figures? | approved at H2, 2026-09-26, as written |
+| [B-later-purchases.md](B-later-purchases.md) | B. Were carted products purchased in a later session? | approved at H2, 2026-09-26, with owner edits to B-D1 and B-D6 |

@@ -1,6 +1,6 @@
 # Method Selection — B. Were carted products purchased in a later session?
 
-Template: verified-analytics-project v2.1 (`assets/templates/method-selection.md`). Written in Sprint 2 Step 2 (2026-09-26), before any Sprint 2 quantity is computed. No outcome in this record comes from a new query: the structural facts cited are from the committed Sprint 0 profile and `docs/data-source.md`. **Status: draft for the owner's decision (H2).** Epistemic risk: **consequential** (the sprint brief). R2, R3, a comparison control, adversarial review, and H9 sign-off apply.
+Template: verified-analytics-project v2.1 (`assets/templates/method-selection.md`). Written in Sprint 2 Step 2 (2026-09-26), before any Sprint 2 quantity is computed. No outcome in this record comes from a new query: the structural facts cited are from the committed Sprint 0 profile and `docs/data-source.md`. **Status: approved by the owner at H2 on 2026-09-26, with two edits (B-D1, B-D6), both incorporated in this text. See "Owner decisions" at the end.** Epistemic risk: **consequential** (the sprint brief). R2, R3, a comparison control, adversarial review, and H9 sign-off apply.
 
 **Question:** "Of carted value with no observed purchase in the session, how much did the same user purchase in a later session?"
 
@@ -17,7 +17,13 @@ Definitions:
 
 - **Eligible carted pair:** a (session, product) pair in a valid session (`docs/metrics.md` §3) with at least one cart event and no purchase event of that product in the session. This is the population of "carted value with no observed purchase in this session" (§7). The session must also start at or before the window's cutoff: 7 days → **2019-10-24 23:59:59 UTC**.
 - **Window:** a purchase event time t with session start ≤ t < session start + N days. With the cutoff, every eligible pair has its full window inside the data (the last event is at 2019-10-31 23:59:59 UTC, `docs/data-source.md`).
-- **Later session:** see decision B-D1. Recommended: a different valid session of the same `user_id` that **starts after** the cart session starts.
+- **Later purchase** (owner decision B-D1, as edited at H2): a purchase event of the same `product_id` that meets **all** of these conditions:
+  1. it is in a different valid session of the same `user_id`;
+  2. that session **starts after** the cart session starts;
+  3. its event time is **strictly after the pair's latest cart event** (a purchase in the same second does not count);
+  4. its event time is within the window below.
+
+  The window and the censoring cutoffs stay anchored on the cart session's start.
 - **Carted value:** the pair's latest non-zero cart price (§7). Pairs whose cart events are all zero-price count in the count share and are excluded from the value share (§7 practice).
 - **Population period:** cart sessions starting 2019-10-01 00:00:00 to the cutoff, UTC.
 
@@ -38,14 +44,14 @@ Definitions:
 | Method | Assumptions | Verifiable how? | Fits this data-generating process? | Verdict |
 |---|---|---|---|---|
 | (1) Fixed-window share with a censoring-safe cutoff (7 days; sensitivity at 3 and 14 days with their own cutoffs: 2019-10-28 and 2019-10-17 23:59:59 UTC) | Full follow-up for every included pair (guaranteed by the cutoff); `user_id` links a person across sessions | Cutoff: by construction, with a test that the latest included session start plus N days is within the data. Identity: partially (the `user_id` checks below); otherwise untestable, handled as a stated limitation | Yes | **chosen (primary)** |
-| (2) Kaplan–Meier estimate of time from cart session start to the first later-session purchase of the product, all eligible pairs (no cutoff), censored at 2019-10-31 23:59:59 UTC | Censoring is non-informative (here administrative: end of data), so it holds if the purchase hazard does not depend on the calendar date | The fixed-window estimate (1) comparing with KM at 7 days is itself the check; KM 1−S(t) is also reported at 3 and 14 days | Yes, with the calendar caveat | **chosen (R3)** |
+| (2) Kaplan–Meier estimate of time from cart session start to the first later purchase of the product (the same conditions 1–3 as the primary estimate), all eligible pairs (no cutoff), censored at 2019-10-31 23:59:59 UTC | Censoring is non-informative (here administrative: end of data), so it holds if the purchase hazard does not depend on the calendar date | The fixed-window estimate (1) comparing with KM at 7 days is itself the check; KM 1−S(t) is also reported at 3 and 14 days | Yes, with the calendar caveat | **chosen (R3)** |
 | (3) Naive share over all eligible pairs, no cutoff | Equal follow-up for all pairs | False by construction: follow-up ranges from 31 days to 0 | No | **rejected**: biased downward by right-censoring |
 | (4) Regression (logistic or Cox) of later purchase on price, category, and so on | A model of covariate effects | — | Answers a different question (associations with covariates), invites causal reading | **rejected**: no covariate question in scope; category and price breakdowns are Sprint 3 decisions and need Changes entries |
 | (5) User-level grain: (user, product) first eligible pair only | Removes double-following when one product is carted in several sessions | By comparison with (1) | Yes | **pre-specified sensitivity**, not primary: the Sprint 1 metric is at pair grain, so the primary estimand stays at pair grain |
 
 **Uncertainty:** a user-clustered bootstrap (resample users with replacement, keeping all their pairs), 2,000 resamples, a fixed seed recorded in the output, and 95% percentile intervals. It applies to the count and value shares and to the KM curve. Greenwood intervals for KM are **rejected** because they assume independent pairs.
 
-**Comparison control (the brief's negative control):** for the same eligible sessions (sessions containing at least one eligible carted pair), (session, product) pairs with at least one view, no cart event, and no purchase of the product in the session. The same window, cutoff, later-session rule, and bootstrap apply, with the pair's latest non-zero view price as value. It separates a cart-specific pattern from general return-and-buy behavior. **It is a comparison baseline, not a pure negative control**: view-only products can also be bought later for real reasons, so it is not expected to be zero. The expectation, fixed now: if the carted-pair share is **not** above the view-only share, the cart-specific reading is not supported and the step stops for escalation.
+**Comparison control (the brief's negative control):** for the same eligible sessions (sessions containing at least one eligible carted pair), (session, product) pairs with at least one view, no cart event, and no purchase of the product in the session. The same window, cutoff, and bootstrap apply, with the pair's latest non-zero view price as value. The later-purchase conditions 1 and 2 apply unchanged. Condition 3 has no direct analogue, because these pairs have no cart event; the proposed analogue is "strictly after the pair's latest view event". **Open: decided with the Step 3 Changes entry (H3).** It separates a cart-specific pattern from general return-and-buy behavior. **It is a comparison baseline, not a pure negative control**: view-only products can also be bought later for real reasons, so it is not expected to be zero. The expectation, fixed now: if the carted-pair share is **not** above the view-only share, the cart-specific reading is not supported and the step stops for escalation.
 
 ## `user_id` reliability checks (before any estimate is viewed)
 
@@ -57,7 +63,7 @@ Definitions:
 ## Failure conditions
 
 - **R2 mismatch** (any cell): stop; a bug in one path.
-- **R3 disagreement:** the fixed-window 7-day count share lies outside the KM 7-day 95% interval. Stop and escalate before interpreting. Candidates: calendar effects (the populations differ), the censoring assumption, or a bug.
+- **R3 disagreement** (owner decision B-D6, as edited at H2): the fixed-window 7-day count share lies outside the all-pairs KM 95% interval at 7 days. Stop and escalate before interpreting, with a **cohort diagnostic**: KM on pairs from cart sessions starting by 2019-10-24 23:59:59 UTC versus KM on pairs from sessions starting after it. Neither method is treated as wrong. The diagnostic shows whether the populations differ (calendar effects or the censoring assumption) rather than one path being in error. A bug is ruled out separately by R2.
 - **Comparison control not below the main estimate:** stop and escalate (above).
 - **Identity failure:** checks 1–2 non-zero, or check 3 below 100%. Stop and escalate.
 - **Dominance:** the top 0.1% of users by eligible pairs hold more than 10% of followed pairs. Report it, and let the bot-like-user sensitivity decide the wording.
@@ -78,7 +84,7 @@ Definitions:
 | B9 | `user_id` checks 1–4 | data check |
 | R2 | `funnel.verify` recomputes B1 (count and value shares) independently of dbt | reproduction |
 
-**Adversarial review (Step 5):** identity linking, censoring, bot-like users (B7), multiple carts of the same product (B6), technical session splits (diagnostic 4), and purchases by other people in the same household (unobservable; stated as a limitation).
+**Adversarial review (Step 5):** identity linking, censoring, bot-like users (B7), multiple carts of the same product (B6), technical session splits (diagnostic 4, which stays under the edited B-D1), and purchases by other people in the same household (unobservable; stated as a limitation).
 
 ## Decisions needed (H2)
 
@@ -92,3 +98,10 @@ Definitions:
 | B-D6 | R3 agreement rule | The fixed-window 7-day count share lies inside the KM 7-day 95% interval | **Approve** |
 | B-D7 | Sensitivities B6, B7, and B8 | Include all three as pre-specified, or drop any | **Include all three** |
 | B-D8 | Claim ceiling | As written above | **Approve** |
+
+## Owner decisions (H2, 2026-09-26, owner-decided)
+
+- **B-D2, B-D3, B-D4, B-D5, B-D7, B-D8:** approved as recommended.
+- **B-D1: approved with an edit.** A later purchase counts only if its event time is strictly after the pair's latest cart event, in addition to being in a different valid session of the same user that starts after the cart session starts. The owner confirmed the conjunctive reading: all four conditions in "Later purchase" above. The censoring cutoffs stay anchored on the cart session's start, and the overlapping-session diagnostic stays.
+- **B-D6: approved with an edit.** If the fixed-window 7-day estimate falls outside the all-pairs KM 95% interval at 7 days, stop and escalate with a cohort diagnostic (KM on pairs from sessions starting by 2019-10-24 versus after), rather than treating either method as wrong.
+- **Carried to H3:** the comparison control's analogue of condition 3 (proposed: strictly after the pair's latest view event). It follows from the B-D1 edit and was not part of the H2 question.
