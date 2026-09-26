@@ -387,6 +387,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** no file needed correcting. The owner decided to log it.
 - **Guard added:** any total or derived figure quoted in a report comes from code output shown with it, never mental arithmetic.
 
+**2026-09-26 · Sprint 2 Step 7 · Decision record attributed an ordering to the owner that the owner had not decided**
+- **Origin:** Claude Code (`ai-workflow/sprint-2-verification.md`, the v1.1.1 release row, commit `ba74cbf`)
+- **What was produced:** "Owner decision: the CHANGELOG 1.1.1 entry follows in the next PR."
+- **What was wrong:** the ordering follows from the Governed tier (every change to `main` through a PR). Claude Code flagged it to the owner; the owner did not decide it. A record of owner decisions must not attribute to the owner what the owner did not decide.
+- **How it was caught:** Claude Code's review of its own commit, before the pull request was opened.
+- **Fix:** the row now says the ordering was flagged by Claude Code and was not an owner decision (commit `311b4b5`, same branch; history not rewritten).
+- **Guard added:** none automated. Rows in the owner-decisions table state only what the owner's message said; anything Claude Code infers or flags is labeled as such.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.
