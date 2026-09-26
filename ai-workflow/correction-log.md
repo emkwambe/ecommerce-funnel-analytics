@@ -162,6 +162,22 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** ANSI codes are stripped before the timestamp. The record also stores the `Done.` line's counts as `dbt_done_counts`. The full build is rerun from a clean tree, so the Step 3 evidence record is complete. Earlier records are left as written.
 - **Guard added:** `funnel.build` fails a run whose output has no `Done. PASS=` line. `test_summary_lines_strip_colour_codes_and_timestamps` uses real dbt output, including the escape codes.
 
+**2026-09-26 · Sprint 1 Step 5 · `.gitignore` also ignored the committed exports folder**
+- **Origin:** Claude Code (Sprint 0 Step 1 `.gitignore`)
+- **What was produced:** the ignore rule `data/`, meant for the top-level `data/` folder (raw CSV, Parquet, warehouse).
+- **What was wrong:** an unanchored `data/` matches a folder named `data` at any depth, including `web/public/data/`, where CLAUDE.md says the JSON exports are committed. The exports could not have been committed. Also, `test_no_row_level_data.py` and `test_naming_rules.py` scan committable files only, so they would never have scanned the exports.
+- **How it was caught:** Claude Code's check after the first `python -m funnel.export`. Every manifest read `git_worktree_dirty: false` while six new files existed; `git check-ignore -v` showed `.gitignore:8:data/`.
+- **Fix:** the rule is anchored as `/data/`. `git check-ignore` confirms the raw CSV and warehouse are still ignored and the exports are not. The row-level and naming guards passed on the exports the first time they were in scope (95 passed).
+- **Guard added:** `analysis/tests/test_export_files.py` requires each export to exist and carry a manifest. A file the guards cannot see would now also be absent from git and fail that test on a fresh checkout.
+
+**2026-09-26 · Sprint 1 Step 5 · Export manifest taken per file, after earlier writes**
+- **Origin:** Claude Code
+- **What was produced:** `funnel/export.py` built each file's manifest inside the write loop.
+- **What was wrong:** once the first export is written, the tree is dirty, so every later file would record `git_worktree_dirty: true` even on a clean run. The ignore bug above hid this in the first run.
+- **How it was caught:** Claude Code's review while diagnosing the ignore bug, before any export was committed.
+- **Fix:** one manifest is taken for the run before the first write. The exports from the first run were deleted and regenerated from a clean tree.
+- **Guard added:** `test_export_files.py` asserts that all exports share one manifest and that it records a clean tree.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

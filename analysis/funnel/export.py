@@ -313,8 +313,11 @@ def main() -> None:
         "metrics_index.json": {"metrics": parse_metrics_index(metrics_text)},
         "data_story.json": data_story(con, metrics_text, dq),
     }
+    # One manifest for the whole run, taken before the first write: once a file is written the
+    # tree is dirty, so a per-file manifest would misreport every file after the first.
+    run_manifest = manifest(SCRIPT, sha)
     for name, payload in exports.items():
-        write_json(WEB_DATA / name, {"manifest": manifest(SCRIPT, sha), "pipeline_build": build, **payload})
+        write_json(WEB_DATA / name, {"manifest": run_manifest, "pipeline_build": build, **payload})
         print(f"Wrote {WEB_DATA / name}")
 
 
