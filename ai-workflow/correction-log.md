@@ -235,6 +235,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the API call was rerun with `MSYS_NO_PATHCONV=1`, and the screenshot check was run from PowerShell.
 - **Guard added:** none automated; arguments that begin with `/` are passed from PowerShell or with path conversion disabled.
 
+**2026-09-26 · Sprint 2 Step 0 · `.env.example` left out of the last direct commit to main**
+- **Origin:** Claude Code
+- **What was produced:** the Step 0 commit `03c1eed`, pushed to `main`. Its command ran `git add` on a list of paths that included `.env.example`, then committed and pushed, gating only on `git commit`'s exit code.
+- **What was wrong:** the Sprint 0 rule `.env*` in `.gitignore` also matches `.env.example`, so `git add` refused that path ("The following paths are ignored") and staged the others. The commit went out without `.env.example`, and its message lists it. The env-drift test passed locally only because the file exists in the working tree; on a fresh clone or in CI it would have failed.
+- **How it was caught:** Claude Code's review of the command output immediately after the push.
+- **Fix:** `.gitignore` gains `!.env.example`, and the file is committed on the Step 1 branch `sprint-2/governed-setup`, so it reaches `main` through the first PR. `03c1eed` is left as pushed; history is not rewritten.
+- **Guard added:** `test_env_example_is_committable_not_ignored` in `analysis/tests/test_env_drift.py` fails if git ignores `.env.example` (checked by running it against the old `.gitignore`: 1 failed). Commit sequences now check `git status --short` after staging, and every listed path must be staged before the commit.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

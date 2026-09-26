@@ -10,6 +10,10 @@ Entries up to v1.0.1 were reconstructed in Sprint 2 from the git history. Figure
 - `ai-workflow/tools.md` (tool inventory and machine constraints), `ai-workflow/uncertainty-register.md`, `ai-workflow/search-log.md`, and `ai-workflow/method-selection/`.
 - `.env.example` listing every environment variable the code reads (names and descriptions only), guarded by an env-drift test.
 - This changelog.
+- CI (`.github/workflows/ci.yml`): pytest on committed exports and synthetic fixtures, web lint and build, and a link check of the README, changelog, and docs. A pull request template.
+
+### Fixed
+- `.env.example` is committed: the `.env*` ignore rule had also matched it (correction log, Sprint 2 Step 0).
 
 ### Changed
 - The README's "How Claude Code was used" section points to where the owner's decisions are recorded.

@@ -40,6 +40,11 @@ def names_in_env_example() -> set[str]:
     return {m.group(1) for line in lines if (m := re.match(r"^([A-Z][A-Z0-9_]*)=", line))}
 
 
+def test_env_example_is_committable_not_ignored():
+    """Sprint 2 Step 0: `.env*` in .gitignore also matched .env.example, so it was left out of the commit."""
+    assert ENV_EXAMPLE in committable_files((".env.example",)), ".env.example is ignored by git; it must be committed"
+
+
 def test_env_example_has_names_only_no_values():
     for line in ENV_EXAMPLE.read_text(encoding="utf-8").splitlines():
         if re.match(r"^[A-Z][A-Z0-9_]*=", line):
