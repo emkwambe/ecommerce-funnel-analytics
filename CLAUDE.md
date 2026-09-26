@@ -58,7 +58,7 @@ Web and deploy commands are added in Sprint 1. All file writes are UTF-8 without
 
 2. **Sourced interpretation.** Every interpretive sentence on the site cites the exported fields that support it. Tests verify numbers; human review verifies conclusions.
 
-3. **Metric lock.** Until `docs\metrics.md` is committed, no code may compute business metrics. That means no conversion rates, revenue, or funnel rates broken down by category, brand, product, time period, or user segment. Sprint 0 is limited to structural profiling:
+3. **Metric lock (lifted by the contract).** `docs\metrics.md` was committed in `8d4093f`. Business metrics may now be computed, **only as defined in `docs\metrics.md`**. That covers conversion rates, revenue, and funnel rates, including breakdowns by category, brand, product, time period, or user segment. A metric the contract does not define may not be computed, published, or answered until a dated Changes entry defines it. Before that commit, Sprint 0 was limited to structural profiling:
    - schema, types, row counts;
    - null rates;
    - duplicate counts;

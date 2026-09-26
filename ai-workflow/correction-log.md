@@ -115,7 +115,7 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Guard added:** `test_terms_inside_metrics_md_section_1_are_allowed` shows the Section 1 exclusion is what lets the contract's own wording pass.
 
 **2026-09-26 · Sprint 1 Step 2 · Contract prose used "carts" outside the naming rules**
-- **Origin:** the contract draft provided for commit (drafting origin to be confirmed by the project owner); the inconsistency was surfaced by Claude Code's new test
+- **Origin:** Claude Chat (`docs/metrics.md` was drafted in Claude Chat; its decisions were approved by the project owner). Claude Code's new test surfaced the inconsistency. The origin was confirmed by the project owner after the contract commit `8d4093f` and recorded in the next commit.
 - **What was produced:** `docs/metrics.md` Section 7 read "Always labeled as events, never as carts.", and the Section 1 enforcement paragraph banned "carts" only "used as a count label", while rule 1 says "Never say "carts"".
 - **What was wrong:** the contract was inconsistent with itself. A whole-word check, the only form a test can enforce reliably, flagged the Section 7 sentence.
 - **How it was caught:** the pytest commit gate (`test_committable_web_docs_and_exports_follow_naming_rules`), before the contract was first committed.
