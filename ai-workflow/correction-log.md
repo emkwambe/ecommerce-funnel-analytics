@@ -283,6 +283,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** recorded here. `35eba66` is pushed and history is not rewritten.
 - **Guard added:** commit messages quote the count from the gate's output in the same command, never a count typed in advance.
 
+**2026-09-26 · Sprint 2 Step 4 · Category export order was not fully determined**
+- **Origin:** Claude Code (Sprint 1 Step 5, `funnel/export.py`)
+- **What was produced:** `funnel_category.json` rows ordered by `category_level, carted_value_with_no_observed_purchase DESC` only.
+- **What was wrong:** 33 `category_code` rows tie at a carted value of 0, and DuckDB returns tied rows in no fixed order. The Sprint 2 re-export reordered those 33 rows. Every row's content was identical (same 127 rows, compared as a multiset), so no published value changed, but the export was not reproducible from run to run (R1).
+- **How it was caught:** Claude Code's regression check comparing the regenerated exports with the committed ones, before any Sprint 2 value was read. The check expected only the Changes-entry, decision-link, and workflow keys to change. (The first draft of this entry again lacked a classifier keyword on this line, repeating the entry "Correction-log entry written outside the log's classification rules"; `test_every_correction_log_entry_is_classified` caught it at the commit gate.)
+- **Fix:** the query adds `category_key` as a final sort key. The regenerated exports from this run were discarded, and the exports are regenerated from the clean tree after this commit.
+- **Guard added:** `test_category_rows_are_in_a_fully_determined_order` in `analysis/tests/test_export_files.py` (committed with the regenerated exports) requires the rows to be in (value descending, `category_key`) order with unique keys.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

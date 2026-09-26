@@ -452,7 +452,8 @@ def main() -> None:
     dq_rows = rows(con, "SELECT * FROM wh.main_marts.mart_data_quality ORDER BY sort_order")
     dq = {r["metric_key"]: r for r in dq_rows}
     category_rows = rows(con, """
-        SELECT * FROM wh.main_marts.mart_funnel_category ORDER BY category_level, carted_value_with_no_observed_purchase DESC
+        SELECT * FROM wh.main_marts.mart_funnel_category
+        ORDER BY category_level, carted_value_with_no_observed_purchase DESC, category_key
     """)
     exports = {
         "kpis.json": {
