@@ -10,6 +10,10 @@ Entries up to v1.0.1 were reconstructed in Sprint 2 from the git history. Figure
 - `ai-workflow/tools.md` (tool inventory and machine constraints), `ai-workflow/uncertainty-register.md`, `ai-workflow/search-log.md`, and `ai-workflow/method-selection/`.
 - `.env.example` listing every environment variable the code reads (names and descriptions only), guarded by an env-drift test.
 - This changelog.
+- CI (`.github/workflows/ci.yml`): pytest on committed exports and synthetic fixtures, web lint and build, and a link check of the README, changelog, and docs. A pull request template.
+
+### Fixed
+- `.env.example` is committed: the `.env*` ignore rule had also matched it (correction log, Sprint 2 Step 0).
 
 ### Changed
 - The README's "How Claude Code was used" section points to where the owner's decisions are recorded.
@@ -30,7 +34,7 @@ Tag `v1.0.1` (commit `b7f0044`).
 
 ## [1.0.0] — 2026-09-26
 
-Sprint 1 release. **Not tagged:** no `v1.0.0` tag was created at the time. This entry corresponds to commit `a96f7e0` (production deploy evidence, verification file, README).
+Sprint 1 release at commit `a96f7e0` (production deploy evidence, verification file, README). No tag was created at the time. The annotated tag `v1.0.0` was added retroactively on 2026-09-26, during Sprint 2, by the project owner's decision (`ai-workflow/sprint-2-verification.md`).
 
 ### Added
 - The metric contract, `docs/metrics.md`, committed before any business metric was computed (`8d4093f`), and its Changes entries.

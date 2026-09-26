@@ -17,8 +17,10 @@ web/.vercel/
 pipeline/target/
 pipeline/logs/
 
-# Secrets and environment files
+# Secrets and environment files. .env.example holds names only and is committed
+# (analysis/tests/test_env_drift.py checks it is not ignored).
 .env*
+!.env.example
 kaggle.json
 
 # Full-resolution evidence images (commit only downsized copies)
