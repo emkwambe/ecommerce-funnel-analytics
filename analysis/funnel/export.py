@@ -5,7 +5,8 @@ Run: python -m funnel.export
 Reads data/warehouse.duckdb (read-only) after a passing `python -m funnel.build`, and writes
 web/public/data/: kpis.json, funnel_category.json, purchase_paths.json, data_quality.json,
 metrics_index.json (parsed from docs/metrics.md), data_story.json (the /data page), and, from
-Sprint 2, investigation_revenue_gap.json (analysis A).
+Sprint 2, investigation_revenue_gap.json (analysis A) and investigation_later_purchases.json
+(analysis B; halts if a B stop rule fired).
 Halts if the dataset hash differs from docs/data-source.md, if the last full dbt build did not
 pass on this dataset, if the reconciliation chain in data_story.json does not sum, or if the
 independent verification of analysis A is missing, on another dataset, or has a mismatch.
@@ -461,6 +462,42 @@ def investigation_revenue_gap(con: duckdb.DuckDBPyConnection, dataset_sha: str) 
     }
 
 
+LATER_PURCHASES_JSON = CURRENT_EVIDENCE_DIR / "later_purchases.json"
+
+
+def investigation_later_purchases(con: duckdb.DuckDBPyConnection, dataset_sha: str) -> dict[str, Any]:
+    """Analysis B (metrics.md Changes 2026-09-26, Sprint 2 investigations, B items 7-16). Point estimates and
+    counts from the marts; intervals, Kaplan-Meier, and seed stability from funnel.later_purchases."""
+    if not LATER_PURCHASES_JSON.exists():
+        sys.exit(f"HALT: {LATER_PURCHASES_JSON} missing; run python -m funnel.later_purchases.")
+    stats = json.loads(LATER_PURCHASES_JSON.read_text(encoding="utf-8"))
+    if stats["manifest"]["dataset_sha256"] != dataset_sha:
+        sys.exit("HALT: later_purchases.json was produced on a different dataset; rerun python -m funnel.later_purchases.")
+    fired = [r["rule"] for r in stats["stop_rules"] if r["fired"]]
+    if fired:
+        sys.exit(f"HALT: analysis B stop rules fired {fired}; escalate before exporting.")
+    estimates = rows(con, "SELECT * FROM wh.main_marts.mart_later_purchase_estimates ORDER BY spec_key")
+    for row in estimates:
+        interval = stats["estimates"][row["spec_key"]]
+        if abs(interval["count_share"] - float(row["count_share"])) > 1e-12:
+            sys.exit(f"HALT: {row['spec_key']} intervals were computed on different point estimates.")
+        row.update({k: interval[k] for k in ("count_interval", "value_interval", "resamples", "seed")})
+    return {
+        "question": "Were carted products purchased in a later session?",
+        "method_record": "ai-workflow/method-selection/B-later-purchases.md",
+        "contract": "docs/metrics.md, Changes 2026-09-26 (Sprint 2 investigations), B items 7-16",
+        "estimates": estimates,
+        "kaplan_meier": stats["kaplan_meier"],
+        "seed_stability": stats["seed_stability"],
+        "stop_rules": stats["stop_rules"],
+        "dominance": stats["dominance"],
+        "checks": rows(con, "SELECT * FROM wh.main_marts.mart_later_purchase_checks ORDER BY sort_order"),
+        "statistics_run": {"git_commit_sha": stats["manifest"]["git_commit_sha"],
+                           "generated_at_utc": stats["manifest"]["generated_at_utc"]},
+        "independent_verification": verification_summary(dataset_sha, ("B1:",)),
+    }
+
+
 def main() -> None:
     sha = require_dataset_hash_match()
     build = last_full_build(sha)
@@ -507,6 +544,7 @@ def main() -> None:
         "data_story.json": data_story(con, metrics_text, dq),
         "workflow.json": workflow_record(),
         "investigation_revenue_gap.json": investigation_revenue_gap(con, sha),
+        "investigation_later_purchases.json": investigation_later_purchases(con, sha),
     }
     # One manifest for the whole run, taken before the first write: once a file is written the
     # tree is dirty, so a per-file manifest would misreport every file after the first.

@@ -7,8 +7,8 @@ SQL that does not read any dbt model, then compares each with the marts in
 data/warehouse.duckdb: integers and DECIMAL sums exactly, rates to 1e-9. Data-quality overlaps
 with Sprint 0 are compared like with like: raw-basis figures recomputed here against Sprint 0's
 profile.json, and the contract-basis figures recomputed here against mart_data_quality.
-Sprint 2 adds R2 for analysis A: the revenue difference, its breakdown and thresholds, and the two
-secondary cases. Writes verify.json under the current sprint's evidence folder (CURRENT_EVIDENCE_DIR
+Sprint 2 adds R2 for analysis A (the revenue difference, its breakdown and thresholds, and the two
+secondary cases) and for analysis B (the B1 7-day count and value shares, with their counts and sums). Writes verify.json under the current sprint's evidence folder (CURRENT_EVIDENCE_DIR
 in funnel.common) and exits non-zero on any mismatch.
 """
 
@@ -391,6 +391,86 @@ def compare_investigation_a(independent: dict[str, Any], headline: dict[str, Any
     return checks
 
 
+# Sprint 2, analysis B (metrics.md Changes 2026-09-26, Sprint 2 investigations, B items 7-10).
+B1_CUTOFF = "2019-10-24 23:59:59"
+B1_WINDOW_DAYS = 7
+
+
+def independent_later_purchases_b1(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
+    """B1 (7 days) recomputed from vev without the dbt models: all four later-purchase conditions tested in
+    one correlated EXISTS per eligible pair, rather than a first-purchase minimum followed by a window."""
+    eligible, followed, eligible_value, followed_value = _one(con, f"""
+        WITH sess AS (
+            SELECT user_session, min(user_id) AS user_id, min(event_time) AS session_start
+            FROM vev GROUP BY user_session
+        ),
+        carts AS (
+            SELECT user_session, product_id, max(event_time) AS latest_cart_time
+            FROM vev WHERE event_type = 'cart' GROUP BY user_session, product_id
+        ),
+        bought AS (SELECT DISTINCT user_session, product_id FROM vev WHERE event_type = 'purchase'),
+        latest_nonzero AS (
+            SELECT user_session, product_id, CAST(price AS DECIMAL(18, 2)) AS value,
+                   row_number() OVER (PARTITION BY user_session, product_id ORDER BY event_time DESC) AS rn
+            FROM vev WHERE event_type = 'cart' AND price > 0
+        ),
+        eligible AS (
+            SELECT c.user_session, c.product_id, c.latest_cart_time, s.user_id, s.session_start, l.value
+            FROM carts AS c
+            JOIN sess AS s USING (user_session)
+            LEFT JOIN bought AS b USING (user_session, product_id)
+            LEFT JOIN (SELECT * FROM latest_nonzero WHERE rn = 1) AS l USING (user_session, product_id)
+            WHERE b.user_session IS NULL AND s.session_start <= TIMESTAMP '{B1_CUTOFF}'
+        ),
+        purchases AS (
+            SELECT p.user_session, p.product_id, p.event_time, s.user_id, s.session_start AS purchase_session_start
+            FROM vev AS p JOIN sess AS s USING (user_session)
+            WHERE p.event_type = 'purchase'
+        ),
+        flagged AS (
+            SELECT e.*, EXISTS (
+                SELECT 1 FROM purchases AS p
+                WHERE p.user_id = e.user_id AND p.product_id = e.product_id
+                  AND p.user_session <> e.user_session
+                  AND p.purchase_session_start > e.session_start
+                  AND p.event_time > e.latest_cart_time
+                  AND p.event_time >= e.session_start
+                  AND p.event_time < e.session_start + INTERVAL {B1_WINDOW_DAYS} DAY
+            ) AS is_followed
+            FROM eligible AS e
+        )
+        SELECT count(*), count(*) FILTER (WHERE is_followed),
+               coalesce(sum(value), 0), coalesce(sum(value) FILTER (WHERE is_followed), 0)
+        FROM flagged
+    """)
+    return {
+        "eligible_pairs": int(eligible),
+        "followed_pairs": int(followed),
+        "eligible_value": Decimal(eligible_value),
+        "followed_value": Decimal(followed_value),
+        "count_share": followed / eligible,
+        "value_share": float(Decimal(followed_value) / Decimal(eligible_value)),
+    }
+
+
+def mart_values_investigation_b(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
+    """B1 from the marts; call after mart_values has attached the warehouse."""
+    row = con.execute("""
+        SELECT eligible_pairs, followed_pairs, eligible_value, followed_value, count_share, value_share
+        FROM wh.main_marts.mart_later_purchase_estimates WHERE spec_key = 'B1'
+    """).fetchone()
+    return {"eligible_pairs": int(row[0]), "followed_pairs": int(row[1]), "eligible_value": Decimal(row[2]),
+            "followed_value": Decimal(row[3]), "count_share": row[4], "value_share": row[5]}
+
+
+def compare_investigation_b(independent: dict[str, Any], mart: dict[str, Any]) -> list[dict[str, Any]]:
+    """R2 checks for B1: counts and DECIMAL sums exactly, shares within RATE_TOLERANCE."""
+    return [{"check": f"B1:{key}", "against": "mart_later_purchase_estimates", "independent": str(independent[key]),
+             "compared": str(mart[key]), "match": _match(independent[key], mart[key])}
+            for key in ("eligible_pairs", "followed_pairs", "eligible_value", "followed_value",
+                        "count_share", "value_share")]
+
+
 def mart_values(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
     con.execute(f"ATTACH '{WAREHOUSE.as_posix()}' AS wh (READ_ONLY)")
     m = con.execute("""
@@ -482,12 +562,16 @@ def main() -> None:
         investigation_a = {"revenue_gap": independent_revenue_gap(con),
                            "duplicates": independent_duplicate_breakdown(con),
                            "cart_no_view": independent_cart_no_view_attribution(con)}
+        print("Recomputing analysis B (B1, 7 days) ...", flush=True)
+        investigation_b = independent_later_purchases_b1(con)
         mart = mart_values(con)
         mart_a = mart_values_investigation_a(con)
+        mart_b = mart_values_investigation_b(con)
     finally:
         peak_spill = sampler.stop()
     sprint0 = json.loads((EVIDENCE_DIR / "profile.json").read_text(encoding="utf-8"))
-    checks = compare(independent, mart, dq, sprint0) + compare_investigation_a(investigation_a, independent, mart_a)
+    checks = (compare(independent, mart, dq, sprint0) + compare_investigation_a(investigation_a, independent, mart_a)
+              + compare_investigation_b(investigation_b, mart_b))
     elapsed = round(time.perf_counter() - started, 1)
     ok = all(c["match"] for c in checks)
     write_json(OUT, {

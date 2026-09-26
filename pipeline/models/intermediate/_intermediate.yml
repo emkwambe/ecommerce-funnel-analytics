@@ -233,3 +233,86 @@ models:
         description: Display label ("2", "3", "4 or more").
       - name: pair_size_group_sort
         description: Display order.
+  - name: int_later_purchase_pairs
+    description: >
+      metrics.md Changes 2026-09-26 (Sprint 2 investigations), B items 7, 8, 12, 13, 16. Pairs analysis B follows
+      up, with no cutoff: 'carted' (carted pairs with no purchase in the session, the Section 7 population) and
+      'viewed' (view, no cart, no purchase, in sessions holding a carted pair), each with its first later purchase
+      under item 8 conditions 1-3 and, for the overlap diagnostic, with condition 2 dropped.
+    columns:
+      - name: pair_key
+        description: pair_type, user_session, and product_id (grain key).
+        data_tests: [unique, not_null]
+      - name: pair_type
+        description: "'carted' or 'viewed' (the comparison baseline, item 13)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["carted", "viewed"]
+      - name: user_session
+        description: The session of the cart (or view) events.
+        data_tests: [not_null]
+      - name: product_id
+        description: Product identifier.
+        data_tests: [not_null]
+      - name: user_id
+        description: The session's user_id (valid sessions have exactly one; Section 3).
+      - name: session_start
+        description: The session's first event, UTC; anchors the window and the cutoff (item 7).
+        data_tests: [not_null]
+      - name: is_long_session
+        description: Session longer than 24 hours (Section 3); used by sensitivity B8.
+      - name: anchor_time
+        description: The pair's latest cart event ('carted') or latest view event ('viewed'); item 8 condition 3.
+        data_tests: [not_null]
+      - name: value
+        description: Latest non-zero cart (or view) price (Section 7; item 13); null when there is none.
+      - name: first_later_purchase_time
+        description: Earliest purchase of the product by the same user_id meeting item 8 conditions 1-3; null if none.
+      - name: first_purchase_time_any_session_start
+        description: As first_later_purchase_time with condition 2 dropped (item 16, overlapping sessions).
+  - name: int_later_purchase_spec_pairs
+    description: >
+      metrics.md Changes 2026-09-26 (Sprint 2 investigations), B items 7-11, 13, 14. One row per (specification,
+      eligible pair) for B1-B3, B5, and B6-B8, with whether the pair is followed within the window (item 8 condition 4).
+    columns:
+      - name: spec_key
+        description: Specification (B1 primary; B2-B3 windows; B5 baseline; B6-B8 sensitivities).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["B1", "B2", "B3", "B5", "B6", "B7", "B8"]
+      - name: window_days
+        description: N, the window in days.
+        data_tests: [not_null]
+      - name: cutoff
+        description: Latest session start included (the entry's cutoff table).
+        data_tests: [not_null]
+      - name: pair_key
+        description: The pair (from int_later_purchase_pairs); unique within a specification.
+        data_tests: [not_null]
+      - name: pair_type
+        description: "'carted' or 'viewed'."
+      - name: user_session
+        description: Session of the pair.
+      - name: product_id
+        description: Product identifier.
+      - name: user_id
+        description: User of the session.
+      - name: session_start
+        description: Session start, UTC.
+      - name: is_long_session
+        description: Session longer than 24 hours.
+      - name: anchor_time
+        description: Latest cart (or view) event of the pair.
+      - name: value
+        description: Latest non-zero cart (or view) price; null excluded from value shares.
+      - name: first_later_purchase_time
+        description: First later purchase (conditions 1-3).
+      - name: first_purchase_time_any_session_start
+        description: First purchase with condition 2 dropped.
+      - name: is_followed
+        description: first_later_purchase_time < session_start + window_days days (item 8, condition 4).
+        data_tests: [not_null]

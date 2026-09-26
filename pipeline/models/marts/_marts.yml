@@ -333,3 +333,109 @@ models:
       - name: remainder
         description: Part (iii); must be zero.
         data_tests: [not_null]
+  - name: mart_later_purchase_estimates
+    description: >
+      metrics.md Changes 2026-09-26 (Sprint 2 investigations), B items 9-11, 13, 14. Point estimates per
+      specification, with the counts and value sums behind every share (H3-D2). Intervals come from
+      funnel.later_purchases (user-level cluster bootstrap, H3-D5).
+    columns:
+      - name: spec_key
+        description: B1 (primary), B2, B3 (windows), B5 (comparison baseline), B6-B8 (sensitivities) (grain key).
+        data_tests: [unique, not_null]
+      - name: pair_type
+        description: "'carted' or 'viewed'."
+      - name: window_days
+        description: N.
+      - name: cutoff
+        description: Latest session start included.
+      - name: eligible_pairs
+        description: Eligible pairs (denominator of the count share).
+        data_tests: [not_null]
+      - name: followed_pairs
+        description: Followed eligible pairs (numerator of the count share).
+        data_tests: [not_null]
+      - name: count_share
+        description: followed_pairs ÷ eligible_pairs (item 9).
+        data_tests: [not_null]
+      - name: eligible_pairs_with_value
+        description: Eligible pairs with a non-null value (value share population).
+      - name: eligible_value
+        description: Value of eligible pairs (denominator of the value share).
+      - name: followed_value
+        description: Value of followed eligible pairs (numerator of the value share).
+      - name: value_share
+        description: followed_value ÷ eligible_value (item 10).
+      - name: users
+        description: Distinct users with an eligible pair (the bootstrap's resampling units).
+  - name: mart_later_purchase_user_sums
+    description: >
+      Changes 2026-09-26 (Sprint 2 investigations), common rules: per (specification, user_id), the sums the
+      user-level cluster bootstrap resamples. Not exported.
+    columns:
+      - name: row_key
+        description: spec_key and user_id (grain key).
+        data_tests: [unique, not_null]
+      - name: spec_key
+        description: Specification.
+        data_tests: [not_null]
+      - name: user_id
+        description: Resampling unit.
+      - name: eligible_pairs
+        description: The user's eligible pairs.
+      - name: followed_pairs
+        description: The user's followed pairs.
+      - name: eligible_value
+        description: The user's eligible value.
+      - name: followed_value
+        description: The user's followed value.
+  - name: mart_later_purchase_km_pairs
+    description: >
+      Changes 2026-09-26 (Sprint 2 investigations), B item 12. Every carted pair with no purchase in the session
+      (no cutoff): time from session start to the first later purchase, or censoring at 2019-10-31 23:59:59 UTC,
+      with the cohort for the diagnostic of owner decision B-D6. Not exported.
+    columns:
+      - name: pair_key
+        description: The carted pair (grain key).
+        data_tests: [unique, not_null]
+      - name: user_id
+        description: Resampling unit.
+      - name: session_start
+        description: Time origin.
+        data_tests: [not_null]
+      - name: value
+        description: Weight for the value-weighted estimate; null pairs weigh zero.
+      - name: is_event
+        description: A later purchase exists (conditions 1-3).
+        data_tests: [not_null]
+      - name: duration_seconds
+        description: Seconds to the first later purchase, or to the censoring time.
+        data_tests: [not_null]
+      - name: cohort
+        description: Session start by the 7-day cutoff, or after it.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["by_7_day_cutoff", "after_7_day_cutoff"]
+  - name: mart_later_purchase_checks
+    description: >
+      Changes 2026-09-26 (Sprint 2 investigations), B items 14-16. The most-active-user threshold, the user_id
+      checks, and the diagnostics published beside the estimate (not findings).
+    columns:
+      - name: row_key
+        description: metric_group and metric_key (grain key).
+        data_tests: [unique, not_null]
+      - name: metric_group
+        description: user_id_check, sensitivity_threshold, or diagnostic.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["user_id_check", "sensitivity_threshold", "diagnostic"]
+      - name: metric_key
+        description: The check or diagnostic.
+        data_tests: [not_null]
+      - name: value
+        description: Its value.
+      - name: sort_order
+        description: Display order.
