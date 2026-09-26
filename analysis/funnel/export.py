@@ -394,6 +394,19 @@ def workflow_record() -> dict[str, Any]:
 
 A_DIMENSION_ORDER = ("time_since_previous_purchase", "price_vs_first_purchase", "purchase_events_in_pair",
                      "time_by_price", "category_top")
+# Groups the Changes entry defines (A item 3), with its labels and order. An empty group is exported as
+# a zero row, so a page shows it as 0 rather than omitting it (for example "Same second", which D1 empties).
+A_TIME_GROUPS = (("same_second", "Same second"), ("under_a_minute", "1 to 59 seconds later"),
+                 ("a_minute_or_more", "1 minute or more later"))
+A_PRICE_GROUPS = (("same_price", "Same price as the first purchase event"),
+                  ("different_price", "Different price from the first purchase event"))
+A_DEFINED_GROUPS = {
+    "time_since_previous_purchase": [(k, label, i + 1) for i, (k, label) in enumerate(A_TIME_GROUPS)],
+    "price_vs_first_purchase": [(k, label, i + 1) for i, (k, label) in enumerate(A_PRICE_GROUPS)],
+    "purchase_events_in_pair": [("2", "2", 1), ("3", "3", 2), ("4_or_more", "4 or more", 3)],
+    "time_by_price": [(f"{tk}|{pk}", f"{tl} · {pl}", 10 * (ti + 1) + pi + 1)
+                      for ti, (tk, tl) in enumerate(A_TIME_GROUPS) for pi, (pk, pl) in enumerate(A_PRICE_GROUPS)],
+}
 
 
 def verification_summary(dataset_sha: str, prefixes: tuple[str, ...]) -> dict[str, Any]:
@@ -419,7 +432,16 @@ def investigation_revenue_gap(con: duckdb.DuckDBPyConnection, dataset_sha: str) 
         cells = [r for r in decomposition if r["dimension"] == name]
         if name == "category_top":  # categories by value, largest first; others in the entry's order
             return sorted(cells, key=lambda r: (-float(r["repeat_purchase_value"]), r["group_key"]))
-        return sorted(cells, key=lambda r: r["sort_order"])
+        present = {r["group_key"]: r for r in cells}
+        unknown = set(present) - {k for k, _, _ in A_DEFINED_GROUPS[name]}
+        if unknown:
+            sys.exit(f"HALT: {name} has groups the Changes entry does not define: {sorted(unknown)}")
+        return [present.get(key) or {
+            "row_key": f"{name}:{key}", "dimension": name, "group_key": key, "group_label": label,
+            "sort_order": order, "repeat_purchase_events": 0, "pairs": 0, "repeat_purchase_value": 0.0,
+            "share_of_difference": 0.0, "top_10_pair_share": None,
+            **{k: total[k] for k in ("revenue", "revenue_repeat_collapsed", "revenue_difference")},
+        } for key, label, order in A_DEFINED_GROUPS[name]]
 
     return {
         "question": "Why are there two revenue figures?",
