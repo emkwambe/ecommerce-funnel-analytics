@@ -15,6 +15,10 @@ function Bar({ share }: { share: number }) {
 
 const rate = (r: number | null) => (r === null ? "—" : fmtPct(r, 1));
 
+// Below the sm breakpoint the three funnel columns fold into a line under the category name,
+// so the table fits a 390 px screen without hiding any figure.
+const wide = "hidden sm:table-cell";
+
 function CategoryTable({ rows, caption }: { rows: CategoryRow[]; caption: string }) {
   return (
     <div className={tableWrap}>
@@ -25,26 +29,32 @@ function CategoryTable({ rows, caption }: { rows: CategoryRow[]; caption: string
             <th className={th}>Category</th>
             <th className={`${th} text-right`}>Carted value with no observed purchase in this session</th>
             <th className={`${th} text-right`}>Revenue</th>
-            <th className={`${th} text-right`}>Sessions entering (view)</th>
-            <th className={`${th} text-right`}>View to cart event</th>
-            <th className={`${th} text-right`}>Cart event to purchase</th>
+            <th className={`${th} ${wide} text-right`}>Sessions entering (view)</th>
+            <th className={`${th} ${wide} text-right`}>View to cart event</th>
+            <th className={`${th} ${wide} text-right`}>Cart event to purchase</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
             <tr key={r.category_key} className="border-b border-line last:border-0">
-              <td className={`${td} ${r.category === "unknown" ? "italic text-muted" : ""}`}>{r.category}</td>
+              <td className={`${td} [overflow-wrap:anywhere]`}>
+                <span className={r.category === "unknown" ? "italic text-muted" : ""}>{r.category}</span>
+                <div className="num mt-1 text-xs text-muted sm:hidden">
+                  {fmtInt(r.funnel_pairs)} entering · view to cart event {rate(r.view_to_cart_step_rate)} · cart event
+                  to purchase {rate(r.cart_to_purchase_step_rate)}
+                </div>
+              </td>
               <td className={`${td} num text-right`}>
                 {fmtDollarsCompact(r.carted_value_with_no_observed_purchase)}
                 <div className="text-xs text-muted">{fmtInt(r.carted_pairs_with_no_observed_purchase)} pairs</div>
               </td>
               <td className={`${td} num text-right`}>{fmtDollarsCompact(r.revenue)}</td>
-              <td className={`${td} num text-right`}>{fmtInt(r.funnel_pairs)}</td>
-              <td className={`${td} num text-right`}>
+              <td className={`${td} ${wide} num text-right`}>{fmtInt(r.funnel_pairs)}</td>
+              <td className={`${td} ${wide} num text-right`}>
                 {rate(r.view_to_cart_step_rate)}
                 <div className="text-xs text-muted">{fmtInt(r.funnel_pairs_with_cart)}</div>
               </td>
-              <td className={`${td} num text-right`}>
+              <td className={`${td} ${wide} num text-right`}>
                 {rate(r.cart_to_purchase_step_rate)}
                 <div className="text-xs text-muted">{fmtInt(r.funnel_cart_pairs_with_carted_product_purchase)}</div>
               </td>

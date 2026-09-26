@@ -1,9 +1,9 @@
-// Smoke test for the site. Usage: SMOKE_URL=https://... npm run smoke (default: a local `next start`).
+// Smoke test for the site. Usage: npm run smoke (production) or SMOKE_URL=http://localhost:3000 npm run smoke.
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const base = (process.env.SMOKE_URL || "http://localhost:3000").replace(/\/$/, "");
+const base = (process.env.SMOKE_URL || "https://ecommercefunnel-analytics.vercel.app").replace(/\/$/, "");
 const dataSourceDoc = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "docs", "data-source.md");
 const documentedSha = readFileSync(dataSourceDoc, "utf-8").match(/^- \*\*SHA-256:\*\* `([0-9a-f]{64})`/m)?.[1];
 

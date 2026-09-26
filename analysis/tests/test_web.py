@@ -36,3 +36,14 @@ def test_section_6_display_labels_are_read_from_metrics_index_not_typed():
         text = page.read_text(encoding="utf-8")
         for label in labels:
             assert label not in text, f"{page.relative_to(REPO_ROOT)} types the label {label!r}; read it from metrics_index.json"
+
+
+def test_evidence_images_within_size_limit():
+    """Committed evidence images are compressed WebP of at most 300 KB (full-resolution copies are gitignored)."""
+    from funnel.row_guard import committable_files
+
+    images = [p for p in committable_files(("ai-workflow/evidence",))
+              if p.suffix.lower() in {".webp", ".png", ".jpg", ".jpeg"}]
+    for image in images:
+        assert image.suffix.lower() == ".webp", f"{image.relative_to(REPO_ROOT)}: commit WebP only"
+        assert image.stat().st_size <= 300 * 1024, f"{image.relative_to(REPO_ROOT)} exceeds 300 KB"

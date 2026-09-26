@@ -211,6 +211,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the delete is written as a literal path, `rm "/c/Dev/ecommerce-funnel-analytics/web/public/data/workflow.json"`.
 - **Guard added:** none beyond CLAUDE.md rule 10 and the permission check.
 
+**2026-09-26 · Sprint 1 Step 7 · Wide tables clipped at 390 px on the first production deploy**
+- **Origin:** Claude Code
+- **What was produced:** the `/funnel` category tables (six columns) and the home page's daily table (full dates and full revenue figures).
+- **What was wrong:** the pages did not overflow, but these tables scrolled sideways inside their boxes at 390 px, so part of each row was off-screen. Step 6's own check measured page overflow only, not clipped scroll boxes.
+- **How it was caught:** the Step 7 screenshot script, adopted from the first project, which also fails a page with a clipped scroll box (4 of 12 page-theme combinations failed on the first production deploy).
+- **Fix:** below the `sm` breakpoint, the three category funnel columns fold into a line under the category name, so no figure is hidden, and long codes wrap. The daily table uses short UTC day labels and compact revenue. All 12 combinations pass before the redeploy.
+- **Guard added:** `npm run screenshots` fails on page overflow or any clipped scroll box. `test_evidence_images_within_size_limit` holds committed evidence images to 300 KB.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

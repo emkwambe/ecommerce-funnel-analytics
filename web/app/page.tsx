@@ -123,7 +123,7 @@ export default function Home() {
             <table className="w-full text-sm">
               <thead className="border-b border-line">
                 <tr>
-                  <th className={th}>UTC day of session start</th>
+                  <th className={th}>UTC day</th>
                   <th className={`${th} text-right`}>Sessions</th>
                   <th className={`${th} text-right`}>Orders</th>
                   <th className={`${th} text-right`}>Session purchase rate</th>
@@ -133,11 +133,11 @@ export default function Home() {
               <tbody>
                 {days.map((d) => (
                   <tr key={d.period_key} className="border-b border-line last:border-0">
-                    <td className={`${td} num`}>{d.period_start}</td>
+                    <td className={`${td} num whitespace-nowrap`}>{prefix} {dayOfMonth(d.period_start)}</td>
                     <td className={`${td} num text-right`}>{fmtInt(d.sessions)}</td>
                     <td className={`${td} num text-right`}>{fmtInt(d.orders)}</td>
                     <td className={`${td} num text-right`}>{fmtPct(d.session_purchase_rate, 2)}</td>
-                    <td className={`${td} num text-right`}>{fmtDollars(d.revenue, 0)}</td>
+                    <td className={`${td} num text-right`}>{fmtDollarsCompact(d.revenue)}</td>
                   </tr>
                 ))}
               </tbody>
