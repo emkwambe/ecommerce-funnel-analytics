@@ -34,7 +34,7 @@ Tag `v1.0.1` (commit `b7f0044`).
 
 ## [1.0.0] — 2026-09-26
 
-Sprint 1 release. **Not tagged:** no `v1.0.0` tag was created at the time. This entry corresponds to commit `a96f7e0` (production deploy evidence, verification file, README).
+Sprint 1 release at commit `a96f7e0` (production deploy evidence, verification file, README). No tag was created at the time. The annotated tag `v1.0.0` was added retroactively on 2026-09-26, during Sprint 2, by the project owner's decision (`ai-workflow/sprint-2-verification.md`).
 
 ### Added
 - The metric contract, `docs/metrics.md`, committed before any business metric was computed (`8d4093f`), and its Changes entries.
