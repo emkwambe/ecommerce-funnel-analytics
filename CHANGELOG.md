@@ -6,6 +6,10 @@ Entries up to v1.0.1 were reconstructed in Sprint 2 from the git history. Figure
 
 ## [Unreleased]
 
+## [1.1.1] — 2026-09-26
+
+Tag `v1.1.1` (commit `c153a16`), deployed to production from `main`, where the production smoke test passed before tagging (`ai-workflow/evidence/sprint-2/smoke_production_v1.1.1.txt`). This entry was moved from Unreleased in the commit after the tag, because under the Governed tier every change to `main`, this file included, goes through a pull request.
+
 ### Fixed
 - The screenshot script writes flat file names for nested routes (`investigations-revenue-figures-390-light.webp`); nested names had failed the WebP step (correction log, Sprint 2 Step 7).
 - The README links the live `/investigations` page, restored after the v1.1.0 deploy (owner decision (b)).

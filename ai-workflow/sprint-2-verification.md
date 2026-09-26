@@ -31,6 +31,8 @@ Every decision below was made by the project owner (Eddy Mkwambe). Claude Code c
 | 2026-09-26 | H8 (release) | On the owner's instruction after the merge: `main` at `243c8c7` (clean tree) deployed to production with `vercel deploy --prod` (deployment `dpl_DuBWWMFpVwAn2zTCnPNMRstamfsR`, READY, target production). Production smoke passed, then the annotated tag `v1.1.0` was created on `243c8c7` and pushed. | `ai-workflow/evidence/sprint-2/smoke_production.txt`; `git ls-remote --tags origin`: `refs/tags/v1.1.0` → tag object `d7c95bd`, peeled to `243c8c7` |
 | 2026-09-26 | H8 | PR #8 (v1.1.0 evidence) merged by the owner via `gh`. | PR #8: state `MERGED`, merged by `emkwambe` at 2026-09-26T18:07:37Z, merge commit `d2f17de`, head `a5fc228`. CI on `main` at `d2f17de`: all three jobs success |
 | 2026-09-26 | Owner review before H9 | (1) The later-purchases page's "two independent recomputations" was found not exactly accurate (only B1's figures were recomputed twice; only 4 of 30 Kaplan–Meier points and no intervals were independently recomputed). The owner approved the corrected wording on both pages. (2) The figure 28,152 appears in no committed file or commit on any branch (only in a session report); the owner decided to log it. | Correction log (two entries); `verify.json` check names; `git grep` and `git log --all -G` |
+| 2026-09-26 | H8 | PR #9 (exact verification wording) merged by the owner in the browser. | PR #9: state `MERGED`, merged by `emkwambe` at 2026-09-26T18:21:16Z, merge commit `c153a16`, head `d700cd1`. CI on `main` at `c153a16` (run 36262241665): all three jobs success |
+| 2026-09-26 | H8 (release v1.1.1) | On the owner's instruction: `main` at `c153a16` (clean) redeployed to production (deployment `dpl_D7RqiZWDFXjezThGpmpKA19AQWSq`, READY, target production). Production smoke passed 30/30. The corrected section-7 wording was confirmed live on the production domain on both investigation pages, with neither old phrase present. The annotated tag `v1.1.1` was then created on `c153a16` and pushed, so the live site corresponds to a tagged release. Owner decision: the CHANGELOG 1.1.1 entry follows in the next PR. | `ai-workflow/evidence/sprint-2/smoke_production_v1.1.1.txt`; `git ls-remote --tags origin`: `refs/tags/v1.1.1` → tag object `d8af229`, peeled to `c153a16` |
 
 The seed-stability check (H3-D5) is reported in the generated section below.
 
@@ -109,7 +111,7 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 
 ## Tests
 
-`174 passed in 5.95s  (pytest_exit_code=0)`
+`174 passed in 6.03s  (pytest_exit_code=0)`
 
 ## Correction log: 19 Sprint 2 entries
 
@@ -144,3 +146,4 @@ The published intervals use the first seed. Across the four seeds, each bound mo
 - `cb3d76d` Merge pull request #6 from emkwambe/sprint-2/site
 - `243c8c7` Merge pull request #7 from emkwambe/sprint-2/release
 - `d2f17de` Merge pull request #8 from emkwambe/sprint-2/v110-evidence
+- `c153a16` Merge pull request #9 from emkwambe/sprint-2/verification-wording
