@@ -318,13 +318,21 @@ ENTRY_HEADING = re.compile(r"^\*\*(\d{4}-\d{2}-\d{2}) · (.+?) · (.+)\*\*$", re
 # Sprint 2 Step 4: "Project owner" added for errors in the owner's own specifications caught by a check.
 ORIGINS = ("Claude Code", "Claude Chat", "Project owner")
 
+# "How it was caught" categories of the trio correction-log template (owner decision, Sprint 2, v1.1.2): local test,
+# CI, Copilot review, human review, smoke, executor self-review, planner review. Keyword rules on the entry's
+# "How it was caught" line; the first match wins, so the more specific signals come first. Harness and shell signals
+# (the executor's own run stopping or failing) count as executor self-review, ahead of human review.
+CAUGHT_CATEGORIES = ("Local test", "CI", "Copilot review", "Human review", "Smoke", "Executor self-review",
+                     "Planner review")
 CAUGHT_RULES = (
-    ("Harness or shell", ("harness", "timeout", "shell error", "command error")),
-    ("Human review", ("human review",)),
-    ("Test or commit gate", ("pytest", "commit gate")),
-    ("Pipeline run or generated output", ("dbt exit code", "generated column types")),
-    ("Screenshot or smoke check", ("screenshot", "smoke")),
-    ("Claude Code's own review", ("review", "check")),
+    ("Planner review", ("planner review", "claude chat's review")),
+    ("Copilot review", ("copilot review",)),
+    ("Executor self-review", ("harness", "timeout", "shell error", "command error")),
+    ("CI", ("ci `", "github actions", "ci run", "in ci")),
+    ("Human review", ("human review", "owner's review", "review by the project owner")),
+    ("Smoke", ("smoke", "screenshot")),
+    ("Local test", ("pytest", "commit gate", "dbt exit code", "dbt test", "generated column types")),
+    ("Executor self-review", ("review", "check")),
 )
 MILESTONES = (
     ("conventions", "Conventions and preflight spec committed before data access",
