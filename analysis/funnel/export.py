@@ -36,7 +36,7 @@ from funnel.common import (
     require_dataset_hash_match,
     write_json,
 )
-from funnel.ingest import KAGGLE_LICENSE_FIELD, PUBLISHER_USAGE_STATEMENT, REES46_URL
+from funnel.ingest import KAGGLE_LICENSE_FIELD, PUBLISHER_USAGE_STATEMENT, REES46_URL, connect
 
 SCRIPT = "funnel.export"
 WAREHOUSE = DATA_DIR / "warehouse.duckdb"
@@ -503,7 +503,7 @@ def main() -> None:
     build = last_full_build(sha)
     if not WAREHOUSE.exists():
         sys.exit(f"HALT: {WAREHOUSE} missing; run python -m funnel.build first.")
-    con = duckdb.connect()
+    con = connect()  # the shared settings (funnel.common): memory limit, threads, insertion order, spill dir
     con.execute(f"ATTACH '{WAREHOUSE.as_posix()}' AS wh (READ_ONLY)")
     metrics_text = METRICS_MD.read_text(encoding="utf-8")
 
