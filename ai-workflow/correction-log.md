@@ -90,6 +90,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the test now requires the five named checks to be present and every check to be true.
 - **Guard added:** the same test now also fails if a UTC check is missing.
 
+**2026-09-26 · Sprint 1 Step 0 · Correction-log entry described a regeneration that had not yet run**
+- **Origin:** Claude Code
+- **What was produced:** the entry "Generated wording used terms the metric contract prohibits" (committed in `907a7f9`) states that the regenerated `docs/data-profile.md` and `profile.json` carry the new wording.
+- **What was wrong:** the entry was written before the regeneration it described. The source texts in `funnel/profile.py` and `funnel/verification.py` were fixed, but `funnel.profile` and `funnel.verification` had not been rerun. The committed `docs/data-profile.md` still read "a separate abandonment signal" (D9) and "the cart event for carts" (D3), and `ai-workflow/sprint-0-verification.md` still read "Carts with no view at or before in the session".
+- **How it was caught:** Claude Code's context review at the start of a new session, comparing the entry with the committed files, reported to the project owner.
+- **Fix:** `funnel.profile` and `funnel.verification` were rerun from a clean tree at `f1b0359` (manifest `git_worktree_dirty: false`). The regenerated files carry the new wording, and every count is unchanged. The earlier entry is now accurate as of this evidence commit.
+- **Guard added:** none new; `analysis/tests/test_naming_rules.py` (Sprint 1 Step 2) will fail on the old wording.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

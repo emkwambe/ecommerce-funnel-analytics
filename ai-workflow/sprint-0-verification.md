@@ -85,7 +85,7 @@ Event type levels observed, overall counts: `view` 40779399, `cart` 926516, `pur
 | Sessions spanning more than 24 hours | 17086 |
 | Purchases with no view of the product in the session | 1276 |
 | Purchases with no cart of the product in the session | 406639 |
-| Carts with no view at or before in the session | 4655 |
+| Cart events with no view at or before in the session | 4655 |
 | Sessions with more than one purchase event | 80261 |
 | (session, product) pairs with repeated purchase events | 41406 |
 
