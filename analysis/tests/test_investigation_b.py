@@ -88,6 +88,36 @@ def test_independent_b1_matches_hand_counts(bcon):
     assert b1["value_share"] == pytest.approx(200 / 290)
 
 
+def test_independent_all_specifications_kaplan_meier_and_diagnostics_match_hand_counts(bcon):
+    b = verify.independent_later_purchases(bcon)
+    expected = {"B1": (7, 3, 290, 200), "B2": (8, 3, 350, 210), "B3": (7, 4, 290, 230), "B5": (4, 1, 53, 15),
+                "B6": (6, 2, 240, 150), "B7": (7, 3, 290, 200), "B8": (6, 3, 260, 200)}
+    got = {k: (v["eligible_pairs"], v["followed_pairs"], v["eligible_value"], v["followed_value"])
+           for k, v in b["specs"].items()}
+    assert got == {k: (e, f, Decimal(ev), Decimal(fv)) for k, (e, f, ev, fv) in expected.items()}
+    assert b["identity"] == {"user_id_check:events_in_eligible_sessions_with_null_user_id": 0.0,
+                             "user_id_check:eligible_sessions_with_more_than_one_user_id": 0.0,
+                             "user_id_check:share_of_eligible_pairs_with_non_null_user_id": 1.0}
+    assert b["most_active_user_threshold_events"] == 7  # U2 has the most events (7); nobody exceeds it
+    assert b["within_1_hour_share"] == 0
+    assert b["km_all_pairs"] == pytest.approx({3: 3 / 8, 7: 4 / 8, 14: 5 / 8, 30: 5 / 8})
+    # By the 7-day cutoff: 3 of 7 before 7 days, none censored earlier. After it: p6 alone, bought in 1 day.
+    assert b["km_cohort_7_day"] == pytest.approx({"by_7_day_cutoff": 3 / 7, "after_7_day_cutoff": 1.0})
+
+
+def test_sql_kaplan_meier_agrees_with_the_numpy_one_under_censoring():
+    c = duckdb.connect()
+    c.execute("""CREATE TEMP TABLE b_pairs AS SELECT 'carted' AS pair_type, TIMESTAMP '2019-10-01' AS session_start,
+                 CASE WHEN ev THEN TIMESTAMP '2019-10-01' + d * INTERVAL 1 DAY END AS first_later
+                 FROM (VALUES (1, true), (2, false), (3, true), (4, true)) AS t(d, ev)""")
+    # Censored pairs are censored at 2019-10-31 23:59:59, so the 2-day non-event is at risk until then.
+    sql = [verify._km_sql(c, "true", d) for d in (1, 2, 4, 5)]
+    order = np.array([1, 3, 4, 30 + 86399 / D]) * D
+    numpy_km = lp.km_cdf(order, np.array([1, 1, 1, 0.0]), np.ones(4), np.array([1, 2, 4, 5]) * D)
+    assert sql == pytest.approx(list(numpy_km))
+    c.close()
+
+
 def _km(weights: np.ndarray, days: tuple[int, ...]) -> np.ndarray:
     order = np.argsort(KM_DURATIONS, kind="stable")
     return lp.km_cdf(KM_DURATIONS[order], KM_EVENTS[order], weights[order], np.array(days, dtype=float) * D)
