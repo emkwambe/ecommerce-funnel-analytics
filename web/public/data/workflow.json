@@ -1,9 +1,9 @@
 {
   "manifest": {
-    "git_commit_sha": "ed7c7e4887e4adc6418f10ae3f15f82c3f631d1c",
+    "git_commit_sha": "4cdf7f07653b41d6368e318dd6603663daabe440",
     "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-26T17:31:00+00:00",
+    "generated_at_utc": "2026-09-26T18:45:43+00:00",
     "script": "funnel.export"
   },
   "pipeline_build": {
@@ -117,19 +117,18 @@
   ],
   "correction_log": {
     "source": "ai-workflow/correction-log.md",
-    "n_entries": 40,
+    "n_entries": 49,
     "by_origin": {
-      "Claude Code": 36,
+      "Claude Code": 45,
       "Claude Chat": 3,
       "Project owner": 1
     },
     "by_caught": {
-      "Harness or shell": 4,
-      "Claude Code's own review": 20,
-      "Pipeline run or generated output": 2,
-      "Human review": 3,
-      "Test or commit gate": 9,
-      "Screenshot or smoke check": 2
+      "Executor self-review": 28,
+      "Local test": 11,
+      "Human review": 5,
+      "Smoke": 4,
+      "CI": 1
     },
     "by_phase": {
       "Sprint 0 Step 5": 4,
@@ -143,14 +142,29 @@
       "v1.0.1": 2,
       "Sprint 2 Step 0": 1,
       "Sprint 2 Step 3": 1,
-      "Sprint 2 Step 4": 7,
+      "Sprint 2 Step 4": 8,
       "Sprint 2 Step 5": 3,
-      "Sprint 2 Step 6": 1
+      "Sprint 2 Step 6": 2,
+      "Sprint 2 Step 7": 6,
+      "Sprint 2 v1.1.2": 1
     },
     "origin_rule": "origin is the entry's Origin line (Claude Code, Claude Chat, or Project owner)",
     "caught_rules": [
       {
-        "category": "Harness or shell",
+        "category": "Planner review",
+        "keywords": [
+          "planner review",
+          "claude chat's review"
+        ]
+      },
+      {
+        "category": "Copilot review",
+        "keywords": [
+          "copilot review"
+        ]
+      },
+      {
+        "category": "Executor self-review",
         "keywords": [
           "harness",
           "timeout",
@@ -159,34 +173,41 @@
         ]
       },
       {
+        "category": "CI",
+        "keywords": [
+          "ci `",
+          "github actions",
+          "ci run",
+          "in ci"
+        ]
+      },
+      {
         "category": "Human review",
         "keywords": [
-          "human review"
+          "human review",
+          "owner's review",
+          "review by the project owner"
         ]
       },
       {
-        "category": "Test or commit gate",
+        "category": "Smoke",
+        "keywords": [
+          "smoke",
+          "screenshot"
+        ]
+      },
+      {
+        "category": "Local test",
         "keywords": [
           "pytest",
-          "commit gate"
-        ]
-      },
-      {
-        "category": "Pipeline run or generated output",
-        "keywords": [
+          "commit gate",
           "dbt exit code",
+          "dbt test",
           "generated column types"
         ]
       },
       {
-        "category": "Screenshot or smoke check",
-        "keywords": [
-          "screenshot",
-          "smoke"
-        ]
-      },
-      {
-        "category": "Claude Code's own review",
+        "category": "Executor self-review",
         "keywords": [
           "review",
           "check"
@@ -199,49 +220,49 @@
         "phase": "Sprint 0 Step 5",
         "title": "DuckDB memory limit set without regard to available RAM",
         "origin": "Claude Code",
-        "caught_by": "Harness or shell"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-24",
         "phase": "Sprint 0 Step 5",
         "title": "Exact-duplicate check grouped everything into one group",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-24",
         "phase": "Sprint 0 Step 5",
         "title": "Profile key tripped the metric-lock guard",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-24",
         "phase": "Sprint 0 Step 6",
         "title": "Hash-gate path bound at definition time",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-24",
         "phase": "Sprint 0 Step 6",
         "title": "Synthetic fixture assumed a time-zone-aware timestamp",
         "origin": "Claude Code",
-        "caught_by": "Pipeline run or generated output"
+        "caught_by": "Local test"
       },
       {
         "date": "2026-09-24",
         "phase": "Sprint 0 Step 5",
         "title": "Command relied on the working directory",
         "origin": "Claude Code",
-        "caught_by": "Harness or shell"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-24",
         "phase": "Sprint 1 Step 0",
         "title": "Generated wording used terms the metric contract prohibits",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-24",
@@ -255,105 +276,105 @@
         "phase": "Sprint 1 Step 0",
         "title": "Ingest evidence test pinned the exact set of checks",
         "origin": "Claude Code",
-        "caught_by": "Test or commit gate"
+        "caught_by": "Local test"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 1 Step 0",
         "title": "Correction-log entry described a regeneration that had not yet run",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 1 Step 0",
         "title": "Inferred-loss wording not covered by the prohibited-term scan",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 1 Step 2",
         "title": "Injected-term check placed the term inside the excluded section",
         "origin": "Claude Code",
-        "caught_by": "Test or commit gate"
+        "caught_by": "Local test"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 1 Step 2",
         "title": "Contract prose used a prohibited count label outside the naming rules",
         "origin": "Claude Chat",
-        "caught_by": "Test or commit gate"
+        "caught_by": "Local test"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 1 Step 3",
         "title": "Edit command used `cd` and a bare `python`, and hung",
         "origin": "Claude Code",
-        "caught_by": "Harness or shell"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 1 Step 3",
         "title": "DuckDB settings in the dbt profile were re-applied per cursor",
         "origin": "Claude Code",
-        "caught_by": "Pipeline run or generated output"
+        "caught_by": "Local test"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 1 Step 3",
         "title": "Contract gave an impossible basis for two data-quality metrics",
         "origin": "Claude Chat",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 1 Step 3",
         "title": "Tie tests silently skipped by the build's test selection",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 1 Step 3",
         "title": "Build record's dbt summary was always empty",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 1 Step 5",
         "title": "`.gitignore` also ignored the committed exports folder",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 1 Step 5",
         "title": "Export manifest taken per file, after earlier writes",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 1 Step 6",
         "title": "Site text stated facts not read from the exports",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 1 Step 6",
         "title": "Daily chart ticks ran past the data and overflowed at 390 px",
         "origin": "Claude Code",
-        "caught_by": "Screenshot or smoke check"
+        "caught_by": "Smoke"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 1 Step 6",
         "title": "Correction-log titles exported to the site unscreened",
         "origin": "Claude Code",
-        "caught_by": "Test or commit gate"
+        "caught_by": "Local test"
       },
       {
         "date": "2026-09-26",
@@ -367,35 +388,35 @@
         "phase": "Sprint 1 Step 7",
         "title": "Wide tables clipped at 390 px on the first production deploy",
         "origin": "Claude Code",
-        "caught_by": "Screenshot or smoke check"
+        "caught_by": "Smoke"
       },
       {
         "date": "2026-09-26",
         "phase": "v1.0.1",
         "title": "Patch item specified from a text rendering of the page",
         "origin": "Claude Chat",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "v1.0.1",
         "title": "Git Bash rewrote leading-slash arguments into Windows paths",
         "origin": "Claude Code",
-        "caught_by": "Harness or shell"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 2 Step 0",
         "title": "`.env.example` left out of the last direct commit to main",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 2 Step 3",
         "title": "Export test pinned that no Changes entry touches decision D4",
         "origin": "Claude Code",
-        "caught_by": "Test or commit gate"
+        "caught_by": "Local test"
       },
       {
         "date": "2026-09-26",
@@ -409,70 +430,133 @@
         "phase": "Sprint 2 Step 4",
         "title": "Added wording-guard term `prove\\w*` was over-broad",
         "origin": "Project owner",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 2 Step 4",
         "title": "Correction-log entry written outside the log's classification rules",
         "origin": "Claude Code",
-        "caught_by": "Test or commit gate"
+        "caught_by": "Local test"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 2 Step 4",
         "title": "Commit message stated a test count before the gate reported it",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 2 Step 4",
         "title": "Category export order was not fully determined",
         "origin": "Claude Code",
-        "caught_by": "Test or commit gate"
+        "caught_by": "Local test"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 2 Step 4",
         "title": "Report described a smooth timing hump as bunching below 60 seconds",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 2 Step 4",
         "title": "Exploratory gap histogram counted each pair's first event as a gap over 300 s",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 2 Step 5",
         "title": "Export opened DuckDB without the shared memory settings",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 2 Step 5",
         "title": "Independent Kaplan–Meier SQL failed when a time step removed everyone at risk",
         "origin": "Claude Code",
-        "caught_by": "Test or commit gate"
+        "caught_by": "Local test"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 2 Step 5",
         "title": "Ledger row claimed an independent recomputation that did not exist",
         "origin": "Claude Code",
-        "caught_by": "Claude Code's own review"
+        "caught_by": "Executor self-review"
       },
       {
         "date": "2026-09-26",
         "phase": "Sprint 2 Step 6",
         "title": "Legend-label test pinned the whole metrics index",
         "origin": "Claude Code",
-        "caught_by": "Test or commit gate"
+        "caught_by": "Local test"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 6",
+        "title": "Long field paths in Sources lines widened the investigation pages at 390 px",
+        "origin": "Claude Code",
+        "caught_by": "Smoke"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 7",
+        "title": "Verification generator listed the timing groups that H4 kept unpublished",
+        "origin": "Claude Code",
+        "caught_by": "Executor self-review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 7",
+        "title": "README linked to a production page before it was deployed",
+        "origin": "Claude Code",
+        "caught_by": "CI"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 7",
+        "title": "Screenshot script failed on nested routes when writing WebP evidence",
+        "origin": "Claude Code",
+        "caught_by": "Smoke"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 7",
+        "title": "Later-purchases page overstated its independent recomputation",
+        "origin": "Claude Code",
+        "caught_by": "Human review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 4",
+        "title": "Report quoted a hand-added total (28,152) for duplicate cart rows",
+        "origin": "Claude Code",
+        "caught_by": "Human review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 7",
+        "title": "Decision record attributed an ordering to the owner that the owner had not decided",
+        "origin": "Claude Code",
+        "caught_by": "Executor self-review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 Step 7",
+        "title": "Final-report draft repeated the verification overstatement and miscounted the site's lag",
+        "origin": "Claude Code",
+        "caught_by": "Executor self-review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 v1.1.2",
+        "title": "Correction-log classifier had no CI category",
+        "origin": "Claude Code",
+        "caught_by": "Executor self-review"
       }
     ]
   },
@@ -489,6 +573,7 @@
     "ai-workflow/sprint-0.md",
     "ai-workflow/sprint-1-verification.md",
     "ai-workflow/sprint-1.md",
+    "ai-workflow/sprint-2-report.md",
     "ai-workflow/sprint-2-verification.md",
     "ai-workflow/sprint-2.md",
     "ai-workflow/tools.md",

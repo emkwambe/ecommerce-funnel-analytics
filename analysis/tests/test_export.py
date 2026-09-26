@@ -96,6 +96,24 @@ def test_every_correction_log_entry_is_classified():
     assert "Other" not in log["by_origin"]
 
 
+def test_caught_categories_are_the_trio_template_categories():
+    """v1.1.2 (owner decision): "how caught" uses exactly the trio correction-log template's categories, and an
+    entry caught by CI (the README link error in PR #7) is classified as CI."""
+    from funnel.export import CAUGHT_CATEGORIES, CAUGHT_RULES, CORRECTION_LOG, caught_category, parse_correction_log
+
+    assert CAUGHT_CATEGORIES == ("Local test", "CI", "Copilot review", "Human review", "Smoke",
+                                 "Executor self-review", "Planner review")
+    assert {label for label, _ in CAUGHT_RULES} == set(CAUGHT_CATEGORIES)
+    log = parse_correction_log(CORRECTION_LOG.read_text(encoding="utf-8"))
+    assert set(log["by_caught"]) <= set(CAUGHT_CATEGORIES)
+    by_title = {e["title"]: e["caught_by"] for e in log["entries"]}
+    assert by_title["README linked to a production page before it was deployed"] == "CI"
+    assert caught_category("CI `docs-checks` (lychee) on PR #7") == "CI"
+    assert caught_category("the pytest commit gate (1 failed)") == "Local test"
+    assert caught_category("human review by the project owner") == "Human review"
+    assert caught_category("Claude Code's harness stopped the run; the human reviewed it") == "Executor self-review"
+
+
 def test_metrics_index_maps_legend_labels_to_full_labels(metrics_text):
     """Changes 2026-09-26 (third entry): chart legends use short labels; tables and tooltips use the full ones."""
     index = parse_metrics_index(metrics_text)

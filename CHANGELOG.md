@@ -6,6 +6,14 @@ Entries up to v1.0.1 were reconstructed in Sprint 2 from the git history. Figure
 
 ## [Unreleased]
 
+## [1.1.2] — 2026-09-26
+
+Tag `v1.1.2` is created on the deployed merge commit after the production smoke test passes.
+
+### Changed
+- The correction log's "how caught" categories are the trio template's: local test, CI, Copilot review, human review, smoke, executor self-review, planner review (owner decision). The README link error from PR #7 is classified as CI.
+- `/how-its-built` refreshed: the correction-log statistics include every Sprint 2 entry (`workflow.json` re-exported).
+
 ## [1.1.1] — 2026-09-26
 
 Tag `v1.1.1` (commit `c153a16`), deployed to production from `main`, where the production smoke test passed before tagging (`ai-workflow/evidence/sprint-2/smoke_production_v1.1.1.txt`). This entry was moved from Unreleased in the commit after the tag, because under the Governed tier every change to `main`, this file included, goes through a pull request.

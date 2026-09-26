@@ -403,6 +403,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the report uses the owner-approved description of the verification, and the code-computed count (seven). Ships in this commit.
 - **Guard added:** the same as the two earlier entries it repeats: verification is described from `verify.json` check names, and every count in a report comes from code output.
 
+**2026-09-26 · Sprint 2 v1.1.2 · Correction-log classifier had no CI category**
+- **Origin:** Claude Code (Sprint 1 Step 6, `CAUGHT_RULES` in `funnel/export.py`, written before the project had CI)
+- **What was produced:** "how caught" categories of the project's own making (Harness or shell; Human review; Test or commit gate; Pipeline run or generated output; Screenshot or smoke check; Claude Code's own review), with no category for CI.
+- **What was wrong:** once the Governed tier added CI, an error caught by the CI link check (the README link to an undeployed page, PR #7) fell through to the catch-all "Claude Code's own review". The `/how-its-built` statistics under-counted what CI caught, and the categories did not match the trio template's.
+- **How it was caught:** Claude Code's review while gathering the Sprint 2 final report, flagged to the project owner as an open item.
+- **Fix:** by the owner's decision, the classifier uses exactly the trio template's categories: local test, CI, Copilot review, human review, smoke, executor self-review, and planner review. Checked on all 48 entries before and after: one entry changes meaning (the README link error, now CI), and every other entry keeps its meaning under the template's name. Harness and shell signals count as executor self-review. Ships in v1.1.2 with a refreshed `/how-its-built`.
+- **Guard added:** `test_caught_categories_are_the_trio_template_categories` (test_export.py): the categories are the template's, every entry falls in one, and the README entry is CI.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.
