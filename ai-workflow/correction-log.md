@@ -106,6 +106,22 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the text now reads "Which price is the value of a purchase, or of carted products with no observed purchase in the session." The code change ships in this commit, and the profile is rerun from the resulting clean tree in the next evidence commit. Counts are unaffected.
 - **Guard added:** "lost cart" and "lost carts" are added to `docs/metrics.md` Section 1 rule 3 before the contract commit, and `analysis/tests/test_naming_rules.py` covers them with an injected-term check.
 
+**2026-09-26 · Sprint 1 Step 2 · Injected-term check placed the term inside the excluded section**
+- **Origin:** Claude Code
+- **What was produced:** `test_injected_term_in_metrics_md_outside_section_1_is_caught` in `analysis/tests/test_naming_rules.py` inserted each term just before the `## 2. Event rules` heading.
+- **What was wrong:** Section 1 runs up to that heading, so the injected text sat inside Section 1, which the guard excludes by design. The guard correctly ignored it, and 11 injection checks failed. The test was wrong, not the guard.
+- **How it was caught:** the pytest commit gate before the metric-contract commit (12 failed, 72 passed; the twelfth failure is the next entry's contract wording).
+- **Fix:** the term is now inserted before the `## 3. Session rules` heading, in the body of Section 2. Ships in this commit.
+- **Guard added:** `test_terms_inside_metrics_md_section_1_are_allowed` shows the Section 1 exclusion is what lets the contract's own wording pass.
+
+**2026-09-26 · Sprint 1 Step 2 · Contract prose used "carts" outside the naming rules**
+- **Origin:** the contract draft provided for commit (drafting origin to be confirmed by the project owner); the inconsistency was surfaced by Claude Code's new test
+- **What was produced:** `docs/metrics.md` Section 7 read "Always labeled as events, never as carts.", and the Section 1 enforcement paragraph banned "carts" only "used as a count label", while rule 1 says "Never say "carts"".
+- **What was wrong:** the contract was inconsistent with itself. A whole-word check, the only form a test can enforce reliably, flagged the Section 7 sentence.
+- **How it was caught:** the pytest commit gate (`test_committable_web_docs_and_exports_follow_naming_rules`), before the contract was first committed.
+- **Fix:** the project owner reworded Section 7 to "The raw count of deduplicated cart events, always labeled as cart events." The enforcement paragraph now bans the whole word "carts" anywhere outside Section 1, which covers "unique carts". No other occurrence of "carts" exists outside Section 1. Ships in this commit, the contract's first.
+- **Guard added:** `test_naming_rules.py` enforces the whole-word rule, and `test_guard_list_matches_contract_rule_3` keeps the guard's list equal to rule 3's.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.
