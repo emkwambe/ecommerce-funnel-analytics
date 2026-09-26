@@ -1,27 +1,27 @@
 {
   "manifest": {
-    "git_commit_sha": "d9ddc6561c421a58a3e5e6faa5bdfb610b680c62",
+    "git_commit_sha": "f6f5c28f7f027e90ddf4ab4dc7f3e0f52b2985d6",
     "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-26T07:23:06+00:00",
+    "generated_at_utc": "2026-09-26T09:34:23+00:00",
     "script": "funnel.export"
   },
   "pipeline_build": {
-    "git_commit_sha": "35256ed8eb526bf7c9dcdb043f5160920269b985",
-    "generated_at_utc": "2026-09-26T06:15:02+00:00",
+    "git_commit_sha": "4ec60953f5b37a52de4fe8b4b75cd08a74773182",
+    "generated_at_utc": "2026-09-26T09:24:02+00:00",
     "dbt_done_counts": {
-      "pass": 88,
+      "pass": 90,
       "warn": 0,
       "error": 0,
       "skip": 0,
       "no_op": 0,
       "reused": 0,
-      "total": 88
+      "total": 90
     },
     "test_coverage": {
       "models_built": 10,
-      "tests_expected": 78,
-      "tests_run": 78,
+      "tests_expected": 80,
+      "tests_run": 80,
       "tests_expected_not_run": []
     }
   },
@@ -97,18 +97,26 @@
       "short_sha": "2404581",
       "date_utc": "2026-09-26 06:38 UTC",
       "subject": "Sprint 1 Step 5: JSON exports with manifests"
+    },
+    {
+      "event": "changes",
+      "label": "Metric contract Changes entry",
+      "sha": "b8321ebbd46b7a0a89eaab467606c93709812fe2",
+      "short_sha": "b8321eb",
+      "date_utc": "2026-09-26 07:36 UTC",
+      "subject": "metrics.md Changes 2026-09-26: session-level purchase paths; cart sessions with a purchase of no carted product"
     }
   ],
   "correction_log": {
     "source": "ai-workflow/correction-log.md",
-    "n_entries": 25,
+    "n_entries": 27,
     "by_origin": {
-      "Claude Code": 23,
-      "Claude Chat": 2
+      "Claude Code": 24,
+      "Claude Chat": 3
     },
     "by_caught": {
-      "Harness or shell": 3,
-      "Claude Code's own review": 12,
+      "Harness or shell": 4,
+      "Claude Code's own review": 13,
       "Pipeline run or generated output": 2,
       "Human review": 2,
       "Test or commit gate": 4,
@@ -122,7 +130,8 @@
       "Sprint 1 Step 3": 5,
       "Sprint 1 Step 5": 2,
       "Sprint 1 Step 6": 4,
-      "Sprint 1 Step 7": 1
+      "Sprint 1 Step 7": 1,
+      "v1.0.1": 2
     },
     "origin_rule": "origin is the entry's Origin line (Claude Code or Claude Chat)",
     "caught_rules": [
@@ -131,7 +140,8 @@
         "keywords": [
           "harness",
           "timeout",
-          "shell error"
+          "shell error",
+          "command error"
         ]
       },
       {
@@ -344,13 +354,29 @@
         "title": "Wide tables clipped at 390 px on the first production deploy",
         "origin": "Claude Code",
         "caught_by": "Screenshot or smoke check"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "v1.0.1",
+        "title": "Patch item specified from a text rendering of the page",
+        "origin": "Claude Chat",
+        "caught_by": "Claude Code's own review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "v1.0.1",
+        "title": "Git Bash rewrote leading-slash arguments into Windows paths",
+        "origin": "Claude Code",
+        "caught_by": "Harness or shell"
       }
     ]
   },
   "workflow_files": [
+    "ai-workflow/claim-ledger.md",
     "ai-workflow/correction-log.md",
     "ai-workflow/sprint-0-verification.md",
     "ai-workflow/sprint-0.md",
+    "ai-workflow/sprint-1-verification.md",
     "ai-workflow/sprint-1.md"
   ]
 }
