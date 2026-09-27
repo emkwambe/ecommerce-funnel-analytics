@@ -534,6 +534,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the owner approved three rewordings: "For carted products in sessions starting …", "… is not the same as value never purchased.", and "Why did products carted in late October show a lower later-purchase rate?". `closing-content.md` was updated in place in this commit.
 - **Guard added:** `python -m funnel.closing` refuses content that the naming guard flags. Its outputs are also covered by the existing tests: `web/public/data/closing.json` is scanned by `test_naming_rules`, and the closing report, the closing export, and the `/questions` and home pages are a surface of the wording guard (`test_wording_guard.py`). The phrase list stays in test code, as the Sprint 2 contract requires.
 
+**2026-09-27 · Closing · The closing report linked to a file not yet on main**
+- **Origin:** Claude Code (`analysis/funnel/closing.py`, `render_report`)
+- **What was produced:** `docs/closing-report.md` linked question 6's evidence as `https://github.com/.../blob/main/ai-workflow/escalations/2026-09-27-C-rankings-stop-rules.md`.
+- **What was wrong:** the brief reaches `main` only when this PR merges, so the link returned 404 on the PR. This is the same class of error as the README link in PR #7.
+- **How it was caught:** CI: the `docs-checks` link check on PR #17 (run 36352732338) failed with `[404]`.
+- **Fix:** the report links to the brief by relative path (`../ai-workflow/escalations/...`), which the link checker resolves in the branch. The `/questions` page keeps the absolute GitHub link, which resolves after the merge and isn't link-checked. Report regenerated in this commit.
+- **Guard added:** none new; the CI link check caught it as designed.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

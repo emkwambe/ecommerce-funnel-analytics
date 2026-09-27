@@ -237,7 +237,9 @@ def render_report(template: str, bound: dict[str, Any], figures: dict[str, dict[
     questions += ["", "| # | Question | Why it matters | Who can answer | Evidence |", "|---|---|---|---|---|"]
     for q in bound["questions"]:
         ev = q["evidence"]
-        href = ev["href"] if ev["external"] else f"https://ecommercefunnel-analytics.vercel.app{ev['href']}"
+        # The report lives in the repo, so it links to the brief by relative path (resolvable before the merge);
+        # site pages link to the live site.
+        href = f"../{ESCALATION_BRIEF}" if ev["external"] else f"https://ecommercefunnel-analytics.vercel.app{ev['href']}"
         questions.append(f"| {q['n']} | {_md_cell(render(q['question'], figures))} | "
                          f"{_md_cell(render(q['why'], figures))} | {_md_cell(q['who'])} | "
                          f"[{ev['label']}]({href}) |")
