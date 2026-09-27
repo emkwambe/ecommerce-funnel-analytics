@@ -26,7 +26,10 @@ const closing = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.u
 const question1 = closing.questions.find((q) => q.start_here);
 // Render {figure} tokens from the export, then compare the text up to the first character HTML may escape.
 const rendered = (s) => s.replace(/\{([a-z_]+)\}/g, (_, k) => closing.figures[k].formatted);
-const plainPrefix = (s) => rendered(s).split(/["'&<>]/)[0].trim();
+const plainPrefix = (s) => rendered(s).split(/["'&<>`]/)[0].trim();
+// Inline code spans in the export (e.g. `user_id`) must render as code, never as literal backticks.
+const codeSpans = [...new Set(closing.questions.flatMap((q) => [q.question, q.card_line, q.why, q.who])
+  .flatMap((t) => [...t.matchAll(/`([^`]+)`/g)].map((m) => m[1])))];
 const ATTRIBUTION = [
   "https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store",
   "https://rees46.com",
@@ -84,6 +87,21 @@ try {
   check(`/questions shows all ${closing.questions.length} questions`,
     closing.questions.every((q) => questions.includes(plainPrefix(q.question))));
   check("/questions has a Sources line", questions.includes("Sources:"));
+  check("/questions is titled \"Questions for further research\"", questions.includes("Questions for further research"));
+  check("/questions renders inline code, not literal backticks",
+    codeSpans.every((s) => questions.includes(`<code class="[overflow-wrap:anywhere]">${s}</code>`) && !questions.includes(`\`${s}\``)),
+    codeSpans.join(", "));
+  check("/questions evidence links use readable labels",
+    closing.questions.every((q) => questions.includes(q.evidence.label.replace(/&/g, "&amp;"))));
+  const nav = home.slice(home.indexOf("<nav"), home.indexOf("</nav>"));
+  const order = ["Funnel", "Investigations", "How it&#x27;s built", "Data", "Data quality", "Metrics", "Further research"];
+  const positions = order.map((label) => nav.indexOf(`>${label}</a>`));
+  check("nav order: Funnel, Investigations, How it's built, Data, Data quality, Metrics, Further research",
+    positions.every((p, i) => p >= 0 && (i === 0 || p > positions[i - 1])), positions.join(","));
+  const built = await (await fetch(`${base}/how-its-built`)).text();
+  check("/how-its-built tile \"Verification by tests and human review\" with the owner sign-off sentence",
+    built.includes("Verification by tests and human review") &&
+    built.includes("The project owner reviewed the results and signed off each published claim."));
 } catch (e) {
   check("closing content on / and /questions", false, String(e));
 }

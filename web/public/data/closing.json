@@ -1,9 +1,9 @@
 {
   "manifest": {
-    "git_commit_sha": "979c3c32b424deae1abf7562175deb9eb14b6068",
-    "git_worktree_dirty": false,
+    "git_commit_sha": "3b9eab16f99dde9b3b58b42b9edd25bfa5f06cdc",
+    "git_worktree_dirty": true,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-27T21:47:43+00:00",
+    "generated_at_utc": "2026-09-27T22:24:42+00:00",
     "script": "funnel.closing"
   },
   "source": {
@@ -128,7 +128,7 @@
       "group": "product_engineering",
       "evidence": {
         "href": "/funnel#purchase-paths",
-        "label": "/funnel (purchase paths section)",
+        "label": "See the evidence: purchase paths",
         "external": false
       },
       "start_here": true
@@ -142,7 +142,7 @@
       "group": "product_engineering",
       "evidence": {
         "href": "/investigations/revenue-figures",
-        "label": "/investigations/revenue-figures",
+        "label": "See the evidence: revenue figures investigation",
         "external": false
       },
       "start_here": false
@@ -156,7 +156,7 @@
       "group": "product_engineering",
       "evidence": {
         "href": "/investigations/later-purchases#identity-checks",
-        "label": "/investigations/later-purchases (identity checks)",
+        "label": "See the evidence: identity checks",
         "external": false
       },
       "start_here": false
@@ -170,7 +170,7 @@
       "group": "more_data",
       "evidence": {
         "href": "/investigations/later-purchases",
-        "label": "/investigations/later-purchases",
+        "label": "See the evidence: later purchases investigation",
         "external": false
       },
       "start_here": false
@@ -184,7 +184,7 @@
       "group": "more_data",
       "evidence": {
         "href": "/investigations/later-purchases#late-october",
-        "label": "/investigations/later-purchases (late-October finding)",
+        "label": "See the evidence: late-October finding",
         "external": false
       },
       "start_here": false
@@ -198,7 +198,7 @@
       "group": "better_methods",
       "evidence": {
         "href": "https://github.com/emkwambe/ecommerce-funnel-analytics/blob/main/ai-workflow/escalations/2026-09-27-C-rankings-stop-rules.md",
-        "label": "The escalation brief (GitHub)",
+        "label": "See the evidence: escalation brief (GitHub)",
         "external": true
       },
       "start_here": false
@@ -212,7 +212,7 @@
       "group": "better_methods",
       "evidence": {
         "href": "/data-quality",
-        "label": "/data-quality",
+        "label": "See the evidence: data quality",
         "external": false
       },
       "start_here": false
@@ -226,7 +226,7 @@
       "group": "experiment",
       "evidence": {
         "href": "/funnel",
-        "label": "/funnel",
+        "label": "See the evidence: session funnel",
         "external": false
       },
       "start_here": false
@@ -240,7 +240,7 @@
       "group": "more_data",
       "evidence": {
         "href": "/data#limitations",
-        "label": "/data (limitations)",
+        "label": "See the evidence: limitations",
         "external": false
       },
       "start_here": false

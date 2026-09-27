@@ -15,8 +15,8 @@ const ROLES = [
     body: "Claude Code carried out each sprint brief inside the repository under binding rules: no hand-typed numbers, a metric lock until the contract was committed, a memory gate before heavy runs, and a manifest on every export. It stopped and asked whenever the contract was unclear or a check failed.",
   },
   {
-    title: "Verification by tests and review",
-    body: "The dbt pipeline carries schema, reconciliation, and tie tests, and every build must run all expected tests. A separate script recomputes the headline metrics from the raw file without dbt and matches them exactly. Guard tests enforce the naming rules and the no-row-level-data rule, and every catch is logged.",
+    title: "Verification by tests and human review",
+    body: "The dbt pipeline carries schema, reconciliation, and tie tests, and every build must run all expected tests. A separate script recomputes the headline metrics from the raw file without dbt and matches them exactly. Guard tests enforce the naming rules and the no-row-level-data rule, and every catch is logged. The project owner reviewed the results and signed off each published claim.",
   },
 ];
 

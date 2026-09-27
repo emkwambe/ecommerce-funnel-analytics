@@ -3,7 +3,7 @@ import { closingSources, closingText, getClosing, getKpis, getPurchasePaths, met
 import { fmtDollars, fmtDollarsCompact, fmtInt, fmtPct } from "@/lib/format";
 import { niceDomain } from "@/lib/scale";
 import { LineChart } from "./line-chart";
-import { Kpi, Section, Sources, tableWrap, td, th } from "./ui";
+import { InlineText, Kpi, Section, Sources, tableWrap, td, th } from "./ui";
 
 const monthName = (isoDate: string) =>
   new Date(`${isoDate}T00:00:00Z`).toLocaleString("en-US", { month: "short", timeZone: "UTC" });
@@ -56,8 +56,8 @@ export default function Home() {
         href="/questions"
         className="block space-y-1 rounded-lg border border-accent/40 bg-accent/10 p-4 hover:border-accent"
       >
-        <span className="text-sm font-medium text-accent">Start here: questions worth asking next →</span>
-        <span className="block font-semibold">{closingText(question1.question, closing.figures)}</span>
+        <span className="text-sm font-medium text-accent">Start here: questions for further research →</span>
+        <span className="block font-semibold"><InlineText text={closingText(question1.question, closing.figures)} /></span>
         <span className="block text-sm text-muted">{closing.question_1.lead}</span>
       </Link>
 
@@ -65,7 +65,7 @@ export default function Home() {
         <ol className="space-y-3">
           {closing.findings.map((finding) => (
             <li key={finding.id} className="rounded-lg border border-line bg-surface p-4">
-              <p>{closingText(finding.text, closing.figures)}</p>
+              <p><InlineText text={closingText(finding.text, closing.figures)} /></p>
               <p className="mt-1 text-xs text-muted">Claim tier: {finding.tier}</p>
             </li>
           ))}
@@ -213,7 +213,7 @@ export default function Home() {
 
       <Section n={5} title="Where to look next">
         <ul className="space-y-1 text-sm">
-          <li><Link href="/questions" className="text-accent underline">Questions worth asking next</Link>, grouped by who can answer them.</li>
+          <li><Link href="/questions" className="text-accent underline">Questions for further research</Link>, grouped by who can answer them.</li>
           <li><Link href="/funnel" className="text-accent underline">The session funnel</Link>, purchase paths, and categories.</li>
           <li><Link href="/investigations" className="text-accent underline">Investigations</Link>: why there are two revenue figures, and whether carted products were purchased in a later session.</li>
           <li><Link href="/data-quality" className="text-accent underline">Data quality</Link>, with each metric&apos;s basis and the long-session sensitivity.</li>
