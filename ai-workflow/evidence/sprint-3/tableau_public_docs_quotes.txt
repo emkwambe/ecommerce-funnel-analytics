@@ -1,0 +1,22 @@
+Tableau Public official documentation: verbatim sentences, Sprint 3 Step 3 (publishing check)
+Each sentence was located by exact string match in the page text (UTF-8, tags stripped, entities decoded, whitespace collapsed).
+Retrieved (UTC): 2026-09-27 01:18
+
+https://help.tableau.com/current/pro/desktop/en-us/public_faq.htm
+  page sha256: 83a5cf686bb60c04139196a2ce925834d3404a6dd425297e11383e1eac74acde; Applies to: Tableau Public
+  [found] "Workbooks and data published to your Tableau Public profile are not private and are freely accessible to anyone."
+  [found] "Note : Anyone who knows (or stumbles across) the URL for the viz can see it, so be sure not to use this service for data that isn’t meant for sharing."
+  [found] "By default, any Tableau Public viz as well as the underlying data can be downloaded by clicking the Download link in the lower right corner of the viz."
+  [found] "The workbook (TWBX file) can be opened by anyone with Tableau Desktop (Professional or Public Edition)."
+  [found] "You can toggle off the ability to download the workbook and the underlying data set in the viz settings."
+  [found] "You can also set the default behavior for new vizzes in your profile settings."
+  [found] "Tableau Public only supports extracted data sources, and does not support live connections to data."
+  [found] "Tableau Public is limited to 15M rows of data per workbook."
+
+https://help.tableau.com/current/pro/desktop/en-us/publish_workbooks_tableaupublic.htm
+  page sha256: f687ca5bc0f9796e92a98f1f2a516d6247066a9df5c82caf57f71330c9f7754d; Applies to: Tableau Desktop, Tableau Public
+  [found] "Workbooks and data published to your Tableau Public profile are not private and are freely accessible to anyone."
+  [found] "On Tableau Public, anyone can interact with your views, or download your workbooks or data sources."
+  [found] "When you save a workbook to Tableau Public, the publishing process creates an extract of the data connection."
+
+all sentences found: True
