@@ -538,7 +538,7 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Origin:** Claude Code (`analysis/funnel/closing.py`, `render_report`)
 - **What was produced:** `docs/closing-report.md` linked question 6's evidence as `https://github.com/.../blob/main/ai-workflow/escalations/2026-09-27-C-rankings-stop-rules.md`.
 - **What was wrong:** the brief reaches `main` only when this PR merges, so the link returned 404 on the PR. This is the same class of error as the README link in PR #7.
-- **How it was caught:** CI: the `docs-checks` link check on PR #17 (run 36352732338) failed with `[404]`.
+- **How it was caught:** in CI: the `docs-checks` link check on PR #17 (run 36352732338) failed with `[404]`.
 - **Fix:** the report links to the brief by relative path (`../ai-workflow/escalations/...`), which the link checker resolves in the branch. The `/questions` page keeps the absolute GitHub link, which resolves after the merge and isn't link-checked. Report regenerated in this commit.
 - **Guard added:** none new; the CI link check caught it as designed.
 

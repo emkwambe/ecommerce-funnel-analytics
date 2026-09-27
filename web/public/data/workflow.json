@@ -1,27 +1,27 @@
 {
   "manifest": {
-    "git_commit_sha": "4cdf7f07653b41d6368e318dd6603663daabe440",
-    "git_worktree_dirty": false,
+    "git_commit_sha": "461d90a197c90c670f03e38587d7cee4465a6173",
+    "git_worktree_dirty": true,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-26T18:45:43+00:00",
+    "generated_at_utc": "2026-09-27T22:50:48+00:00",
     "script": "funnel.export"
   },
   "pipeline_build": {
-    "git_commit_sha": "1512d763ea81fa45918f8fced2c708ea02efbf39",
-    "generated_at_utc": "2026-09-26T14:51:29+00:00",
+    "git_commit_sha": "b62b32e6fdb813cd7045e9b8077917cda0a13d3b",
+    "generated_at_utc": "2026-09-27T17:38:41+00:00",
     "dbt_done_counts": {
-      "pass": 191,
+      "pass": 216,
       "warn": 0,
       "error": 0,
       "skip": 0,
       "no_op": 0,
       "reused": 0,
-      "total": 191
+      "total": 216
     },
     "test_coverage": {
-      "models_built": 21,
-      "tests_expected": 170,
-      "tests_run": 170,
+      "models_built": 23,
+      "tests_expected": 193,
+      "tests_run": 193,
       "tests_expected_not_run": []
     }
   },
@@ -117,18 +117,19 @@
   ],
   "correction_log": {
     "source": "ai-workflow/correction-log.md",
-    "n_entries": 49,
+    "n_entries": 61,
     "by_origin": {
-      "Claude Code": 45,
-      "Claude Chat": 3,
-      "Project owner": 1
+      "Claude Code": 54,
+      "Claude Chat": 4,
+      "Project owner": 2,
+      "Unattributed second actor": 1
     },
     "by_caught": {
-      "Executor self-review": 28,
-      "Local test": 11,
-      "Human review": 5,
+      "Executor self-review": 33,
+      "Local test": 16,
+      "Human review": 6,
       "Smoke": 4,
-      "CI": 1
+      "CI": 2
     },
     "by_phase": {
       "Sprint 0 Step 5": 4,
@@ -146,9 +147,16 @@
       "Sprint 2 Step 5": 3,
       "Sprint 2 Step 6": 2,
       "Sprint 2 Step 7": 6,
-      "Sprint 2 v1.1.2": 1
+      "Sprint 2 v1.1.2": 2,
+      "Sprint 3 Step 0": 2,
+      "Sprint 3 Step 1": 1,
+      "Sprint 3 Step 1 (H3)": 1,
+      "Sprint 3 Step 3": 1,
+      "Sprint 3 Step 4": 3,
+      "Sprint 3 Step 4 (H4 brief)": 1,
+      "Closing": 2
     },
-    "origin_rule": "origin is the entry's Origin line (Claude Code, Claude Chat, or Project owner)",
+    "origin_rule": "origin is the entry's Origin line (Claude Code, Claude Chat, Project owner, or Unattributed second actor)",
     "caught_rules": [
       {
         "category": "Planner review",
@@ -557,16 +565,105 @@
         "title": "Correction-log classifier had no CI category",
         "origin": "Claude Code",
         "caught_by": "Executor self-review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 2 v1.1.2",
+        "title": "First STATE.md cut decision lines at colons",
+        "origin": "Claude Code",
+        "caught_by": "Executor self-review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 3 Step 0",
+        "title": "Register update would have listed accepted limitations as open uncertainties",
+        "origin": "Claude Code",
+        "caught_by": "Local test"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 3 Step 0",
+        "title": "Command-center role recorded from a prompt meant for another session",
+        "origin": "Project owner",
+        "caught_by": "Human review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 3 Step 1",
+        "title": "Metrics index keys assumed one labeled Changes entry per date",
+        "origin": "Claude Code",
+        "caught_by": "Local test"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 3 Step 1 (H3)",
+        "title": "Two new tests wrong on their first run",
+        "origin": "Claude Code",
+        "caught_by": "Local test"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 3 Step 3",
+        "title": "Evidence file of verbatim quotes written with a corrupted character",
+        "origin": "Claude Code",
+        "caught_by": "Executor self-review"
+      },
+      {
+        "date": "2026-09-26",
+        "phase": "Sprint 3 Step 4",
+        "title": "Three errors in the ranking code, caught before its first commit",
+        "origin": "Claude Code",
+        "caught_by": "Local test"
+      },
+      {
+        "date": "2026-09-27",
+        "phase": "Sprint 3 Step 4",
+        "title": "The ranking run crashed in the prior fit after three hours",
+        "origin": "Claude Code",
+        "caught_by": "Local test"
+      },
+      {
+        "date": "2026-09-27",
+        "phase": "Sprint 3 Step 4",
+        "title": "Unapproved pipeline and contract changes, and a ranking run on them",
+        "origin": "Unattributed second actor",
+        "caught_by": "Executor self-review"
+      },
+      {
+        "date": "2026-09-27",
+        "phase": "Sprint 3 Step 4 (H4 brief)",
+        "title": "A synthetic comparison with too few resamples for its quantiles",
+        "origin": "Claude Code",
+        "caught_by": "Executor self-review"
+      },
+      {
+        "date": "2026-09-27",
+        "phase": "Closing",
+        "title": "Three naming-rule violations in the approved closing content",
+        "origin": "Claude Chat",
+        "caught_by": "Executor self-review"
+      },
+      {
+        "date": "2026-09-27",
+        "phase": "Closing",
+        "title": "The closing report linked to a file not yet on main",
+        "origin": "Claude Code",
+        "caught_by": "CI"
       }
     ]
   },
   "workflow_files": [
+    "ai-workflow/STATE.md",
     "ai-workflow/adversarial-review-B.md",
     "ai-workflow/claim-ledger.md",
+    "ai-workflow/closing-content.md",
+    "ai-workflow/closing-report-template.md",
     "ai-workflow/correction-log.md",
     "ai-workflow/escalations/2026-09-26-B-R3-agreement.md",
+    "ai-workflow/escalations/2026-09-27-C-rankings-stop-rules.md",
     "ai-workflow/method-selection/A-revenue-gap.md",
     "ai-workflow/method-selection/B-later-purchases.md",
+    "ai-workflow/method-selection/C-category-rankings.md",
     "ai-workflow/method-selection/README.md",
     "ai-workflow/search-log.md",
     "ai-workflow/sprint-0-verification.md",
@@ -576,6 +673,8 @@
     "ai-workflow/sprint-2-report.md",
     "ai-workflow/sprint-2-verification.md",
     "ai-workflow/sprint-2.md",
+    "ai-workflow/sprint-3-verification.md",
+    "ai-workflow/sprint-3.md",
     "ai-workflow/tools.md",
     "ai-workflow/uncertainty-register.md"
   ]

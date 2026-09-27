@@ -160,3 +160,26 @@ def test_second_labeled_entry_on_a_date_keeps_the_first_entrys_keys(metrics_text
     # The Sprint 3 entry (approved at H3) is the second labeled entry dated 2026-09-26.
     assert before["2026-09-26-2_item_4"] == "Viewing sessions with an observed purchase in the category (%)"
     assert before["2026-09-26_item_9"].startswith("Carted products with no observed purchase in the session")
+
+
+def test_only_workflow_writes_that_one_file(tmp_path, monkeypatch):
+    """Owner decision (v1.1.4, option (a)): refreshing workflow.json touches no other export."""
+    from funnel import export
+
+    monkeypatch.setattr(export, "WEB_DATA", tmp_path)
+    monkeypatch.setattr(export, "require_dataset_hash_match", lambda: "a" * 64)
+    monkeypatch.setattr(export, "last_full_build", lambda sha: {"git_commit_sha": "b" * 40})
+    export.main(["--only", "workflow.json"])
+    assert [p.name for p in tmp_path.iterdir()] == ["workflow.json"]
+    with pytest.raises(SystemExit, match="needs the full export"):
+        export.main(["--only", "kpis.json"])
+
+
+def test_committed_workflow_counts_every_correction_log_entry():
+    """/how-its-built counts the whole correction log: refresh with python -m funnel.export --only workflow.json."""
+    import json
+
+    from funnel.export import CORRECTION_LOG, WEB_DATA, parse_correction_log
+
+    committed = json.loads((WEB_DATA / "workflow.json").read_text(encoding="utf-8"))["correction_log"]
+    assert committed == json.loads(json.dumps(parse_correction_log(CORRECTION_LOG.read_text(encoding="utf-8"))))

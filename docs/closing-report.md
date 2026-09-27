@@ -55,7 +55,11 @@ Claude Code caught the mismatch at run reconciliation, when the run's recorded m
 - **Guards:** new run guards refuse a dirty working tree, and refuse marts without a gated build record (`funnel.provenance`).
 - **Records:** the correction log records the incident with the origin "Unattributed second actor". The escalation brief has the full timeline.
 
-## 6. Questions worth asking next
+## 6. A note on the site
+
+The list of metric-contract changes on `/data` shows 4 of the 6 dated Changes entries in `docs/metrics.md`. This is by design under option D. The newer entries define the Sprint 3 ranking and record that it was stopped, and the site's exports weren't regenerated for them, because nothing from the ranking is published. The contract itself, rendered on `/metrics`, shows every entry.
+
+## 7. Questions worth asking next
 
 These are the questions this data can't answer, grouped by who can answer them. The same content, with a link to each question's evidence, is on the site at `/questions`.
 

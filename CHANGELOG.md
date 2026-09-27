@@ -11,6 +11,8 @@ Entries up to v1.0.1 were reconstructed in Sprint 2 from the git history. Figure
 - The questions page is labeled "Further research" in the navigation and titled "Questions for further research"; `/questions` is unchanged, and the home page's links use the new name.
 - `/how-its-built`: the verification tile is "Verification by tests and human review", and it states that the project owner reviewed the results and signed off each published claim.
 - Inline code in exported text (for example `user_id` in question 3) renders as code, not literal backticks.
+- `/how-its-built` counts every correction-log entry through Sprint 3 and the closing, including the origin "Unattributed second actor": `workflow.json` was refreshed alone with the new `funnel.export --only workflow.json`, and every other export is byte-identical. A test now fails if `workflow.json` lags the correction log.
+- The closing report notes that `/data` lists only some of the contract's dated Changes entries, by design under option D; the counts are computed by `funnel.closing`.
 - Evidence links on `/questions` have readable labels ("See the evidence: …"), generated in `closing.json` by `funnel.closing`, not typed into the page.
 
 ## [1.1.3] — 2026-09-27
