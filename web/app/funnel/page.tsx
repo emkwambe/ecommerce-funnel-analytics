@@ -231,7 +231,7 @@ export default function FunnelPage() {
         <Sources fields={["kpis.json: month.sessions, .sessions_with_view, .sessions_with_cart, .sessions_with_purchase, .view_to_cart_session_rate, .cart_session_purchase_rate, .cart_sessions_with_no_observed_purchase", "kpis.json: month.sessions_with_purchase_of_carted_product, .sessions_with_purchases_only_of_uncarted_products, .cart_sessions_with_purchase_of_no_carted_product", "metrics_index.json: display_label, short_label, definition (metrics.md §6; Changes 2026-09-26)"]} />
       </Section>
 
-      <Section n={2} title="Purchase paths">
+      <Section n={2} title="Purchase paths" id="purchase-paths">
         <ul className="space-y-3">
           {paths.map((p) => (
             <li key={p.purchase_path} className="text-sm">

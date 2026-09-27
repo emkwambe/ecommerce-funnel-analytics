@@ -19,9 +19,12 @@ PARQUET_DIR = DATA_DIR / "parquet"
 DUCKDB_TMP_DIR = DATA_DIR / "duckdb_tmp"
 DOCS_DIR = REPO_ROOT / "docs"
 EVIDENCE_DIR = REPO_ROOT / "ai-workflow" / "evidence" / "sprint-0"
-# Where funnel.build and funnel.verify write their evidence for the sprint in progress. Earlier
-# sprints' evidence folders stay as committed; their verification generators read them directly.
-CURRENT_EVIDENCE_DIR = REPO_ROOT / "ai-workflow" / "evidence" / "sprint-2"
+# Where funnel.build, funnel.verify, and funnel.rankings write their evidence for the sprint in progress.
+# Earlier sprints' evidence folders stay as committed, and their readers name them explicitly: analysis B's
+# statistics (funnel.later_purchases) and the Sprint 2 verification generator read SPRINT2_EVIDENCE_DIR.
+EVIDENCE_ROOT = REPO_ROOT / "ai-workflow" / "evidence"
+SPRINT2_EVIDENCE_DIR = EVIDENCE_ROOT / "sprint-2"
+CURRENT_EVIDENCE_DIR = EVIDENCE_ROOT / "sprint-3"
 DATA_SOURCE_MD = DOCS_DIR / "data-source.md"
 
 KAGGLE_SLUG = "mkechinov/ecommerce-behavior-data-from-multi-category-store"

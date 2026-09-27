@@ -259,6 +259,45 @@ export const getMetricsIndex = () => read<Export & { metrics: MetricEntry[] }>("
 export const getDataStory = () => read<DataStory>("data_story.json");
 export const getWorkflow = () => read<Workflow>("workflow.json");
 export const getRevenueGap = () => read<RevenueGap>("investigation_revenue_gap.json");
+
+/** Closing content (owner decision, 2026-09-27), written by python -m funnel.closing from the closing report. */
+export type ClosingFigure = { value: number | string; formatted: string; source: string; field: string };
+export type ClosingQuestion = {
+  n: number;
+  question: string;
+  card_line: string;
+  why: string;
+  who: string;
+  group: string;
+  evidence: { href: string; label: string; external: boolean };
+  start_here: boolean;
+};
+export type Closing = {
+  manifest: Manifest;
+  source: { content: string; content_sha256: string; report: string; escalation_brief: string };
+  status: string;
+  figures: Record<string, ClosingFigure>;
+  findings: { id: string; text: string; tier: string }[];
+  question_1: { lead: string; text: string };
+  groups: { key: string; label: string; questions: number[] }[];
+  questions: ClosingQuestion[];
+};
+export const getClosing = () => read<Closing>("closing.json");
+
+/** A closing text with each {figure} token replaced by the figure's text from closing.json (never typed). */
+export function closingText(text: string, figures: Record<string, ClosingFigure>): string {
+  return text.replace(/\{([a-z_]+)\}/g, (_, key: string) => {
+    const figure = figures[key];
+    if (!figure) throw new Error(`closing.json has no figure "${key}"`);
+    return figure.formatted;
+  });
+}
+
+/** Sources-line entries for the figures a set of closing texts uses. */
+export function closingSources(texts: string[], figures: Record<string, ClosingFigure>): string[] {
+  const keys = new Set(texts.flatMap((t) => [...t.matchAll(/\{([a-z_]+)\}/g)].map((m) => m[1])));
+  return [...keys].sort().map((k) => `${figures[k].source}: ${figures[k].field} (via closing.json: figures.${k})`);
+}
 export const getLaterPurchases = () => read<LaterPurchases>("investigation_later_purchases.json");
 
 /** A metric by its metrics_index key, e.g. "2026-09-26_item_9" for a numbered Changes-entry item. */

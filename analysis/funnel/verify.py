@@ -8,13 +8,16 @@ data/warehouse.duckdb: integers and DECIMAL sums exactly, rates to 1e-9. Data-qu
 with Sprint 0 are compared like with like: raw-basis figures recomputed here against Sprint 0's
 profile.json, and the contract-basis figures recomputed here against mart_data_quality.
 Sprint 2 adds R2 for analysis A (the revenue difference, its breakdown and thresholds, and the two
-secondary cases) and for analysis B (the B1 7-day count and value shares, with their counts and sums). Writes verify.json under the current sprint's evidence folder (CURRENT_EVIDENCE_DIR
+secondary cases) and for analysis B (the B1 7-day count and value shares, with their counts and sums).
+Sprint 3 adds R2 for the category ranking (C1 at both levels: counts, both revenue sums, the ranked set,
+posterior means, and point ranks; it reads rankings.json, so it runs after python -m funnel.rankings). Writes verify.json under the current sprint's evidence folder (CURRENT_EVIDENCE_DIR
 in funnel.common) and exits non-zero on any mismatch.
 """
 
 from __future__ import annotations
 
 import json
+import math
 import sys
 import time
 from decimal import Decimal
@@ -29,6 +32,7 @@ from funnel.common import (
     EVIDENCE_DIR,
     PARQUET_FILE,
     REPO_ROOT,
+    SPRINT2_EVIDENCE_DIR,
     manifest,
     require_available_ram,
     require_dataset_hash_match,
@@ -595,7 +599,7 @@ def mart_values_investigation_b_all(con: duckdb.DuckDBPyConnection) -> dict[str,
                  SELECT spec_key, eligible_pairs, followed_pairs, eligible_value, followed_value
                  FROM wh.main_marts.mart_later_purchase_estimates""").fetchall()}
     checks = dict(con.execute("SELECT row_key, value FROM wh.main_marts.mart_later_purchase_checks").fetchall())
-    stats = json.loads((CURRENT_EVIDENCE_DIR / "later_purchases.json").read_text(encoding="utf-8"))
+    stats = json.loads((SPRINT2_EVIDENCE_DIR / "later_purchases.json").read_text(encoding="utf-8"))
     curve = {r["days"]: r["count"] for r in stats["kaplan_meier"]["curve"]}
     cohort = stats.get("cohort_diagnostic") or {}
     return {
@@ -649,6 +653,182 @@ def compare_investigation_b(independent: dict[str, Any], mart: dict[str, Any]) -
              "compared": str(mart[key]), "match": _match(independent[key], mart[key])}
             for key in ("eligible_pairs", "followed_pairs", "eligible_value", "followed_value",
                         "count_share", "value_share")]
+
+
+# ---------- Sprint 3: R2 for the category ranking (metrics.md Changes 2026-09-26, Sprint 3 ranking; C-D7) ----------
+# "An independent implementation, using the same engine": the C1 counts and revenue sums come from DuckDB SQL over the
+# independent tables above, never from a dbt model, and the posterior means from the scalar code below, written
+# separately from funnel.rankings (nested bisection on the score equations instead of Newton's method).
+
+RANKING_MIN_SIZE = 1000   # item 9
+RANKING_S_MAX = 1e10      # the prior-precision cap stated in the search log (Sprint 3)
+POSTERIOR_TOLERANCE = 1e-9  # relative, method record C failure condition F4
+
+
+def independent_ranking_counts(con: duckdb.DuckDBPyConnection) -> dict[str, dict[str, tuple[int, int, Decimal, Decimal]]]:
+    """Per level and category (unknown included): category-sessions entered by a view, those with a purchase in the
+    category, revenue over purchase events (zero-price excluded), and the repeat-collapsed revenue (price on each
+    session-product pair's earliest purchase event, in that event's category)."""
+    rows = con.execute("""
+        WITH e AS (
+            SELECT user_session, product_id, event_type, event_time, CAST(price AS DECIMAL(18, 2)) AS amount, price,
+                   CASE WHEN category_code IS NULL OR trim(category_code) = '' THEN 'unknown'
+                        ELSE split_part(trim(category_code), '.', 1) END AS top_level,
+                   CASE WHEN category_code IS NULL OR trim(category_code) = '' THEN 'unknown'
+                        ELSE trim(category_code) END AS full_code
+            FROM vev
+        ),
+        by_level AS (
+            SELECT 'category_top' AS lvl, user_session, product_id, event_type, event_time, amount, price,
+                   top_level AS cat FROM e
+            UNION ALL
+            SELECT 'category_code', user_session, product_id, event_type, event_time, amount, price, full_code FROM e
+        ),
+        entered AS (SELECT DISTINCT lvl, user_session, cat FROM by_level WHERE event_type = 'view'),
+        bought AS (
+            SELECT lvl, user_session, cat, coalesce(sum(amount) FILTER (WHERE price > 0), 0) AS revenue
+            FROM by_level WHERE event_type = 'purchase' GROUP BY lvl, user_session, cat
+        ),
+        first_purchase AS (
+            SELECT lvl, user_session, cat, amount FROM (
+                SELECT *, row_number() OVER (PARTITION BY lvl, user_session, product_id ORDER BY event_time, amount) AS k
+                FROM by_level WHERE event_type = 'purchase' AND price > 0)
+            WHERE k = 1
+        ),
+        collapsed AS (SELECT lvl, user_session, cat, sum(amount) AS revenue_collapsed FROM first_purchase
+                      GROUP BY lvl, user_session, cat)
+        SELECT en.lvl, en.cat, count(*), count(b.user_session),
+               coalesce(sum(b.revenue), 0), coalesce(sum(c.revenue_collapsed), 0)
+        FROM entered AS en
+        LEFT JOIN bought AS b USING (lvl, user_session, cat)
+        LEFT JOIN collapsed AS c USING (lvl, user_session, cat)
+        GROUP BY en.lvl, en.cat
+    """).fetchall()
+    out: dict[str, dict[str, tuple[int, int, Decimal, Decimal]]] = {}
+    for lvl, cat, n, x, revenue, collapsed in rows:
+        out.setdefault(lvl, {})[cat] = (int(n), int(x), Decimal(revenue), Decimal(collapsed))
+    return out
+
+
+def _psi(x: float) -> float:
+    """Digamma for x > 0 (scalar): shift up to x >= 20, then the asymptotic series."""
+    acc = 0.0
+    while x < 20.0:
+        acc -= 1.0 / x
+        x += 1.0
+    f = 1.0 / (x * x)
+    return acc + math.log(x) - 0.5 / x - f * (1 / 12 - f * (1 / 120 - f * (1 / 252 - f * (1 / 240 - f / 132))))
+
+
+def _scores(mu: float, s: float, xs: list[float], ns: list[float]) -> tuple[float, float]:
+    """d loglik / d mu and d loglik / d s for Beta(mu s, (1 - mu) s) over categories (x, n)."""
+    a, b = mu * s, (1.0 - mu) * s
+    ga = gb = 0.0
+    for x, n in zip(xs, ns):
+        shared = _psi(a + b) - _psi(n + a + b)
+        ga += _psi(x + a) - _psi(a) + shared
+        gb += _psi(n - x + b) - _psi(b) + shared
+    return s * (ga - gb), mu * ga + (1.0 - mu) * gb
+
+
+def _bisect(f, lo: float, hi: float, steps: int = 120) -> float:
+    f_lo = f(lo)
+    for _ in range(steps):
+        mid = 0.5 * (lo + hi)
+        if mid in (lo, hi):
+            break
+        f_mid = f(mid)
+        if (f_mid > 0) == (f_lo > 0):
+            lo, f_lo = mid, f_mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+
+def independent_posterior(counts: dict[str, tuple[int, int]]) -> dict[str, Any]:
+    """Maximum-likelihood beta-binomial prior over the categories at or above RANKING_MIN_SIZE, and each one's
+    posterior mean. For each s, mu solves the mu-score by bisection; s solves the s-score at that mu by bisection
+    over log s (envelope theorem). If the s-score is still positive at the cap, s stays at the cap."""
+    ranked = sorted(c for c, (n, _) in counts.items() if n >= RANKING_MIN_SIZE and c != "unknown")
+    xs = [float(counts[c][1]) for c in ranked]
+    ns = [float(counts[c][0]) for c in ranked]
+
+    def best_mu(s: float) -> float:
+        return _bisect(lambda m: _scores(m, s, xs, ns)[0], 1e-12, 1.0 - 1e-12)
+
+    def s_score(log_s: float) -> float:
+        s = math.exp(log_s)
+        return _scores(best_mu(s), s, xs, ns)[1]
+
+    if not ranked:
+        return {"a": None, "b": None, "at_cap": None, "posterior_mean": {}, "rank": {}}
+    # The s-score's sign is meaningless near the cap (it shrinks like 1 / s^2 below rounding), so the root is
+    # bracketed by the first change from positive to non-positive on a grid of log s, then bisected. No change
+    # means the likelihood rises all the way to the cap.
+    grid = [math.log(1e-6) + k * (math.log(RANKING_S_MAX) - math.log(1e-6)) / 96 for k in range(97)]
+    signs = [s_score(t) > 0 for t in grid]
+    bracket = next((k for k in range(1, len(grid)) if signs[k - 1] and not signs[k]), None)
+    at_cap = bracket is None
+    log_s = grid[-1] if at_cap else _bisect(s_score, grid[bracket - 1], grid[bracket])
+    s = math.exp(log_s)
+    mu = best_mu(s)
+    a, b = mu * s, (1.0 - mu) * s
+    posterior = {c: (x + a) / (n + a + b) for c, x, n in zip(ranked, xs, ns)}
+    order = sorted(ranked, key=lambda c: -posterior[c])
+    ranks = {c: 1 + sum(posterior[d] > posterior[c] for d in ranked) for c in order}
+    return {"a": a, "b": b, "at_cap": at_cap, "posterior_mean": posterior, "rank": ranks}
+
+
+def independent_rankings(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
+    counts = independent_ranking_counts(con)
+    return {"counts": counts,
+            "posterior": {lvl: independent_posterior({c: (v[0], v[1]) for c, v in cats.items()})
+                          for lvl, cats in counts.items()}}
+
+
+def published_rankings(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
+    """C1 counts from mart_category_ranking_counts and the C1 point estimates from rankings.json."""
+    counts: dict[str, dict[str, tuple[int, int, Decimal, Decimal]]] = {}
+    for lvl, cat, n, x, revenue, collapsed in con.execute("""
+            SELECT category_level, category, category_sessions, category_sessions_with_purchase, revenue,
+                   revenue_collapsed
+            FROM wh.main_marts.mart_category_ranking_counts WHERE spec_key = 'C1'""").fetchall():
+        counts.setdefault(lvl, {})[cat] = (int(n), int(x), Decimal(revenue), Decimal(collapsed))
+    stats = json.loads((CURRENT_EVIDENCE_DIR / "rankings.json").read_text(encoding="utf-8"))
+    posterior = {lvl: {"a": out["specs"]["C1"]["prior"]["a"], "b": out["specs"]["C1"]["prior"]["b"],
+                       "posterior_mean": {r["category"]: r["estimate"] for r in out["specs"]["C1"]["rows"]},
+                       "rank": {r["category"]: r["rank"] for r in out["specs"]["C1"]["rows"]}}
+                 for lvl, out in stats["levels"].items()}
+    return {"counts": counts, "posterior": posterior}
+
+
+def compare_rankings(independent: dict[str, Any], published: dict[str, Any]) -> list[dict[str, Any]]:
+    """R2: counts and DECIMAL sums exactly (both directions, unknown included); posterior means within
+    POSTERIOR_TOLERANCE relative; point ranks and the ranked set exactly."""
+    checks: list[dict[str, Any]] = []
+
+    def add(name: str, ind: Any, other: Any, against: str, match: bool) -> None:
+        checks.append({"check": name, "against": against, "independent": str(ind), "compared": str(other),
+                       "match": match})
+
+    fields = ("category_sessions", "category_sessions_with_purchase", "revenue", "revenue_collapsed")
+    for lvl in sorted(set(independent["counts"]) | set(published["counts"])):
+        ind_c, pub_c = independent["counts"].get(lvl, {}), published["counts"].get(lvl, {})
+        for cat in sorted(set(ind_c) | set(pub_c)):
+            for k, field in enumerate(fields):
+                a = ind_c[cat][k] if cat in ind_c else None
+                b = pub_c[cat][k] if cat in pub_c else None
+                add(f"C1:{lvl}:{cat}:{field}", a, b, "mart_category_ranking_counts", a is not None and a == b)
+        ind_p, pub_p = independent["posterior"].get(lvl, {}), published["posterior"].get(lvl, {})
+        ind_m, pub_m = ind_p.get("posterior_mean", {}), pub_p.get("posterior_mean", {})
+        add(f"C1:{lvl}:ranked_set", sorted(ind_m), sorted(pub_m), "rankings.json", sorted(ind_m) == sorted(pub_m))
+        for cat in sorted(ind_m):
+            a, b = ind_m[cat], pub_m.get(cat)
+            add(f"C1:{lvl}:{cat}:posterior_mean", a, b, "rankings.json",
+                b is not None and abs(a - b) <= POSTERIOR_TOLERANCE * abs(a))
+            add(f"C1:{lvl}:{cat}:rank", ind_p["rank"][cat], pub_p.get("rank", {}).get(cat), "rankings.json",
+                ind_p["rank"][cat] == pub_p.get("rank", {}).get(cat))
+    return checks
 
 
 def mart_values(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
@@ -746,16 +926,20 @@ def main() -> None:
         investigation_b = independent_later_purchases_b1(con)
         print("Recomputing analysis B (all specifications, KM, diagnostics) ...", flush=True)
         investigation_b_all = independent_later_purchases(con)
+        print("Recomputing the Sprint 3 category ranking (C1 counts, revenue, posterior means) ...", flush=True)
+        rankings = independent_rankings(con)
         mart = mart_values(con)
         mart_a = mart_values_investigation_a(con)
         mart_b = mart_values_investigation_b(con)
         mart_b_all = mart_values_investigation_b_all(con)
+        published_c = published_rankings(con)
     finally:
         peak_spill = sampler.stop()
     sprint0 = json.loads((EVIDENCE_DIR / "profile.json").read_text(encoding="utf-8"))
     checks = (compare(independent, mart, dq, sprint0) + compare_investigation_a(investigation_a, independent, mart_a)
               + compare_investigation_b(investigation_b, mart_b)
-              + compare_investigation_b_all(investigation_b_all, mart_b_all))
+              + compare_investigation_b_all(investigation_b_all, mart_b_all)
+              + compare_rankings(rankings, published_c))
     elapsed = round(time.perf_counter() - started, 1)
     ok = all(c["match"] for c in checks)
     write_json(OUT, {

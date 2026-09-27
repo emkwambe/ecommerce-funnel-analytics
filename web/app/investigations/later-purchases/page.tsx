@@ -83,7 +83,7 @@ export default function LaterPurchasesPage() {
         <Sources fields={["investigation_later_purchases.json: estimates[spec_key=B1].population, .count_share, .count_interval, .followed_pairs, .eligible_pairs, .value_share, .value_interval, .followed_value, .eligible_value"]} />
       </Section>
 
-      <Section n={2} title="Late October differs">
+      <Section n={2} title="Late October differs" id="late-october">
         <p>
           For carted products from {c.later_population}, the Kaplan–Meier estimate of the share purchased by the same user in a
           later session within 7 days is {fmtPct(c.later_km_7_day, 1)} {range(c.later_km_7_day_interval)}, lower than{" "}
@@ -180,7 +180,7 @@ export default function LaterPurchasesPage() {
         <Sources fields={["investigation_later_purchases.json: estimates[spec_key=B1,B2,B3,B6,B7,B8].population, .count_share, .count_interval, .value_share, .value_interval, .followed_pairs, .eligible_pairs", "checks[row_key=sensitivity_threshold:most_active_user_threshold_events].value"]} />
       </Section>
 
-      <Section n={6} title="Two things to know">
+      <Section n={6} title="Two things to know" id="identity-checks">
         <p>
           {fmtPct(withinHour, 1)} of the carted products followed by a later purchase were first purchased within one hour of
           the latest cart event. This may reflect technical session splits rather than return visits: how the store starts a new

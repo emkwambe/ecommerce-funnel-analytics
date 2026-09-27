@@ -49,8 +49,18 @@ def test_metrics_page_never_shows_draft_entries_as_defined_metrics(tmp_path):
         assert "awaiting the owner's approval (H3)" in rendered
         assert rendered.replace("\r\n", "\n").count("\n### ") == text.replace("\r\n", "\n").count("\n### ")
         assert all(e["name"] != "Zeta session rate (%)" for e in parse_metrics_index(text))
-    # Approved entries render unchanged, and the page reads the contract through the filter.
-    assert _render_contract_for_metrics_page(contract, tmp_path) == contract
+    # On the committed contract: approved sections render unchanged, and any draft section renders as its heading and
+    # the notice only. The page reads the contract through the filter.
+    rendered = _render_contract_for_metrics_page(contract, tmp_path)
+    blocks_in, blocks_out = contract.split("\n### "), rendered.split("\n### ")
+    assert len(blocks_in) == len(blocks_out)
+    for original, shown in zip(blocks_in, blocks_out):
+        heading = original.split("\n", 1)[0]
+        if "DRAFT, pending H3" in heading:
+            assert shown.startswith(heading) and "awaiting the owner's approval (H3)" in shown
+            assert len(shown) < len(original)
+        else:
+            assert shown == original
     data_ts = (WEB / "lib" / "data.ts").read_text(encoding="utf-8")
     assert re.search(r"getMetricsMarkdown\(\): string \{\s*return withoutDraftEntries\(", data_ts)
 

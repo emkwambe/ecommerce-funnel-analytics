@@ -1,0 +1,249 @@
+{
+  "manifest": {
+    "git_commit_sha": "979c3c32b424deae1abf7562175deb9eb14b6068",
+    "git_worktree_dirty": false,
+    "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+    "generated_at_utc": "2026-09-27T21:47:43+00:00",
+    "script": "funnel.closing"
+  },
+  "source": {
+    "content": "ai-workflow/closing-content.md",
+    "content_sha256": "8b8e87a1242ec967329b0350503bdd07cce38d39c7c5f778068e4a47317dc964",
+    "report": "docs/closing-report.md",
+    "escalation_brief": "ai-workflow/escalations/2026-09-27-C-rankings-stop-rules.md"
+  },
+  "status": "closed",
+  "figures": {
+    "later_population": {
+      "value": "sessions starting October 1–24, 2019 UTC",
+      "formatted": "October 1–24, 2019 (UTC)",
+      "source": "investigation_later_purchases.json",
+      "field": "estimates[spec_key=B1].population"
+    },
+    "revenue_gap": {
+      "value": 18506588.3,
+      "formatted": "$18.5M",
+      "source": "investigation_revenue_gap.json",
+      "field": "totals.revenue_difference"
+    },
+    "later_value_share": {
+      "value": 0.13403694948260964,
+      "formatted": "13.4%",
+      "source": "investigation_later_purchases.json",
+      "field": "estimates[spec_key=B1].value_share"
+    },
+    "later_window": {
+      "value": 7,
+      "formatted": "7 days",
+      "source": "investigation_later_purchases.json",
+      "field": "estimates[spec_key=B1].window_days"
+    },
+    "later_window_adjective": {
+      "value": 7,
+      "formatted": "7-day",
+      "source": "investigation_later_purchases.json",
+      "field": "estimates[spec_key=B1].window_days"
+    },
+    "no_cart_revenue_share": {
+      "value": 0.48078959947101524,
+      "formatted": "48%",
+      "source": "purchase_paths.json",
+      "field": "rows[\"Purchase with no observed same-session cart event\"].revenue_share"
+    },
+    "month": {
+      "value": "2019-10-01",
+      "formatted": "October 2019",
+      "source": "kpis.json",
+      "field": "month.period_start"
+    }
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "text": "In {month}, {no_cart_revenue_share} of revenue came from purchases with no observed same-session cart event. A funnel that assumes view → cart → purchase describes only about half of the business.",
+      "tier": "shows"
+    },
+    {
+      "id": "F2",
+      "text": "For carted products in sessions starting {later_population}, {later_value_share} of the carted value with no observed purchase in the session was followed by a purchase of the same product by the same user within {later_window}. Carted value with no purchase in the session is not the same as value never purchased.",
+      "tier": "shows"
+    },
+    {
+      "id": "F3",
+      "text": "The two revenue figures differ by {revenue_gap}, entirely because of repeated purchase events of the same product within a session. The data cannot tell whether these are extra units or the same purchase logged again.",
+      "tier": "shows"
+    },
+    {
+      "id": "F4",
+      "text": "A pre-registered category ranking was not published. On synthetic data where every category had the same rate, its rule still reported differences, so it could not be trusted to separate real ones.",
+      "tier": "shows (a method result)"
+    }
+  ],
+  "question_1": {
+    "lead": "Question 1 is the project's answer to \"what should the team test first?\"",
+    "text": "Before testing any change to the funnel, find out how the half of purchases that bypass the cart actually happen. The answer decides where every later test should aim."
+  },
+  "groups": [
+    {
+      "key": "product_engineering",
+      "label": "Product and engineering",
+      "questions": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "key": "more_data",
+      "label": "More data",
+      "questions": [
+        4,
+        5,
+        9
+      ]
+    },
+    {
+      "key": "better_methods",
+      "label": "Better methods",
+      "questions": [
+        6,
+        7
+      ]
+    },
+    {
+      "key": "experiment",
+      "label": "Only an experiment",
+      "questions": [
+        8
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "n": 1,
+      "question": "How do purchases with no observed same-session cart event happen? A \"buy now\" option, an app flow, or a logging behavior?",
+      "card_line": "{no_cart_revenue_share} of revenue takes this path",
+      "why": "Nearly half of revenue bypasses the cart, so any effort aimed at the cart addresses at most half the business. Knowing the mechanism decides where tests should aim.",
+      "who": "Product and engineering: checkout flows and tracking design",
+      "group": "product_engineering",
+      "evidence": {
+        "href": "/funnel#purchase-paths",
+        "label": "/funnel (purchase paths section)",
+        "external": false
+      },
+      "start_here": true
+    },
+    {
+      "n": 2,
+      "question": "Are repeated purchase events of the same product in a session extra units or the same purchase logged again?",
+      "card_line": "Decides the {revenue_gap} revenue gap",
+      "why": "The two revenue figures differ by {revenue_gap} because of these events. Until this is known, every revenue figure must be shown both ways.",
+      "who": "Engineering: the order system and event schema",
+      "group": "product_engineering",
+      "evidence": {
+        "href": "/investigations/revenue-figures",
+        "label": "/investigations/revenue-figures",
+        "external": false
+      },
+      "start_here": false
+    },
+    {
+      "n": 3,
+      "question": "Does one `user_id` mean one person across sessions and devices?",
+      "card_line": "Cross-session findings depend on it",
+      "why": "Every finding that links sessions, including later purchases, assumes the identity holds. The checks available in the data passed, but cross-device identity can't be verified from this file.",
+      "who": "The identity and tracking owners",
+      "group": "product_engineering",
+      "evidence": {
+        "href": "/investigations/later-purchases#identity-checks",
+        "label": "/investigations/later-purchases (identity checks)",
+        "external": false
+      },
+      "start_here": false
+    },
+    {
+      "n": 4,
+      "question": "What happens to carted items beyond {later_window}, and beyond October?",
+      "card_line": "{later_value_share} is a one-month lower bound",
+      "why": "The later-purchase share was measured within {later_window}, inside one month. Purchases later, or outside the data's window, aren't observed.",
+      "who": "More months of data",
+      "group": "more_data",
+      "evidence": {
+        "href": "/investigations/later-purchases",
+        "label": "/investigations/later-purchases",
+        "external": false
+      },
+      "start_here": false
+    },
+    {
+      "n": 5,
+      "question": "Why did products carted in late October show a lower later-purchase rate?",
+      "card_line": "Calendar, promotions, or data end",
+      "why": "The late-October group differed from the early-October group, and the reason isn't in the data. It limits how far the {later_window_adjective} figure generalizes.",
+      "who": "A promotions calendar, plus more months of data",
+      "group": "more_data",
+      "evidence": {
+        "href": "/investigations/later-purchases#late-october",
+        "label": "/investigations/later-purchases (late-October finding)",
+        "external": false
+      },
+      "start_here": false
+    },
+    {
+      "n": 6,
+      "question": "Which categories truly differ in conversion, and what rule can say so reliably?",
+      "card_line": "The ranking rule failed its null test",
+      "why": "The pre-registered ranking rule reported differences even when none existed. A rule must first pass a test on synthetic data with a known answer.",
+      "who": "Better methods: a rule calibrated on synthetic data with a known answer",
+      "group": "better_methods",
+      "evidence": {
+        "href": "https://github.com/emkwambe/ecommerce-funnel-analytics/blob/main/ai-workflow/escalations/2026-09-27-C-rankings-stop-rules.md",
+        "label": "The escalation brief (GitHub)",
+        "external": true
+      },
+      "start_here": false
+    },
+    {
+      "n": 7,
+      "question": "How much does automated or bot traffic shape the numbers?",
+      "card_line": "Needs a pre-registered check",
+      "why": "Heavy automated users could distort rates. This must be checked with a pre-registered, labeled sensitivity analysis, never an exclusion made after seeing results.",
+      "who": "Better methods: a pre-registered sensitivity analysis",
+      "group": "better_methods",
+      "evidence": {
+        "href": "/data-quality",
+        "label": "/data-quality",
+        "external": false
+      },
+      "start_here": false
+    },
+    {
+      "n": 8,
+      "question": "Would changing a step in the funnel actually change revenue?",
+      "card_line": "Everything so far is descriptive",
+      "why": "Every finding here describes what happened. None shows what a change would cause.",
+      "who": "Only an experiment",
+      "group": "experiment",
+      "evidence": {
+        "href": "/funnel",
+        "label": "/funnel",
+        "external": false
+      },
+      "start_here": false
+    },
+    {
+      "n": 9,
+      "question": "What is the profit picture, not just revenue?",
+      "card_line": "Revenue is not margin",
+      "why": "The data has no margins or returns, so a revenue-heavy category isn't necessarily a profitable one.",
+      "who": "More data: margin and returns",
+      "group": "more_data",
+      "evidence": {
+        "href": "/data#limitations",
+        "label": "/data (limitations)",
+        "external": false
+      },
+      "start_here": false
+    }
+  ]
+}

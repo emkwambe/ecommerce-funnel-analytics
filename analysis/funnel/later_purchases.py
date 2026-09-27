@@ -14,7 +14,7 @@ metrics.md Changes 2026-09-26 (Sprint 2 investigations), B items 9-16 and the co
   share not above the comparison baseline (B5). The dominance rule is reported, not a stop.
 
 Reads data/warehouse.duckdb read-only behind the dataset-hash and available-memory gates. Writes
-later_purchases.json to the current sprint's evidence folder, and exits 3 if a stop rule fired.
+later_purchases.json to the Sprint 2 evidence folder, and exits 3 if a stop rule fired.
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ from typing import Any
 import numpy as np
 
 from funnel.common import (
-    CURRENT_EVIDENCE_DIR,
+    SPRINT2_EVIDENCE_DIR,
     DATA_DIR,
     DUCKDB_TMP_DIR,
     manifest,
@@ -36,7 +36,7 @@ from funnel.common import (
 )
 
 SCRIPT = "funnel.later_purchases"
-OUT = CURRENT_EVIDENCE_DIR / "later_purchases.json"
+OUT = SPRINT2_EVIDENCE_DIR / "later_purchases.json"  # analysis B is a Sprint 2 analysis
 RESAMPLES = 2000
 SEED = 20260926
 STABILITY_SEEDS = (20260927, 20260928, 20260929)

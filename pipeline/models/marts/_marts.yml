@@ -439,3 +439,81 @@ models:
         description: Its value.
       - name: sort_order
         description: Display order.
+  - name: mart_category_sessions
+    description: >
+      Changes 2026-09-26 (Sprint 3 ranking), items 1-4, 10, 11, and 12: one row per (level, valid session,
+      category) entered by a view in the category (the Section 9 category funnel population), at the top level
+      and the full-code drill-down, "unknown" included. Carries the purchase flag, both revenue sums, and the
+      sensitivity flags. Not exported; funnel.rankings reads it for the user-clustered bootstrap.
+    columns:
+      - name: category_level
+        description: "'category_top' or 'category_code'."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["category_top", "category_code"]
+      - name: category
+        description: Top-level category or full code; "unknown" when missing (Section 9). Never ranked when "unknown".
+        data_tests: [not_null]
+      - name: user_session
+        description: The valid session (Section 3).
+        data_tests: [not_null]
+      - name: user_id
+        description: The session's user; the resampling unit of the cluster bootstrap.
+        data_tests: [not_null]
+      - name: has_purchase
+        description: At least one purchase event of a product in the category (item 4).
+        data_tests: [not_null]
+      - name: revenue
+        description: Price over purchase events of products in the category, zero-price excluded (item 11, primary).
+        data_tests: [not_null]
+      - name: revenue_collapsed
+        description: >
+          Price on the earliest purchase event of each (session, product) purchase pair in the category (item 11,
+          repeat purchase events collapsed; Section 4).
+        data_tests: [not_null]
+      - name: is_long_session
+        description: The session is longer than 24 hours (sensitivity C6).
+        data_tests: [not_null]
+      - name: is_most_active_user
+        description: The user is above the 99.9th percentile of deduplicated events in valid sessions (C7).
+        data_tests: [not_null]
+      - name: has_missing_code_event
+        description: The session has an event of a product with a missing code (C8).
+        data_tests: [not_null]
+  - name: mart_category_ranking_counts
+    description: >
+      Changes 2026-09-26 (Sprint 3 ranking), items 4, 5, 11, and 12: per (specification, level, category),
+      category-sessions, those with a purchase, and both revenue sums. Specifications C1 (all), C6 (no sessions
+      over 24 hours), C7 (no most active users), C8 (sessions with no missing-code event). Point values for
+      funnel.rankings, the reconciliation with mart_funnel_category, and R2 in funnel.verify. Not exported.
+    columns:
+      - name: row_key
+        description: spec_key, category_level, and category (grain key).
+        data_tests: [unique, not_null]
+      - name: spec_key
+        description: Specification (C1, C6, C7, C8).
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["C1", "C6", "C7", "C8"]
+      - name: category_level
+        description: "'category_top' or 'category_code'."
+        data_tests: [not_null]
+      - name: category
+        description: Top-level category or full code; "unknown" included.
+        data_tests: [not_null]
+      - name: category_sessions
+        description: Category-sessions (item 1).
+        data_tests: [not_null]
+      - name: category_sessions_with_purchase
+        description: Category-sessions with a purchase of a product in the category (item 4 numerator).
+        data_tests: [not_null]
+      - name: revenue
+        description: Revenue per category-session numerator, primary (item 11).
+      - name: revenue_collapsed
+        description: Revenue per category-session numerator, repeat purchase events collapsed (item 11).
+      - name: users
+        description: Distinct users with a category-session in the category.

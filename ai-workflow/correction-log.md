@@ -459,6 +459,89 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the script decodes the pages strictly as UTF-8, drops the substitution, and writes the file itself as UTF-8 without a BOM. A check confirms no U+FFFD and no BOM, and all 11 sentences match exactly. Ships in this commit.
 - **Guard added:** the evidence script exits non-zero if any sentence isn't found by exact match.
 
+**2026-09-26 · Sprint 3 Step 4 · Three errors in the ranking code, caught before its first commit**
+- **Origin:** Claude Code (`analysis/funnel/verify.py` R2 posterior, `pipeline/models/marts/_marts.yml`, `analysis/tests/test_rankings.py`)
+- **What was produced:**
+  1. The independent R2 posterior decided "prior at the cap" from the sign of the s-score at s = 1e10.
+  2. The new marts' YAML, appended to `_marts.yml`, which had no trailing newline.
+  3. A test asserting that four identical-rate categories never have a separable pair.
+- **What was wrong:**
+  1. Near the cap the true s-score shrinks like 1/s², below rounding, so its sign is noise. The R2 path put overdispersed synthetic data at the cap and returned the pooled rate for every category (79% relative error).
+  2. The first new entry was glued onto the last line of the file, which is invalid YAML.
+  3. Under identical rates a chance extreme can separate. The test's seed happened to give a category at z = 2.59 and three separable pairs, so the assertion encoded a false guarantee.
+- **How it was caught:** local test: pytest runs before the commit: (1) `test_independent_posterior_agrees_with_rankings_within_the_r2_tolerance` failed; (2) the scratch `dbt build` on the synthetic log refused to parse the YAML; (3) the same test file failed, and a diagnosis over 40 datasets followed (1 of 40 separated).
+- **Fix:**
+  1. R2 brackets the root at the first positive-to-non-positive sign change on a grid of log s, then bisects.
+  2. The newline was restored.
+  3. The test now checks a false-separation rate. The calibration is logged as search-log row 36, before the real run, because it bears on stop rule F6.
+
+  All three ship in this commit.
+- **Guard added:** the agreement test (R2 against `funnel.rankings` within 1e-9); `test_identical_rates_rarely_separate`; the scratch dbt build is recorded as part of the code check (search-log row 26).
+
+**2026-09-27 · Sprint 3 Step 4 · The ranking run crashed in the prior fit after three hours**
+- **Origin:** Claude Code (`analysis/funnel/rankings.py`, `fit_prior_mle`, `_ab`, and the final JSON write, at `d5dea4f`)
+- **What was produced:** a damped-Newton fit of the beta-binomial prior with no bound on logit μ and no cap on the step, a line search that accepted its last trial point even when that point was worse, and a result dictionary holding numpy scalars, written once at the end of the run.
+- **What was wrong:** in one bootstrap resample of the code-level C5 run (minimum size 500), a Newton step sent logit μ far enough that `math.exp` overflowed. The run died about three hours in and wrote nothing. Reviewing the code for the fix turned up three more defects:
+  1. the line search could accept a worse point;
+  2. 1 − μ was computed by subtraction, so it could round to 0 and make b = 0;
+  3. `json.dumps` rejects numpy booleans, so even a clean run would have crashed at its final write.
+
+  The run's earlier `divide by zero encountered in log` warning came from the same unguarded trial points.
+- **How it was caught:** local test and the executor's own run: the background run exited with code 1 (`OverflowError: math range error`). The other defects were found by reviewing the code and confirmed by the new pytest tests.
+- **Fix:**
+  - logit μ bounded to ±40, with a numerically stable logistic that computes 1 − μ directly;
+  - a trust region of 2 per coordinate on the Newton step;
+  - the log-likelihood returns −∞ outside the parameter space, and the line search accepts only finite, non-worse points (if none exists, the fit stops at the current point);
+  - numpy values converted before every JSON write;
+  - each finished part saved under `data/rankings_partial/`, so a crash can't lose a whole level.
+
+  No specification changed (search-log row 37). Ships in this commit.
+- **Guard added:** `test_mle_survives_extreme_starting_points`, and `test_run_level_rules_and_json_write_end_to_end`, which runs `run_level`, the rules, and the JSON serialization on a synthetic warehouse before any multi-hour run.
+
+**2026-09-27 · Sprint 3 Step 4 · Unapproved pipeline and contract changes, and a ranking run on them**
+- **Origin:** Unattributed second actor (not Claude Code in this session, and not the project owner, who stated at H4 on 2026-09-27 that the changes were neither made nor approved by the owner)
+- **What was produced:** between 06:57 and 11:40 on 2026-09-27:
+  - two pandas audit scripts over the raw Parquet file;
+  - a filter excluding one `user_id` in `stg_events.sql` and `stg_dedup_audit.sql`;
+  - a `docs/metrics.md` Changes entry (D11) claiming owner approval and quoting typed outcome figures;
+  - a `dbt run` and `dbt test` outside `funnel.build`, with no gates and no build record (`assert_dedup_reconciles` failed);
+  - a `funnel.rankings` run ("run 4") on the rebuilt marts, which overwrote run 3's outputs.
+- **What was wrong:**
+  - The contract was changed without an owner decision, and with a false claim of one. Typed numbers break rule 1.
+  - The specification was changed after outcomes were seen.
+  - The warehouse was rebuilt outside the gated, recorded path, with a failing test.
+  - Run 3's log and exit-code files were lost, so its end can't be recovered.
+- **How it was caught:** Claude Code's run reconciliation check: the owner's question about the log's memory gate and marts fingerprint led to a comparison with run 3's recorded values (6.59 GB, `8605ac0bfff3`), then to file times, `git status`, and the dbt logs (`ai-workflow/escalations/2026-09-27-C-rankings-stop-rules.md`).
+- **Fix:**
+  - Everything was preserved on `quarantine/unapproved-2026-09-27` (`884cae3`, never to be merged).
+  - The committed state was restored at `015a80f`, and the warehouse is rebuilt through `funnel.build`.
+  - Run 4 is void (search-log row 41).
+- **Guard added:** `funnel.provenance`. `funnel.build` and `funnel.rankings` refuse a dirty working tree, `funnel.build` records the ranking marts' fingerprint, and `funnel.rankings` refuses marts without a gated build record carrying that fingerprint. Tests: `test_provenance.py`.
+
+**2026-09-27 · Sprint 3 Step 4 (H4 brief) · A synthetic comparison with too few resamples for its quantiles**
+- **Origin:** Claude Code (a scratch diagnostic for the F6 escalation brief)
+- **What was produced:** a Bonferroni-adjusted pairwise bootstrap comparison over 78 pairs, computed from 200 resamples, reported to the session as evidence that the anti-conservatism went beyond the rank rule.
+- **What was wrong:** with 200 draws, the adjusted quantiles (0.064% and 99.936%) are just the minimum and maximum of the draws, so the comparison separates pairs by construction. It is no evidence either way.
+- **How it was caught:** Claude Code's review of its own diagnostic before writing the brief.
+- **Fix:** the comparison was excluded from the brief, and the brief says so (§2, F6, reading 4). The rank rule was re-checked at the real setting of 2,000 resamples.
+- **Guard added:** none automated (scratch code). The brief states the resample count behind every synthetic figure.
+
+**2026-09-27 · Closing · Three naming-rule violations in the approved closing content**
+- **Origin:** Claude Chat (drafting `ai-workflow/closing-content.md`, the owner-approved closing content)
+- **What was produced:** the headline finding F2, "For carts from sessions starting October 1–24, 2019 (UTC), … is not the same as value lost.", and question 5, "Why did late-October carts show a lower later-purchase rate?".
+- **What was wrong:** two uses of the whole word "carts" (naming rule 1: cart events are not carts), and "lost", loss wording that analysis B's claim tier forbids.
+- **How it was caught:** executor self-review: Claude Code ran the project's naming guard (`funnel.naming_guard.naming_findings`) and the wording-guard pattern over the content before any of it was committed or reached a page.
+- **Fix:** the owner approved three rewordings: "For carted products in sessions starting …", "… is not the same as value never purchased.", and "Why did products carted in late October show a lower later-purchase rate?". `closing-content.md` was updated in place in this commit.
+- **Guard added:** `python -m funnel.closing` refuses content that the naming guard flags. Its outputs are also covered by the existing tests: `web/public/data/closing.json` is scanned by `test_naming_rules`, and the closing report, the closing export, and the `/questions` and home pages are a surface of the wording guard (`test_wording_guard.py`). The phrase list stays in test code, as the Sprint 2 contract requires.
+
+**2026-09-27 · Closing · The closing report linked to a file not yet on main**
+- **Origin:** Claude Code (`analysis/funnel/closing.py`, `render_report`)
+- **What was produced:** `docs/closing-report.md` linked question 6's evidence as `https://github.com/.../blob/main/ai-workflow/escalations/2026-09-27-C-rankings-stop-rules.md`.
+- **What was wrong:** the brief reaches `main` only when this PR merges, so the link returned 404 on the PR. This is the same class of error as the README link in PR #7.
+- **How it was caught:** CI: the `docs-checks` link check on PR #17 (run 36352732338) failed with `[404]`.
+- **Fix:** the report links to the brief by relative path (`../ai-workflow/escalations/...`), which the link checker resolves in the branch. The `/questions` page keeps the absolute GitHub link, which resolves after the merge and isn't link-checked. Report regenerated in this commit.
+- **Guard added:** none new; the CI link check caught it as designed.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getKpis, getPurchasePaths, metric } from "@/lib/data";
+import { closingSources, closingText, getClosing, getKpis, getPurchasePaths, metric } from "@/lib/data";
 import { fmtDollars, fmtDollarsCompact, fmtInt, fmtPct } from "@/lib/format";
 import { niceDomain } from "@/lib/scale";
 import { LineChart } from "./line-chart";
@@ -30,13 +30,17 @@ export default function Home() {
   const rateScale = niceDomain(days.map((d) => d.session_purchase_rate));
   const minRate = days.reduce((a, b) => (b.session_purchase_rate < a.session_purchase_rate ? b : a));
   const maxRate = days.reduce((a, b) => (b.session_purchase_rate > a.session_purchase_rate ? b : a));
+  // Closing (owner decision, 2026-09-27): status, findings, and question 1 come from closing.json, never typed.
+  const closing = getClosing();
+  const question1 = closing.questions.find((q) => q.start_here);
+  if (!question1) throw new Error("closing.json has no question marked start_here");
 
   return (
     <div className="space-y-12">
       <header className="space-y-5">
         <span className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-sm font-medium text-accent">
           <span aria-hidden className="h-2 w-2 rounded-full bg-accent" />
-          Sprint 1 · pipeline and definitions
+          {`Project status: ${closing.status}`}
         </span>
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">E-commerce Funnel Analytics: {monthYear}</h1>
         <p className="max-w-2xl text-lg leading-relaxed">
@@ -48,7 +52,31 @@ export default function Home() {
         </p>
       </header>
 
-      <Section n={1} title="What the data shows">
+      <Link
+        href="/questions"
+        className="block space-y-1 rounded-lg border border-accent/40 bg-accent/10 p-4 hover:border-accent"
+      >
+        <span className="text-sm font-medium text-accent">Start here: questions worth asking next →</span>
+        <span className="block font-semibold">{closingText(question1.question, closing.figures)}</span>
+        <span className="block text-sm text-muted">{closing.question_1.lead}</span>
+      </Link>
+
+      <Section n={1} title="Headline findings">
+        <ol className="space-y-3">
+          {closing.findings.map((finding) => (
+            <li key={finding.id} className="rounded-lg border border-line bg-surface p-4">
+              <p>{closingText(finding.text, closing.figures)}</p>
+              <p className="mt-1 text-xs text-muted">Claim tier: {finding.tier}</p>
+            </li>
+          ))}
+        </ol>
+        <Sources fields={[
+          ...closingSources(closing.findings.map((finding) => finding.text), closing.figures),
+          "closing.json: findings[] (from docs/closing-report.md)",
+        ]} />
+      </Section>
+
+      <Section n={2} title="What the data shows">
         <div className="space-y-2">
           <p>
             In {monthYear}, {fmtPct(noCartPath.revenue_share, 1)} of revenue came from purchases with no observed
@@ -71,12 +99,12 @@ export default function Home() {
           <Sources fields={["kpis.json: month.view_to_cart_session_rate, .cart_session_purchase_rate"]} />
         </div>
         <p className="text-sm text-muted">
-          This sprint defines every metric, builds and tests the pipeline, and describes the funnel. It makes no
-          recommendation yet: what to test first is the next sprint&apos;s question.
+          What to test first: question 1 on the{" "}
+          <Link href="/questions" className="text-accent underline">questions page</Link>.
         </p>
       </Section>
 
-      <Section n={2} title={`The month in numbers (${prefix} ${m.period_start.slice(0, 4)}, UTC)`}>
+      <Section n={3} title={`The month in numbers (${prefix} ${m.period_start.slice(0, 4)}, UTC)`}>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <Kpi entry={metric("Sessions")} value={fmtInt(m.sessions)} basis="valid sessions" />
           <Kpi entry={metric("Order")} label="Orders" value={fmtInt(m.orders)} basis="sessions with an observed purchase" />
@@ -109,7 +137,7 @@ export default function Home() {
         <Sources fields={["kpis.json: month.sessions, .orders, .session_purchase_rate, .revenue, .revenue_repeat_collapsed, .average_order_value, .revenue_per_session"]} />
       </Section>
 
-      <Section n={3} title="By UTC day of session start">
+      <Section n={4} title="By UTC day of session start">
         <p className="text-muted">
           Each session, its order, and its revenue count on the UTC day of the session&apos;s first event. The store&apos;s
           local time zone is unknown.
@@ -183,8 +211,9 @@ export default function Home() {
         </details>
       </Section>
 
-      <Section n={4} title="Where to look next">
+      <Section n={5} title="Where to look next">
         <ul className="space-y-1 text-sm">
+          <li><Link href="/questions" className="text-accent underline">Questions worth asking next</Link>, grouped by who can answer them.</li>
           <li><Link href="/funnel" className="text-accent underline">The session funnel</Link>, purchase paths, and categories.</li>
           <li><Link href="/investigations" className="text-accent underline">Investigations</Link>: why there are two revenue figures, and whether carted products were purchased in a later session.</li>
           <li><Link href="/data-quality" className="text-accent underline">Data quality</Link>, with each metric&apos;s basis and the long-session sensitivity.</li>

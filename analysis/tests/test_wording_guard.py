@@ -62,6 +62,10 @@ SURFACES = {
     "README.md": lambda: [(README, False)],
     "/investigations pages and their render sources": lambda: (
         [(p, False) for p in investigation_pages()] + [(p, False) for p in investigation_render_sources()]),
+    # Closing (owner decision, 2026-09-27): the closing report, the export the pages render from, and the pages.
+    "closing report, /questions, and the home page": lambda: [
+        (REPO_ROOT / "docs" / "closing-report.md", False), (WEB_DATA / "closing.json", False),
+        (REPO_ROOT / "web" / "app" / "questions" / "page.tsx", False), (REPO_ROOT / "web" / "app" / "page.tsx", False)],
 }
 
 

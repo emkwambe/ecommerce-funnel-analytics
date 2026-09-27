@@ -162,7 +162,7 @@ export default function DataPage() {
         <Sources fields={["data_story.json: reconciliation (from stg_dedup_audit, stg_events, int_sessions, mart_kpis_daily)"]} />
       </Section>
 
-      <Section n={6} title="Limitations">
+      <Section n={6} title="Limitations" id="limitations">
         <ul className="list-disc space-y-2 pl-5 text-sm">
           {s.limitations.map((l) => (
             <li key={l.text}>

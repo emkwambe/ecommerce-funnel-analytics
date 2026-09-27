@@ -301,3 +301,11 @@ Every data-quality metric states its basis. Exact duplicate rows removed are cou
 **Claim ceiling:** "Categories are ordered by estimated session conversion. Two categories are described as different only where their rank intervals don't overlap. This describes the period in the file and doesn't explain why categories differ."
 
 **Effect on published numbers:** none changes. A rankings page is added. The category funnel is unchanged, and item 5 reconciles the two.
+
+### 2026-09-27 · Sprint 3: ranking stopped (option D); nothing published under items 6–10 (Section 9)
+
+**Reason:** the category ranking defined in the entry "2026-09-26 · Sprint 3: category session conversion and its size-adjusted ranking" failed its own pre-specified negative control (stop rule F6). A diagnosis on synthetic data, where every category has the same expected conversion by construction, ran the committed ranking code at the real settings. It found that the separability rule (item 8: categories are different only where their 90% rank intervals don't overlap) still separated categories, with no clustering and no permutation involved. A rule that reports differences where none exist can't be trusted to separate real ones (`ai-workflow/escalations/2026-09-27-C-rankings-stop-rules.md`, §2). The project owner approved this entry at H3 on 2026-09-27 and stopped the ranking under option D.
+
+**Effect:** the ranking is not published. Nothing defined in items 6–10 of that entry (the size-adjusted estimate, ranks and rank intervals, separability, the minimum reporting size as a ranking rule, and the levels) appears on the site, in exports, or in any answer. Items 1–5 and 11 define no published number either, because no Sprint 3 quantity is published. The 2026-09-26 entry stays in this document, unchanged, as the pre-registration that the negative control tested.
+
+**Effect on published numbers:** none.
