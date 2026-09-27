@@ -301,28 +301,3 @@ Every data-quality metric states its basis. Exact duplicate rows removed are cou
 **Claim ceiling:** "Categories are ordered by estimated session conversion. Two categories are described as different only where their rank intervals don't overlap. This describes the period in the file and doesn't explain why categories differ."
 
 **Effect on published numbers:** none changes. A rankings page is added. The category funnel is unchanged, and item 5 reconciles the two.
-
-### 2026-09-27 · Sprint 3: category session conversion as a non-ranked rate table, replacing the ranking (Section 9) · DRAFT, pending H3
-
-**Status: draft.** Claude Code drafted this entry on 2026-09-27, following the project owner's H4 decision (option A, recorded in `ai-workflow/sprint-3-verification.md`). The owner hasn't approved it. No quantity it defines has been computed on the contract pipeline. It takes effect only when the owner approves it at H3.
-
-**Reason:** the ranking defined in the entry "2026-09-26 · Sprint 3: category session conversion and its size-adjusted ranking" failed its own pre-specified negative control (stop rule F6). A diagnosis on synthetic data, where every category has the same expected conversion by construction, used the committed ranking code at the real settings (2,000 user-clustered resamples, 90% rank intervals). It separated at least one pair of categories in 3 of 6 datasets, with no clustering and no permutation involved. So the rule "different only where 90% rank intervals don't overlap" describes chance differences as real in a large share of null situations, which is what the claim ceiling was written to prevent (`ai-workflow/escalations/2026-09-27-C-rankings-stop-rules.md`, §2). The other fired rules (F1, F3, F5, F8) are consistent with that fragility, or come from rules miscalibrated for large categories.
-
-**What changes.** Items 6, 7, 8, and 10's ranking, and the robustness plan's ranking specifications (C1's ordering, C2–C5, C9), are withdrawn. Nothing is ranked, shrunk, or ordered by rate, and no two categories are described as different. The rest of that entry stands unchanged: items 1–5 (the unit, multi-category sessions, missing codes, the session-conversion estimand, and the reconciliation test), item 9's minimum reporting size of 1,000 category-sessions, item 11's revenue per category-session with both U1 figures, and item 13 (U2).
-
-1. **The table.** One row per top-level category, and in a drill-down per full `category_code`, with:
-   - category-sessions (item 1) and those with a purchase in the category (item 4 numerator), as counts;
-   - session conversion in the category (item 4): the raw rate, x ÷ n, with no shrinkage;
-   - a 95% user-clustered interval for the rate: the 2.5th and 97.5th percentiles over 2,000 resamples, each drawing `user_id` values with replacement and keeping all of a drawn user's category-sessions, seed 20260926, with the seed recorded in the export (the Sprint 2 interval convention);
-   - revenue per category-session, primary and repeat-collapsed (item 11), each with the same kind of 95% interval.
-
-   Categories below 1,000 category-sessions are listed with their counts only, as "insufficient data". "unknown" is not a row; its category-sessions and their share are published as an exclusion count (item 3).
-2. **Order of rows:** by category-sessions, largest first, never by rate. The page states that the order is by size.
-3. **Seed stability:** the intervals are recomputed with seeds 20260927, 20260928, and 20260929. The largest change in any bound is reported in `ai-workflow/sprint-3-verification.md`, and the published intervals use seed 20260926.
-4. **Design effect:** each rate's design effect (the bootstrap variance of the rate ÷ p(1 − p)/n) is published beside it, so the reader can see how much user clustering widens each interval. That's the finding behind F3.
-5. **R2:** `funnel.verify` reproduces every count, revenue sum, and rate independently (as approved in C-D7: "an independent implementation, using the same engine"). The intervals are checked by seed stability, not by R2.
-6. **Pipeline provenance:** the table is computed only from marts with a gated build record (`funnel.provenance`), after the H4 restoration.
-
-**Claim ceiling:** "This table reports each category's share of viewing sessions that include a purchase in the category, with a user-clustered 95% interval. It does not rank categories or say that any two differ. The method we pre-specified for telling categories apart failed its own negative control, so we don't make that claim. It describes the period in the file and doesn't explain why rates vary."
-
-**Effect on published numbers:** none changes. The planned rankings page becomes a rate table with the claim ceiling above. The category funnel page is unchanged, and item 5's reconciliation still ties the two.
