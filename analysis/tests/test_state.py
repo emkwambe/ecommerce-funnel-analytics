@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from funnel import state
 
 
@@ -37,7 +39,42 @@ def test_one_line_keeps_colons_and_semicolons():
 def test_uncertainty_lines_are_whole():
     for item in state.open_uncertainties():
         assert not item.rstrip(")").endswith(":"), item
-        assert "(material; open" in item or "(critical; open" in item, item
+        # Accepted limitations (H5) stay listed, under their own status, never shown as "open".
+        assert re.search(r"\((material|critical); (open|accepted limitation)\)$", item), item
+
+
+def test_open_prs_become_waiting_rows():
+    rows = state.waiting_from_open_prs([{"number": 14, "title": "Sprint 3 Step 0", "url": "https://x/pull/14"}])
+    assert rows == ["H8|Merge PR #14 (Sprint 3 Step 0)|https://x/pull/14"]
+
+
+def test_stale_snapshot_is_reported_only_for_prs_no_longer_open():
+    snapshot = ("## Waiting on the owner\n| H | Question | Link |\n|---|---|---|\n"
+                "| H8 | Merge PR #13 (records) | https://x/13 |\n| H8 | Merge PR #14 | https://x/14 |\n\n## Open")
+    found = state.snapshot_discrepancies(snapshot, {13: "MERGED", 14: "OPEN"})
+    assert len(found) == 1 and "PR #13" in found[0] and "MERGED" in found[0]
+
+
+def test_print_mode_writes_nothing(tmp_path, monkeypatch, capsys):
+    """trio v2.4.1 §2a: the live state is printed, never written or committed."""
+    out = tmp_path / "STATE.md"
+    out.write_text("committed snapshot\n", encoding="utf-8")
+    monkeypatch.setattr(state, "OUT", out)
+    monkeypatch.setattr(state, "live_inputs", lambda now, w, nxt, d: ("now", [], "next", []))
+    monkeypatch.setattr(state, "live_release", lambda: "https://site at v9 (abc)")
+    monkeypatch.setattr(state, "repo_line", lambda: "Last merged: PR #1")
+    state.main(["--print"])
+    assert out.read_text(encoding="utf-8") == "committed snapshot\n"
+    printed = capsys.readouterr().out
+    assert "live state" in printed and "nothing was written or committed" in printed
+
+
+def test_writing_the_snapshot_still_needs_now_and_next(tmp_path, monkeypatch):
+    import pytest
+
+    monkeypatch.setattr(state, "OUT", tmp_path / "STATE.md")
+    with pytest.raises(SystemExit, match="required when writing"):
+        state.main(["--now", "x"])
 
 
 def test_waiting_argument_needs_three_parts(tmp_path, monkeypatch):

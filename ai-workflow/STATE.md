@@ -1,35 +1,35 @@
 # STATE — ecommerce-funnel-analytics
 
-Generated 2026-09-26 19:06 UTC by Claude Code (`python -m funnel.state`) from git, gh, and the working context. The repo wins over this file if they disagree. Regenerate it; don't hand-edit.
+Generated 2026-09-26 23:56 UTC by Claude Code from git, gh, and the working context: a per-PR snapshot, written by `python -m funnel.state` inside the PR that commits it. After that PR merges, its waiting line is expected to be stale; `python -m funnel.state --print` gives the live state. The repo wins over this file if they disagree. Regenerate it; don't hand-edit.
 
 **Mode:** Transparent · **Tier:** Governed · **Live:** https://ecommercefunnel-analytics.vercel.app at v1.1.2 (4dedfac)
 
 ## Now
-Sprint 2 closed: v1.1.2 live (how-its-built refreshed; correction-log categories from the trio template). Records PR #13 open.
+Sprint 3 Step 0 (carryover): the Sprint 3 plan, planning decisions (H1, H5), and U1/U2 as accepted limitations, in PR #14. Rankings work starts after its merge.
 
 ## Waiting on the owner
 | H | Question (one line) | Link |
 |---|---|---|
-| H8 | Merge PR #13 (v1.1.2 records, Mode: Transparent, STATE.md) | https://github.com/emkwambe/ecommerce-funnel-analytics/pull/13 |
+| H8 | Merge PR #14 (Sprint 3 Step 0: carryover) | https://github.com/emkwambe/ecommerce-funnel-analytics/pull/14 |
 
-## Open uncertainties (material or critical)
-- U1: Repeated purchase events of the same product in a session: extra units or repeated logging? (material; open)
-- U2: Is user_id a reliable identity across sessions? (material; open)
+## Open uncertainties and accepted limitations (material or critical)
+- U1: Repeated purchase events of the same product in a session: extra units or repeated logging? (material; accepted limitation)
+- U2: Is user_id a reliable identity across sessions? (material; accepted limitation)
 
 ## Recent owner decisions
 | Date | H | Decision | Recorded in |
 |---|---|---|---|
-| 2026-09-26 | Owner decisions on the final report's o… | (a) Refresh the live /how-its-built page now, as v1.1.2. | `ai-workflow/sprint-2-verification.md` |
-| 2026-09-26 | H8 | PR #12 (v1.1.2) merged by the owner via gh. | `ai-workflow/sprint-2-verification.md` |
-| 2026-09-26 | H8 (release v1.1.2) | On the owner's instruction: main at 4dedfac (clean) deployed to production (deployment dpl_8xpA8WYe66hxqzHHEWi1LspWXDen, READY, target production). | `ai-workflow/sprint-2-verification.md` |
-| 2026-09-26 | H6 | Owner's go-ahead ("go") to delete the merged sprint-2/* branches listed: 11 local branches with git branch -d and 8 GitHub copies, and sprint-2/v112-how-its-bu… | `ai-workflow/sprint-2-verification.md` |
-| 2026-09-26 | Owner decision | Add "Mode: Transparent" to CLAUDE.md and generate ai-workflow/STATE.md from the trio v2.4.0 template (from git, gh, and the working context), regenerated at ev… | `ai-workflow/sprint-2-verification.md` |
+| 2026-09-26 | H1 | Sprint 3 scope: carryover PR, then size-adjusted category rankings end to end. | `ai-workflow/sprint-3-verification.md` |
+| 2026-09-26 | H1 | Primary ranking metric: session conversion, meaning the share of category-sessions that include a purchase in that category, shrunk toward the pooled rate for… | `ai-workflow/sprint-3-verification.md` |
+| 2026-09-26 | H5 | U1 and U2 are reclassified from *open* to accepted limitation, with binding constraints: (a) every revenue-based figure shows both the primary and the repeat-c… | `ai-workflow/sprint-3-verification.md` |
+| 2026-09-26 | H1 (plan) | The owner adopted ai-workflow/sprint-3.md as the Sprint 3 plan: "the merged plan; it replaces any earlier draft". | `ai-workflow/sprint-3-verification.md` |
+| 2026-09-26 | Owner decision | "From now on, you're the command center for this project." From Sprint 3 on, the Claude Code session holds the command-center role (plan, challenge, verify) as… | `ai-workflow/sprint-3-verification.md` |
 
 ## Repo
-Last merged: PR #12 (4dedfac, 2026-09-26T19:00:40Z) · Open PRs: #13 v1.1.2 records; Mode: Transparent; STATE.md (trio v2.4.0 state sync) · Working tree: clean
+Last merged: PR #13 (59cb293, 2026-09-26T22:56:15Z) · Open PRs: #14 Sprint 3 Step 0: carryover (plan, planning decisions, U1/U2 accepted limitations, state sync) · Working tree: clean
 
 ## Next action
-owner: merge PR #13; then command center: plan Sprint 3 (recommendations, size-adjusted category rankings, Tableau, the agent)
+owner: merge PR #14 and decide the command center's plan-review questions; then executor: Sprint 3 Steps 1-2 (contract draft and method-selection record, for one H3 approval)
 
 ## Known chat/repo discrepancies
 none
