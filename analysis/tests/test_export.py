@@ -154,5 +154,9 @@ def test_second_labeled_entry_on_a_date_keeps_the_first_entrys_keys(metrics_text
     that pages read with metricByKey() must not change."""
     before = {e["key"]: e["name"] for e in parse_metrics_index(metrics_text)}
     after = {e["key"]: e["name"] for e in parse_metrics_index(_with_changes_entry(metrics_text, "2026-09-26 · Later"))}
-    assert after["2026-09-26-2_item_1"] == "A new label"
+    added = {k: v for k, v in after.items() if k not in before and "_item_" in k}
+    assert list(added.values()) == ["A new label"] and re.fullmatch(r"2026-09-26-\d+_item_1", *added)
     assert {k: after[k] for k in before} == before
+    # The Sprint 3 entry (approved at H3) is the second labeled entry dated 2026-09-26.
+    assert before["2026-09-26-2_item_4"] == "Viewing sessions with an observed purchase in the category (%)"
+    assert before["2026-09-26_item_9"].startswith("Carted products with no observed purchase in the session")

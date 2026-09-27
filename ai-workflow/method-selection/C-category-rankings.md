@@ -1,6 +1,6 @@
 # Method Selection — C. Which categories convert viewing sessions most often, allowing for size?
 
-Template: verified-analytics-project v2.2.0 (`assets/templates/method-selection.md`). Written in Sprint 3 Steps 1 and 2 (2026-09-26), before any Sprint 3 quantity is computed. **Status: draft for H3.** The owner approves this record together with the draft `docs/metrics.md` Changes entry "Sprint 3: category session conversion and its size-adjusted ranking". Epistemic risk: **material** (the plan's risk classification). Any slow-down trigger in `ai-workflow/sprint-3.md` raises it to consequential.
+Template: verified-analytics-project v2.2.0 (`assets/templates/method-selection.md`). Written in Sprint 3 Steps 1 and 2 (2026-09-26), before any Sprint 3 quantity is computed. **Status: approved by the owner at H3 on 2026-09-26, with all recommendations C-D1 to C-D10 as written.** It was approved together with the `docs/metrics.md` Changes entry "Sprint 3: category session conversion and its size-adjusted ranking". See "Owner decisions" at the end. Epistemic risk: **material** (the plan's risk classification). Any slow-down trigger in `ai-workflow/sprint-3.md` raises it to consequential.
 
 **What was looked at before writing this record.** Only exposure counts and structure: the number of top-level categories and full codes, and each one's `funnel_pairs` (category-sessions), read from the committed `web/public/data/funnel_category.json`. The output was printed with only the `category` and `funnel_pairs` fields. No purchase count, rate, or revenue was read. **Disclosure:** the same file has published `funnel_pairs_with_purchase` since Sprint 1, so candidate A (the raw rate) is computable from public data and was visible to anyone who read the category funnel page. This lock is therefore not blind to the raw outcome. It does fix the method, the threshold, and the claim rules before any shrinkage, bootstrap, or ranking output exists.
 
@@ -34,6 +34,7 @@ Template: verified-analytics-project v2.2.0 (`assets/templates/method-selection.
 | C. Wilson lower bound (95%) per category | Binomial sampling, independent category-sessions | The comparison with B | Conservative and prior-free; ignores clustering | **chosen as R3**: rank correlation with B, and every category whose separable status differs between the two |
 | D. Hierarchical model (full Bayes, MCMC) with a user random effect | A correct random-effects model | Posterior predictive checks | Would handle clustering in the shrinkage | **rejected**: a large build for 13 categories, and it adds a dependency. Reconsider if F3 fires at the code level |
 | E. Session-level bootstrap | Sessions are independent | — | No: one user's sessions aren't independent (Sprint 2 analysis B) | **rejected** |
+| F. Separability by a per-pair bootstrap probability, P(θi > θj) ≥ 0.95 (an alternative to non-overlapping rank intervals) | The bootstrap distribution of each pairwise difference is calibrated | Coverage under the negative control | Better calibrated for a single pair, but it needs a multiplicity rule across pairs | **rejected** (owner decision at H3, 2026-09-26): the rank-interval rule stays as the claim rule, and this rule is **not computed** |
 
 **Uncertainty:** a cluster bootstrap at the `user_id` level (resample users with replacement, keeping all their category-sessions), 2,000 resamples, seed 20260926, with seed stability checked on 20260927 to 20260929. The prior is refitted and the categories re-ranked in every resample, so the rank interval includes prior uncertainty. The implementation follows Sprint 2's user-sum approach: one row per (user, category) with the counts needed, and resample weights drawn per user.
 
@@ -82,3 +83,18 @@ Template: verified-analytics-project v2.2.0 (`assets/templates/method-selection.
 | C-D8 | Secondary revenue metric | As defined in item 11 of the draft entry (category-sessions population, both U1 figures, not ranked, 90% intervals) | **Approve** |
 | C-D9 | Sensitivities C4 to C8 | Include all, or drop any | **Include all** |
 | C-D10 | Claim ceiling | The plan's wording, verbatim | **Approve** |
+
+## Owner decisions (H3, 2026-09-26, owner-decided)
+
+The owner approved the `docs/metrics.md` Changes entry and this record with **all recommendations C-D1 to C-D10 as written**, including:
+
+- **C-D1:** the top-level headline, with a full-code drill-down where shrinkage applies.
+- **C-D2:** a minimum of 1,000 category-sessions. Codes below it are excluded from the ranking and from the prior fit, and shown as "insufficient data".
+- **C-D6:** zero separable pairs across 5 shuffles.
+- **C-D7:** R2 by independent DuckDB SQL (not dbt) plus an independently written posterior. The page describes it exactly as "an independent implementation, using the same engine".
+- **C-D8:** revenue per category-session as drafted, both U1 figures, never ranked.
+
+On the Step 1 objections:
+
+- **Objection 2** (the approval is outcome-aware) is recorded as a disclosure in this record: see "What was looked at before writing this record" at the top.
+- **Objection 3:** the rank-interval separability rule stays. The per-pair probability rule is recorded as a rejected alternative (candidate F) and is not computed.
