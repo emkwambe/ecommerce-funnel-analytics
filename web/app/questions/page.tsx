@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { type ClosingQuestion, closingSources, closingText, getClosing } from "@/lib/data";
-import { PageHeader, Sources, td, th } from "../ui";
+import { InlineText, PageHeader, Sources, td, th } from "../ui";
 
-export const metadata: Metadata = { title: "Questions worth asking next · E-commerce Funnel Analytics" };
+export const metadata: Metadata = { title: "Questions for further research · E-commerce Funnel Analytics" };
 
 // Every text on this page comes from closing.json (python -m funnel.closing, generated from the closing report);
 // figures are resolved from the export's figures table, never typed.
@@ -13,11 +13,11 @@ function Evidence({ q }: { q: ClosingQuestion }) {
   const cls = "text-sm text-accent underline [overflow-wrap:anywhere]";
   return external ? (
     <a className={cls} href={href}>
-      Evidence: {label}
+      {label}
     </a>
   ) : (
     <Link className={cls} href={href}>
-      Evidence: {label}
+      {label}
     </Link>
   );
 }
@@ -31,7 +31,7 @@ export default function QuestionsPage() {
 
   return (
     <div className="space-y-12">
-      <PageHeader title="Questions worth asking next">
+      <PageHeader title="Questions for further research">
         <p>
           The project is closed. These are the questions its data can&apos;t answer, grouped by who can answer them.
           Each card links to the page that holds its evidence.
@@ -40,7 +40,7 @@ export default function QuestionsPage() {
 
       <section className="space-y-2 rounded-lg border border-accent/40 bg-accent/10 p-4" aria-label="Start here">
         <p className="font-semibold">{c.question_1.lead}</p>
-        <p>{closingText(c.question_1.text, f)}</p>
+        <p><InlineText text={closingText(c.question_1.text, f)} /></p>
       </section>
 
       {c.groups.map((g) => (
@@ -63,8 +63,8 @@ export default function QuestionsPage() {
                       </span>
                     )}
                   </div>
-                  <h3 className="font-medium leading-snug">{closingText(q.question, f)}</h3>
-                  <p className="text-sm text-muted">{closingText(q.card_line, f)}</p>
+                  <h3 className="font-medium leading-snug"><InlineText text={closingText(q.question, f)} /></h3>
+                  <p className="text-sm text-muted"><InlineText text={closingText(q.card_line, f)} /></p>
                   <div className="mt-auto pt-1">
                     <Evidence q={q} />
                   </div>
@@ -93,10 +93,10 @@ export default function QuestionsPage() {
               {c.questions.map((q) => (
                 <tr key={q.n} className="border-b border-line align-top last:border-0">
                   <td className={`${td} num`}>{q.n}</td>
-                  <td className={`${td} [overflow-wrap:anywhere]`}>{closingText(q.question, f)}</td>
-                  <td className={`${td} [overflow-wrap:anywhere]`}>{closingText(q.why, f)}</td>
+                  <td className={`${td} [overflow-wrap:anywhere]`}><InlineText text={closingText(q.question, f)} /></td>
+                  <td className={`${td} [overflow-wrap:anywhere]`}><InlineText text={closingText(q.why, f)} /></td>
                   <td className={`${td} [overflow-wrap:anywhere]`}>
-                    {closingText(q.who, f)} <span className="text-muted">({groupLabel.get(q.group)})</span>
+                    <InlineText text={closingText(q.who, f)} /> <span className="text-muted">({groupLabel.get(q.group)})</span>
                   </td>
                 </tr>
               ))}
@@ -107,15 +107,15 @@ export default function QuestionsPage() {
           {c.questions.map((q) => (
             <li key={q.n} className="space-y-1 rounded-lg border border-line bg-surface p-3 text-sm">
               <p className="font-medium">
-                {q.n}. {closingText(q.question, f)}
+                {q.n}. <InlineText text={closingText(q.question, f)} />
               </p>
               <p>
                 <span className="text-muted">Why it matters: </span>
-                {closingText(q.why, f)}
+                <InlineText text={closingText(q.why, f)} />
               </p>
               <p>
                 <span className="text-muted">Who can answer: </span>
-                {closingText(q.who, f)} ({groupLabel.get(q.group)})
+                <InlineText text={closingText(q.who, f)} /> ({groupLabel.get(q.group)})
               </p>
             </li>
           ))}

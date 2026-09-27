@@ -17,11 +17,11 @@ export const metadata: Metadata = {
 const NAV = [
   { href: "/funnel", label: "Funnel" },
   { href: "/investigations", label: "Investigations" },
-  { href: "/questions", label: "Questions" },
-  { href: "/data-quality", label: "Data quality" },
-  { href: "/data", label: "Data" },
-  { href: "/metrics", label: "Metrics" },
   { href: "/how-its-built", label: "How it's built" },
+  { href: "/data", label: "Data" },
+  { href: "/data-quality", label: "Data quality" },
+  { href: "/metrics", label: "Metrics" },
+  { href: "/questions", label: "Further research" },
 ];
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -24,6 +24,16 @@ export function PageHeader({ title, children }: { title: string; children?: Reac
   );
 }
 
+/** Exported text with `code` spans rendered as inline code instead of literal backticks. */
+export function InlineText({ text }: { text: string }) {
+  const parts = text.split(/`([^`]+)`/);
+  return (
+    <>
+      {parts.map((part, i) => (i % 2 === 1 ? <code key={i} className="[overflow-wrap:anywhere]">{part}</code> : part))}
+    </>
+  );
+}
+
 /** Names the exported JSON fields an interpretive sentence rests on (CLAUDE.md rule 2). */
 export function Sources({ fields }: { fields: string[] }) {
   return (

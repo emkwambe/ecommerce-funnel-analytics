@@ -112,3 +112,14 @@ def test_pages_render_closing_content_from_the_export_never_typed(committed):
     for figure in committed["figures"].values():
         for page in (APP / "page.tsx", APP / "questions" / "page.tsx"):
             assert figure["formatted"] not in _code(page), (page, figure["formatted"])
+
+
+def test_evidence_labels_are_readable_not_raw_paths(committed):
+    """Owner decision (v1.1.4): labels like "See the evidence: purchase paths", generated in the export."""
+    for q in committed["questions"]:
+        label = q["evidence"]["label"]
+        assert label.startswith(c.EVIDENCE_PREFIX), label
+        assert "/" not in label and "#" not in label, label
+    labels = {q["n"]: q["evidence"]["label"] for q in committed["questions"]}
+    assert labels[1] == "See the evidence: purchase paths"
+    assert labels[2] == "See the evidence: revenue figures investigation"

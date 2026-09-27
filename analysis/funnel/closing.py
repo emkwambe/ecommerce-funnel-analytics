@@ -49,6 +49,12 @@ GROUPS = (  # card-grid order; labels as in closing-content.md
 # Evidence links: the content names a page and, in parentheses, a section; sections map to anchors on the pages.
 ANCHORS = {"purchase paths section": "purchase-paths", "identity checks": "identity-checks",
            "late-October finding": "late-october", "limitations": "limitations"}
+# Readable evidence labels (owner decision, v1.1.4): "See the evidence: " plus the section the content names (without
+# a trailing "section"), or the page's name when no section is named.
+EVIDENCE_PREFIX = "See the evidence: "
+PAGE_NAMES = {"/funnel": "session funnel", "/investigations/revenue-figures": "revenue figures investigation",
+              "/investigations/later-purchases": "later purchases investigation", "/data-quality": "data quality",
+              "/data": "about the data"}
 
 
 class ClosingError(Exception):
@@ -160,17 +166,20 @@ def _section(text: str, heading: str) -> str:
 
 def _evidence(cell: str) -> dict[str, str]:
     if cell.startswith("The escalation brief on GitHub"):
-        return {"href": f"{REPO_URL}/blob/main/{ESCALATION_BRIEF}", "label": "The escalation brief (GitHub)",
-                "external": True}
+        return {"href": f"{REPO_URL}/blob/main/{ESCALATION_BRIEF}",
+                "label": f"{EVIDENCE_PREFIX}escalation brief (GitHub)", "external": True}
     m = re.fullmatch(r"`(/[a-z/-]*)`(?: \((.+)\))?", cell)
     if not m:
         raise ClosingError(f"unrecognized evidence link: {cell!r}")
     path, section = m.group(1), m.group(2)
+    if path not in PAGE_NAMES:
+        raise ClosingError(f"no readable name for evidence page {path!r}")
     if section is None:
-        return {"href": path, "label": path, "external": False}
+        return {"href": path, "label": EVIDENCE_PREFIX + PAGE_NAMES[path], "external": False}
     if section not in ANCHORS:
         raise ClosingError(f"no anchor for evidence section {section!r}")
-    return {"href": f"{path}#{ANCHORS[section]}", "label": f"{path} ({section})", "external": False}
+    label = section.removesuffix(" section")
+    return {"href": f"{path}#{ANCHORS[section]}", "label": EVIDENCE_PREFIX + label, "external": False}
 
 
 def parse_content(text: str) -> dict[str, Any]:
