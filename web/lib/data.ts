@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { withoutDraftEntries } from "./contract.mjs";
 
 /** Provenance block on every export (CLAUDE.md rule 5), written by python -m funnel.export. */
 export type Manifest = {
@@ -274,6 +275,7 @@ export function metric(name: string): MetricEntry {
   return found;
 }
 
+/** The committed contract as /metrics renders it: unapproved (DRAFT) Changes entries show only a notice. */
 export function getMetricsMarkdown(): string {
-  return readFileSync(join(process.cwd(), "content", "metrics.md"), "utf-8");
+  return withoutDraftEntries(readFileSync(join(process.cwd(), "content", "metrics.md"), "utf-8"));
 }

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 
 from funnel.common import KAGGLE_URL, REPO_ROOT
 from funnel.ingest import REES46_URL
@@ -15,6 +16,43 @@ WEB = REPO_ROOT / "web"
 def test_metrics_page_copy_equals_committed_contract():
     assert WEB_METRICS_MD.exists(), "run npm --prefix web run build (sync-content) to create web/content/metrics.md"
     assert WEB_METRICS_MD.read_bytes() == METRICS_MD.read_bytes()
+
+
+def _render_contract_for_metrics_page(markdown: str, tmp_path) -> str:
+    """Runs the page's own filter (web/lib/contract.mjs) with node, as getMetricsMarkdown() applies it."""
+    source, script = tmp_path / "metrics.md", tmp_path / "render.mjs"
+    source.write_bytes(markdown.encode("utf-8"))  # bytes: write_text would turn \n into \r\n on Windows
+    script.write_text(
+        f"import {{ readFileSync }} from 'node:fs';\n"
+        f"import {{ withoutDraftEntries }} from {json.dumps((WEB / 'lib' / 'contract.mjs').as_uri())};\n"
+        f"process.stdout.write(withoutDraftEntries(readFileSync({json.dumps(str(source))}, 'utf-8')));\n",
+        encoding="utf-8",
+    )
+    done = subprocess.run(["node", str(script)], capture_output=True, check=True)
+    return done.stdout.decode("utf-8")
+
+
+def test_metrics_page_never_shows_draft_entries_as_defined_metrics(tmp_path):
+    """Sprint 3 H3 (owner decision): /metrics never shows an unapproved ("DRAFT, pending H3") Changes entry as
+    defined metrics. The heading stays, with a notice; the entry's definitions and labels don't render."""
+    from funnel.export import parse_metrics_index
+
+    contract = METRICS_MD.read_text(encoding="utf-8")
+    draft = ("### 2026-09-30 · A proposed metric (Section 9) · DRAFT, pending H3\n\n"
+             '1. **A proposed metric.** Zeta sessions ÷ sessions. Display label: "Zeta session rate (%)".\n\n')
+    middle = contract.replace("## Changes\n", "## Changes\n\n" + draft, 1)  # a draft followed by approved entries
+    assert middle != contract
+    for text in (middle, contract + "\n" + draft):  # the draft in the middle, and as the last entry
+        rendered = _render_contract_for_metrics_page(text, tmp_path)
+        assert "Zeta session rate" not in rendered and "Zeta sessions" not in rendered
+        assert "A proposed metric (Section 9) · DRAFT, pending H3" in rendered
+        assert "awaiting the owner's approval (H3)" in rendered
+        assert rendered.replace("\r\n", "\n").count("\n### ") == text.replace("\r\n", "\n").count("\n### ")
+        assert all(e["name"] != "Zeta session rate (%)" for e in parse_metrics_index(text))
+    # Approved entries render unchanged, and the page reads the contract through the filter.
+    assert _render_contract_for_metrics_page(contract, tmp_path) == contract
+    data_ts = (WEB / "lib" / "data.ts").read_text(encoding="utf-8")
+    assert re.search(r"getMetricsMarkdown\(\): string \{\s*return withoutDraftEntries\(", data_ts)
 
 
 def test_footer_carries_both_attribution_links():

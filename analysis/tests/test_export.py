@@ -28,7 +28,9 @@ def test_metrics_index_covers_section_6_and_skips_section_1(metrics_text):
 
 def test_changes_entries_are_indexed_with_their_sections(metrics_text):
     entries = changes_entries(metrics_text)
-    assert len(entries) == len(re.findall(r"^### ", _sections(metrics_text)["Changes"], re.MULTILINE)) >= 2
+    approved = [h for h in re.findall(r"^### (.+)$", _sections(metrics_text)["Changes"], re.MULTILINE)
+                if "DRAFT, pending H3" not in h]
+    assert len(entries) == len(approved) >= 2
     assert entries[0]["sections"] == ["6", "9", "10"]
     assert all(re.fullmatch(r"\d{4}-\d{2}-\d{2}", e["date"]) for e in entries)
 
@@ -132,3 +134,29 @@ def test_metrics_index_maps_legend_labels_to_full_labels(metrics_text):
     names = {e["name"] for e in index}
     assert "Sessions with an observed cart event and an observed purchase, none of a carted product" in names
     assert all(e["definition"] for e in index)
+
+
+def _with_changes_entry(text: str, heading: str) -> str:
+    return text + f'\n### {heading}\n\n1. **A metric.** Display label: "A new label". Short label: "New".\n'
+
+
+def test_draft_changes_entries_are_not_indexed(metrics_text):
+    """Sprint 3: a Changes entry pending H3 defines nothing publishable, so it stays out of the index and the
+    changes list until its "DRAFT, pending H3" marker is removed."""
+    draft = _with_changes_entry(metrics_text, "2026-09-30 · A new metric (Section 9) · DRAFT, pending H3")
+    assert "A new label" not in {e["name"] for e in parse_metrics_index(draft)}
+    assert not any("DRAFT" in c["title"] for c in changes_entries(draft))
+    assert not any("DRAFT" in c["title"] for c in changes_entries(metrics_text))
+
+
+def test_second_labeled_entry_on_a_date_keeps_the_first_entrys_keys(metrics_text):
+    """Sprint 3: two entries with labeled numbered items on one date must not collide, and the Sprint 2 keys
+    that pages read with metricByKey() must not change."""
+    before = {e["key"]: e["name"] for e in parse_metrics_index(metrics_text)}
+    after = {e["key"]: e["name"] for e in parse_metrics_index(_with_changes_entry(metrics_text, "2026-09-26 · Later"))}
+    added = {k: v for k, v in after.items() if k not in before and "_item_" in k}
+    assert list(added.values()) == ["A new label"] and re.fullmatch(r"2026-09-26-\d+_item_1", *added)
+    assert {k: after[k] for k in before} == before
+    # The Sprint 3 entry (approved at H3) is the second labeled entry dated 2026-09-26.
+    assert before["2026-09-26-2_item_4"] == "Viewing sessions with an observed purchase in the category (%)"
+    assert before["2026-09-26_item_9"].startswith("Carted products with no observed purchase in the session")
