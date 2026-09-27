@@ -139,6 +139,11 @@ def _slug(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", name.lower()).strip("_")
 
 
+def _is_draft(heading: str) -> bool:
+    """A Changes entry proposed but not yet approved at H3 carries "DRAFT, pending H3" in its heading."""
+    return "DRAFT, pending H3" in heading
+
+
 def parse_metrics_index(text: str) -> list[dict[str, str]]:
     """Metric definitions from Sections 4, 6, and 7, and the dated Changes entries.
 
@@ -154,8 +159,11 @@ def parse_metrics_index(text: str) -> list[dict[str, str]]:
         if len(cells) == 3 and cells[0] not in ("Metric", "---") and not set(cells[0]) <= {"-"}:
             entries.append({"key": _slug(cells[0]), "name": cells[0], "definition": cells[1],
                             "display_label": cells[2], "section": "6"})
+    item_prefixes: set[str] = set()
     for heading, body in re.findall(r"^### (.+?)\n(.*?)(?=^### |\Z)", sections.get("Changes", ""),
                                     re.MULTILINE | re.DOTALL):
+        if _is_draft(heading):
+            continue  # not yet approved at H3: its metrics may not be published or answered
         entries.append({"key": "changes_" + _slug(heading), "name": heading.strip(),
                         "definition": " ".join(body.split()), "display_label": heading.strip(),
                         "section": "Changes"})
@@ -171,12 +179,20 @@ def parse_metrics_index(text: str) -> list[dict[str, str]]:
                             "short_label": short or None})
         # Sprint 2 format: numbered items "N. **Title.** ..." carrying 'Display label: "..."' and optionally
         # '. Short label: "..."'. Indexed by "<entry date>_item_<N>" so pages read labels without typing them.
+        # A later entry with labeled items on the same date is indexed as "<entry date>-<k>_item_<N>" (k = 2, 3, ...),
+        # so the first entry's keys never change.
+        items = re.findall(r"^(\d+)\. \*\*(.+?)\*\*(.*?)(?=^\d+\. \*\*|^#### |\Z)", body, re.MULTILINE | re.DOTALL)
         date = heading.split(" ")[0]
-        for number, title, item in re.findall(r"^(\d+)\. \*\*(.+?)\*\*(.*?)(?=^\d+\. \*\*|^#### |\Z)", body,
-                                              re.MULTILINE | re.DOTALL):
+        prefix, k_entry = date, 1
+        if any("Display label:" in item for _, _, item in items):
+            while prefix in item_prefixes:
+                k_entry += 1
+                prefix = f"{date}-{k_entry}"
+            item_prefixes.add(prefix)
+        for number, title, item in items:
             labels = re.findall(r'Display label: "([^"]+)"(?:\. Short label: "([^"]+)")?', item)
             for k, (full, short) in enumerate(labels):
-                entries.append({"key": f"{date}_item_{number}" + (f"_{k + 1}" if k else ""), "name": full,
+                entries.append({"key": f"{prefix}_item_{number}" + (f"_{k + 1}" if k else ""), "name": full,
                                 "definition": title.strip().rstrip("."), "note": None, "display_label": full,
                                 "section": "Changes", "short_label": short or None})
     keys = [e["key"] for e in entries]
@@ -193,6 +209,8 @@ def changes_entries(text: str) -> list[dict[str, Any]]:
     """Dated Changes entries with the metrics.md sections each one touches."""
     out = []
     for heading in re.findall(r"^### (.+)$", _sections(text).get("Changes", ""), re.MULTILINE):
+        if _is_draft(heading):
+            continue
         touched = re.search(r"\(Sections? ([\d, ]+)\)", heading)
         out.append({"title": heading.strip(),
                     "date": heading.split(" ")[0],

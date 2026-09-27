@@ -427,6 +427,22 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the section is headed "Open uncertainties and accepted limitations (material or critical)", and each line keeps its own status. U1 and U2 stay visible, as H5 requires. Ships in this commit.
 - **Guard added:** `test_uncertainty_lines_are_whole` accepts only the statuses "open" and "accepted limitation", so any other unresolved status fails the test.
 
+**2026-09-26 · Sprint 3 Step 0 · Command-center role recorded from a prompt meant for another session**
+- **Origin:** Project owner (an owner prompt routed to the wrong session: "From now on, you're the command center for this project" was written for a separate Claude chat)
+- **What was produced:** an owner-decision row in `ai-workflow/sprint-3-verification.md` (Step 0, PR #14) recording that the Claude Code session holds the command-center role from Sprint 3 on, and a matching note in Claude Code's session memory.
+- **What was wrong:** the owner had decided that the long-running Claude chat is the command center; Claude Code remains the executor. The row recorded a role the owner did not assign to this session.
+- **How it was caught:** human review: the owner caught it at the Sprint 3 state handshake, where `python -m funnel.state --print` listed the decision under "Recent owner decisions".
+- **Fix:** in the Sprint 3 Step 1 PR, the original row is kept and marked superseded, and the owner correction is recorded beside it (dated 2026-09-26); Claude Code's session memory now records the executor role.
+- **Guard added:** none new. The existing rule applies: owner decisions are recorded only as the owner states them in the session they are meant for, and `funnel.state --print` surfaces recent decisions at every handshake, which is where this was caught.
+
+**2026-09-26 · Sprint 3 Step 1 · Metrics index keys assumed one labeled Changes entry per date**
+- **Origin:** Claude Code (Sprint 2, `parse_metrics_index` in `analysis/funnel/export.py`)
+- **What was produced:** numbered Changes-entry items indexed as `<entry date>_item_<N>`, and every Changes entry indexed and listed, whether approved or not.
+- **What was wrong:** a second entry with labeled items on the same date produced duplicate keys. The Sprint 3 draft entry (2026-09-26) collided with the Sprint 2 entry (`2026-09-26_item_4`), and the exporter raised an error. The parser would also have exported a draft entry's labels to `metrics_index.json`, where the site and the agent read defined metrics, before H3 approval.
+- **How it was caught:** local test: the pytest commit gate (`4 failed, 182 passed`; `ValueError: metrics_index keys are not unique: ['2026-09-26_item_4']`).
+- **Fix:** a later labeled entry on the same date is keyed `<entry date>-<k>_item_<N>` (k = 2, 3, …), so the Sprint 2 keys don't change. Entries whose heading carries "DRAFT, pending H3" are left out of the metrics index and the changes list, and `test_changes_entries_are_indexed_with_their_sections` counts approved entries only. `web/content/metrics.md` re-synced. Ships in this commit.
+- **Guard added:** `test_draft_changes_entries_are_not_indexed` and `test_second_labeled_entry_on_a_date_keeps_the_first_entrys_keys` (test_export.py).
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.
