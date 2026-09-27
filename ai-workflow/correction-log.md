@@ -532,7 +532,7 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **What was wrong:** two uses of the whole word "carts" (naming rule 1: cart events are not carts), and "lost", loss wording that analysis B's claim tier forbids.
 - **How it was caught:** executor self-review: Claude Code ran the project's naming guard (`funnel.naming_guard.naming_findings`) and the wording-guard pattern over the content before any of it was committed or reached a page.
 - **Fix:** the owner approved three rewordings: "For carted products in sessions starting …", "… is not the same as value never purchased.", and "Why did products carted in late October show a lower later-purchase rate?". `closing-content.md` was updated in place in this commit.
-- **Guard added:** the closing export is generated under `web/public/data/`, where `test_naming_rules` scans it; its generator also refuses content that the naming guard or the wording pattern flags.
+- **Guard added:** `python -m funnel.closing` refuses content that the naming guard flags. Its outputs are also covered by the existing tests: `web/public/data/closing.json` is scanned by `test_naming_rules`, and the closing report, the closing export, and the `/questions` and home pages are a surface of the wording guard (`test_wording_guard.py`). The phrase list stays in test code, as the Sprint 2 contract requires.
 
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a

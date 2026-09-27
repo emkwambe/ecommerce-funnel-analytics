@@ -72,3 +72,16 @@ By the owner's closing decision (2026-09-27), the category ranking defined in th
 - **Why:** the pre-registered separability rule (two categories are different only where their 90% rank intervals don't overlap) **failed its synthetic-null calibration, stop rule F6**. On synthetic data where all 13 categories have the same expected conversion, the committed ranking code at the real settings (2,000 user-clustered resamples, seed 20260926) separated at least one pair in 3 of 6 datasets, with no clustering and no permutation involved (`ai-workflow/escalations/2026-09-27-C-rankings-stop-rules.md`, §2; search-log row 42). A rule that reports differences where none exist can't be trusted to separate real ones.
 - **Runs:** no ranking result was ever used. Run 1 crashed, run 2 was stopped by Claude Code for low memory, run 3's outcome is unknown, and run 4 is void (search-log rows 37–41). R2 was not run.
 - **What stays:** the Step 4 code, the provenance guards, the escalation brief (committed in this PR), and the approved 2026-09-26 entry, as the pre-registration that the negative control tested. The withdrawn option A draft was never approved.
+
+## Closing build (no analysis runs)
+
+- **Generator:** `python -m funnel.closing` reads the committed exports and the owner-approved `ai-workflow/closing-content.md`. It binds 7 figures to export fields and writes `docs/closing-report.md` and `web/public/data/closing.json`.
+- **Figures checked against the exports before building:**
+  - `purchase_paths.json` no-cart `revenue_share` 0.48079 → 48%;
+  - `investigation_revenue_gap.json` `totals.revenue_difference` 18,506,588.30 → $18.5M;
+  - `investigation_later_purchases.json` B1 `value_share` 0.13404 → 13.4%, `window_days` 7, and `population` "sessions starting October 1–24, 2019 UTC".
+  - A figure that differs from its export, an unbound number, or a naming-rule violation stops the build (`test_closing.py`).
+- **Web:** `npm --prefix web run build` exits 0, and `/questions` is prerendered.
+- **Local smoke** against the production build: `42/42 checks passed` (`ai-workflow/evidence/closing/smoke_local.txt`). That includes "Project status: closed", the four findings on `/`, question 1 marked "Start here", all nine questions, and a Sources line on `/questions`.
+- **Screenshots:** 390 px, light and dark: all 20 page-theme combinations PASS (no horizontal overflow, no clipped scroll box). The committed images are the home page and `/questions` (`ai-workflow/evidence/closing/`).
+- **Pending after the owner's merge:** production deploy, production smoke including `/questions`, and tag v1.1.3.

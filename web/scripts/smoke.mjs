@@ -8,7 +8,7 @@ const dataSourceDoc = join(dirname(fileURLToPath(import.meta.url)), "..", "..", 
 const documentedSha = readFileSync(dataSourceDoc, "utf-8").match(/^- \*\*SHA-256:\*\* `([0-9a-f]{64})`/m)?.[1];
 
 const PAGES = ["/", "/funnel", "/data-quality", "/data", "/metrics", "/how-its-built", "/investigations",
-  "/investigations/revenue-figures", "/investigations/later-purchases"];
+  "/investigations/revenue-figures", "/investigations/later-purchases", "/questions"];
 const EXPORTS = [
   "kpis.json",
   "funnel_category.json",
@@ -19,7 +19,14 @@ const EXPORTS = [
   "workflow.json",
   "investigation_revenue_gap.json",
   "investigation_later_purchases.json",
+  "closing.json",
 ];
+// Closing (owner decision, 2026-09-27): the committed closing export decides what / and /questions must show.
+const closing = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "public", "data", "closing.json"), "utf-8"));
+const question1 = closing.questions.find((q) => q.start_here);
+// Render {figure} tokens from the export, then compare the text up to the first character HTML may escape.
+const rendered = (s) => s.replace(/\{([a-z_]+)\}/g, (_, k) => closing.figures[k].formatted);
+const plainPrefix = (s) => rendered(s).split(/["'&<>]/)[0].trim();
 const ATTRIBUTION = [
   "https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store",
   "https://rees46.com",
@@ -63,6 +70,22 @@ try {
   }
 } catch (e) {
   check("footer attribution links on /", false, String(e));
+}
+
+try {
+  const home = await (await fetch(`${base}/`)).text();
+  check("/ shows \"Project status: closed\"", home.includes("Project status: closed"));
+  check("/ links prominently to /questions", home.includes('href="/questions"'));
+  for (const finding of closing.findings) {
+    check(`/ shows headline finding ${finding.id}`, home.includes(plainPrefix(finding.text)), plainPrefix(finding.text).slice(0, 40));
+  }
+  const questions = await (await fetch(`${base}/questions`)).text();
+  check("/questions marks question 1 \"Start here\"", questions.includes("Start here") && questions.includes(plainPrefix(question1.question)));
+  check(`/questions shows all ${closing.questions.length} questions`,
+    closing.questions.every((q) => questions.includes(plainPrefix(q.question))));
+  check("/questions has a Sources line", questions.includes("Sources:"));
+} catch (e) {
+  check("closing content on / and /questions", false, String(e));
 }
 
 const failed = results.filter((ok) => !ok).length;
