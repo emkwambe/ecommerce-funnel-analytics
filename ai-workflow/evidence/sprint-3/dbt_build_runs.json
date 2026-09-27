@@ -84,6 +84,48 @@
         "tests_run": 1,
         "tests_expected_not_run": []
       }
+    },
+    {
+      "manifest": {
+        "git_commit_sha": "b62b32e6fdb813cd7045e9b8077917cda0a13d3b",
+        "git_worktree_dirty": false,
+        "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
+        "generated_at_utc": "2026-09-27T17:38:41+00:00",
+        "script": "funnel.build"
+      },
+      "dbt_args": [
+        "build"
+      ],
+      "available_ram_gb_before_run": 7.42,
+      "duckdb_memory_limit": "2GB",
+      "duckdb_threads": 4,
+      "dbt_threads": 1,
+      "elapsed_seconds": 1528.2,
+      "peak_spill_bytes": 14190084096,
+      "spill_sample_interval_seconds": 1.0,
+      "dbt_exit_code": 0,
+      "dbt_summary": [
+        "Finished running 23 table models, 193 data tests in 0 hours 25 minutes and 12.64 seconds (1512.64s).",
+        "Completed successfully",
+        "Done. PASS=216 WARN=0 ERROR=0 SKIP=0 NO-OP=0 REUSED=0 TOTAL=216"
+      ],
+      "dbt_done_counts": {
+        "pass": 216,
+        "warn": 0,
+        "error": 0,
+        "skip": 0,
+        "no_op": 0,
+        "reused": 0,
+        "total": 216
+      },
+      "test_coverage": {
+        "models_built": 23,
+        "tests_expected": 193,
+        "tests_run": 193,
+        "tests_expected_not_run": []
+      },
+      "worktree_clean_at_start": true,
+      "marts_fingerprint": "8605ac0bfff33c24404902b15afcfdbf5585c01e4ac4723e37e8bbe8f51d166e"
     }
   ]
 }
