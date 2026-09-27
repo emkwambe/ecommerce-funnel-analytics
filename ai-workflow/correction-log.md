@@ -526,6 +526,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the comparison was excluded from the brief, and the brief says so (§2, F6, reading 4). The rank rule was re-checked at the real setting of 2,000 resamples.
 - **Guard added:** none automated (scratch code). The brief states the resample count behind every synthetic figure.
 
+**2026-09-27 · Closing · Three naming-rule violations in the approved closing content**
+- **Origin:** Claude Chat (drafting `ai-workflow/closing-content.md`, the owner-approved closing content)
+- **What was produced:** the headline finding F2, "For carts from sessions starting October 1–24, 2019 (UTC), … is not the same as value lost.", and question 5, "Why did late-October carts show a lower later-purchase rate?".
+- **What was wrong:** two uses of the whole word "carts" (naming rule 1: cart events are not carts), and "lost", loss wording that analysis B's claim tier forbids.
+- **How it was caught:** executor self-review: Claude Code ran the project's naming guard (`funnel.naming_guard.naming_findings`) and the wording-guard pattern over the content before any of it was committed or reached a page.
+- **Fix:** the owner approved three rewordings: "For carted products in sessions starting …", "… is not the same as value never purchased.", and "Why did products carted in late October show a lower later-purchase rate?". `closing-content.md` was updated in place in this commit.
+- **Guard added:** the closing export is generated under `web/public/data/`, where `test_naming_rules` scans it; its generator also refuses content that the naming guard or the wording pattern flags.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.
