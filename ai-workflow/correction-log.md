@@ -478,6 +478,26 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
   All three ship in this commit.
 - **Guard added:** the agreement test (R2 against `funnel.rankings` within 1e-9); `test_identical_rates_rarely_separate`; the scratch dbt build is recorded as part of the code check (search-log row 26).
 
+**2026-09-27 · Sprint 3 Step 4 · The ranking run crashed in the prior fit after three hours**
+- **Origin:** Claude Code (`analysis/funnel/rankings.py`, `fit_prior_mle`, `_ab`, and the final JSON write, at `d5dea4f`)
+- **What was produced:** a damped-Newton fit of the beta-binomial prior with no bound on logit μ and no cap on the step, a line search that accepted its last trial point even when that point was worse, and a result dictionary holding numpy scalars, written once at the end of the run.
+- **What was wrong:** in one bootstrap resample of the code-level C5 run (minimum size 500), a Newton step sent logit μ far enough that `math.exp` overflowed. The run died about three hours in and wrote nothing. Reviewing the code for the fix turned up three more defects:
+  1. the line search could accept a worse point;
+  2. 1 − μ was computed by subtraction, so it could round to 0 and make b = 0;
+  3. `json.dumps` rejects numpy booleans, so even a clean run would have crashed at its final write.
+
+  The run's earlier `divide by zero encountered in log` warning came from the same unguarded trial points.
+- **How it was caught:** local test and the executor's own run: the background run exited with code 1 (`OverflowError: math range error`). The other defects were found by reviewing the code and confirmed by the new pytest tests.
+- **Fix:**
+  - logit μ bounded to ±40, with a numerically stable logistic that computes 1 − μ directly;
+  - a trust region of 2 per coordinate on the Newton step;
+  - the log-likelihood returns −∞ outside the parameter space, and the line search accepts only finite, non-worse points (if none exists, the fit stops at the current point);
+  - numpy values converted before every JSON write;
+  - each finished part saved under `data/rankings_partial/`, so a crash can't lose a whole level.
+
+  No specification changed (search-log row 37). Ships in this commit.
+- **Guard added:** `test_mle_survives_extreme_starting_points`, and `test_run_level_rules_and_json_write_end_to_end`, which runs `run_level`, the rules, and the JSON serialization on a synthetic warehouse before any multi-hour run.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

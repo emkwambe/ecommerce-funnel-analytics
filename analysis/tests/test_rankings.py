@@ -258,3 +258,77 @@ def test_triggers_fire_only_when_their_condition_holds():
     for r in level["specs"]["C1"]["rows"]:
         r["shrinkage_weight"] = 0.0005
     assert [r["rule"][:2] for r in rk.triggers(level) if r["fired"]] == ["F2"]
+
+
+# ---------- end to end: run_level, the rules, and the JSON write on a synthetic warehouse ----------
+
+def _warehouse(rng: np.random.Generator) -> duckdb.DuckDBPyConnection:
+    """An in-memory stand-in for the two marts: six categories at two levels, 400 users, random flags."""
+    sizes = {"a": 40, "b": 60, "c": 100, "d": 150, "e": 200, "f": 300}
+    rates = {"a": 0.05, "b": 0.30, "c": 0.10, "d": 0.20, "e": 0.08, "f": 0.15}
+    rows = []
+    for level in ("category_top", "category_code"):
+        k = 0
+        for cat, size in sizes.items():
+            name = cat if level == "category_top" else f"{cat}.x"
+            for _ in range(size):
+                k += 1
+                bought = bool(rng.random() < rates[cat])
+                price = float(rng.integers(1, 100)) if bought else 0.0
+                rows.append((level, name, f"s{level}{k}", int(rng.integers(0, 400)), bought, price, price / 2,
+                             bool(rng.random() < 0.05), bool(rng.random() < 0.05), bool(rng.random() < 0.2)))
+        rows.append((level, "unknown", f"u{level}", 1, True, 5.0, 5.0, False, False, True))
+    c = duckdb.connect()
+    c.execute("ATTACH ':memory:' AS wh")
+    c.execute("CREATE SCHEMA wh.main_marts")
+    c.execute("""CREATE TABLE wh.main_marts.mart_category_sessions (category_level VARCHAR, category VARCHAR,
+                 user_session VARCHAR, user_id BIGINT, has_purchase BOOLEAN, revenue DECIMAL(18, 2),
+                 revenue_collapsed DECIMAL(18, 2), is_long_session BOOLEAN, is_most_active_user BOOLEAN,
+                 has_missing_code_event BOOLEAN)""")
+    c.executemany("INSERT INTO wh.main_marts.mart_category_sessions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", rows)
+    c.execute("""CREATE TABLE wh.main_marts.mart_category_ranking_counts AS
+        WITH specs AS (
+            SELECT 'C1' AS spec_key, * FROM wh.main_marts.mart_category_sessions
+            UNION ALL SELECT 'C6', * FROM wh.main_marts.mart_category_sessions WHERE NOT is_long_session
+            UNION ALL SELECT 'C7', * FROM wh.main_marts.mart_category_sessions WHERE NOT is_most_active_user
+            UNION ALL SELECT 'C8', * FROM wh.main_marts.mart_category_sessions WHERE NOT has_missing_code_event)
+        SELECT spec_key, category_level, category, count(*) AS category_sessions,
+               count(*) FILTER (WHERE has_purchase) AS category_sessions_with_purchase,
+               sum(revenue) AS revenue, sum(revenue_collapsed) AS revenue_collapsed
+        FROM specs GROUP BY ALL""")
+    return c
+
+
+def test_run_level_rules_and_json_write_end_to_end(tmp_path, monkeypatch):
+    import json
+
+    monkeypatch.setattr(rk, "RESAMPLES", 30)
+    monkeypatch.setattr(rk, "MIN_SIZE", 50)
+    monkeypatch.setattr(rk, "SENSITIVITY_MIN_SIZES", (30, 120))
+    monkeypatch.setattr(rk, "PARTIAL_DIR", tmp_path)
+    c = _warehouse(np.random.default_rng(7))
+    for level in rk.LEVELS:
+        out = rk.run_level(c, level)
+        assert [r["category"] for r in out["insufficient_data"]] if "insufficient_data" in out else True
+        c1 = out["specs"]["C1"]
+        assert len(c1["rows"]) == 5 and [r["category"] for r in c1["insufficient_data"]] == [
+            "a" if level == "category_top" else "a.x"]
+        assert all(not r["category"].startswith("unknown") for r in c1["rows"])
+        assert not out["min_size_sensitivity"]["30"]["same_ranked_set_as_c1"]
+        assert len(out["negative_control"]) == 5 and len(out["seed_stability"]) == 3
+        rules = rk.triggers(out)
+        assert len(rules) == 7 and all(isinstance(r["fired"], (bool, np.bool_)) for r in rules)
+        json.dumps(rk.plain({"level": out, "rules": rules}))  # the final write must not fail on numpy types
+    assert sorted(p.name for p in tmp_path.iterdir()) == sorted(
+        f"{lvl}__{part}.json" for lvl in rk.LEVELS for part in ("C1", "C6", "C7", "C8", "level"))
+    c.close()
+
+
+def test_mle_survives_extreme_starting_points():
+    # Tiny, all-zero, and all-one categories drive logit mu and log s to their bounds without overflow.
+    for x, n in (([0.0, 0.0, 1.0], [500.0, 800.0, 600.0]), ([500.0, 799.0, 600.0], [500.0, 800.0, 600.0]),
+                 ([0.0, 400.0], [900.0, 500.0])):
+        prior = rk.fit_prior_mle(np.array(x), np.array(n))
+        assert all(math.isfinite(prior[k]) for k in ("a", "b", "mu", "s", "loglik"))
+    assert rk._ab(np.array([-1000.0, 0.0]))[0] > 0 and rk._ab(np.array([1000.0, 0.0]))[1] > 0  # a and b stay positive
+    assert rk.loglik(0.0, 1.0, np.array([1.0]), np.array([2.0])) == -math.inf

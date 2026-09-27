@@ -44,6 +44,7 @@ from funnel.common import (
 
 SCRIPT = "funnel.rankings"
 OUT = CURRENT_EVIDENCE_DIR / "rankings.json"
+PARTIAL_DIR = DATA_DIR / "rankings_partial"
 LEVELS = ("category_top", "category_code")
 RESAMPLES = 2000
 SEED = 20260926
@@ -55,6 +56,7 @@ INTERVAL = (0.05, 0.95)  # 90%
 WILSON_Z = 1.959963984540054  # two-sided 95%: the Wilson lower bound (95%) of method record C, candidate C
 S_MAX = 1e10  # cap on the prior precision a + b: at the cap the prior is the pooled rate (no overdispersion)
 S_MIN = 1e-6
+MAX_STEP = 2.0  # largest Newton step in each coordinate of theta = (logit mu, log s)
 # Operational thresholds fixed before the real-data run (search log, Sprint 3 rows).
 DESIGN_EFFECT_LIMIT = 2.0          # F3: the median design effect over ranked categories
 B_C_DISAGREEMENT_LIMIT = 2         # F5: categories whose separable partners differ between B and C
@@ -95,7 +97,10 @@ def lgamma(x: np.ndarray) -> np.ndarray:
 # ---------- the beta-binomial prior ----------
 
 def loglik(a: float, b: float, x: np.ndarray, n: np.ndarray) -> float:
-    """Beta-binomial log-likelihood over categories, without the binomial coefficients (constant in a, b)."""
+    """Beta-binomial log-likelihood over categories, without the binomial coefficients (constant in a, b).
+    -inf outside the parameter space (a or b not positive and finite), so a line search rejects such points."""
+    if not (0 < a < math.inf and 0 < b < math.inf):
+        return -math.inf
     return float(np.sum(lgamma(x + a) + lgamma(n - x + b) - lgamma(n + a + b))
                  + len(x) * (lgamma(np.array([a + b]))[0] - lgamma(np.array([a]))[0] - lgamma(np.array([b]))[0]))
 
@@ -111,17 +116,23 @@ def _theta(mu: float, s: float) -> np.ndarray:
     return np.array([math.log(mu / (1 - mu)), math.log(s)])
 
 
+LOGIT_BOUND = 40.0  # |logit mu| <= 40, so mu stays within about 4e-18 of 0 and 1 and exp() cannot overflow
+
+
 def _ab(theta: np.ndarray) -> tuple[float, float, float, float]:
-    mu = 1.0 / (1.0 + math.exp(-theta[0]))
+    u = min(max(float(theta[0]), -LOGIT_BOUND), LOGIT_BOUND)
+    e = math.exp(-abs(u))
+    mu, one_minus_mu = (1.0 / (1.0 + e), e / (1.0 + e)) if u >= 0 else (e / (1.0 + e), 1.0 / (1.0 + e))
     s = math.exp(theta[1])
-    return mu * s, (1 - mu) * s, mu, s
+    return mu * s, one_minus_mu * s, mu, s
 
 
 def _score_theta(theta: np.ndarray, x: np.ndarray, n: np.ndarray) -> np.ndarray:
     """Gradient of the log-likelihood in theta = (logit mu, log s), with a = mu s and b = (1 - mu) s."""
     a, b, mu, s = _ab(theta)
+    one_minus_mu = b / s  # computed without cancellation in _ab
     ga, gb = _score_ab(a, b, x, n)
-    return np.array([mu * (1 - mu) * s * (ga - gb), s * (mu * ga + (1 - mu) * gb)])
+    return np.array([mu * one_minus_mu * s * (ga - gb), s * (mu * ga + one_minus_mu * gb)])
 
 
 def fit_prior_mom(x: np.ndarray, n: np.ndarray) -> dict[str, Any]:
@@ -171,14 +182,20 @@ def fit_prior_mle(x: np.ndarray, n: np.ndarray, max_iter: int = 200) -> dict[str
             step_f = gf / max(1.0, float(np.max(np.abs(gf))))
         step = np.zeros(2)
         step[free] = step_f
+        step *= min(1.0, MAX_STEP / max(float(np.max(np.abs(step))), 1e-300))  # trust region in theta
         base = loglik(*_ab(theta)[:2], x, n)
-        t = 1.0
+        t, cand = 1.0, None
         while t > 1e-8:
-            cand = theta + t * step
-            cand[1] = min(max(cand[1], lo), hi)
-            if loglik(*_ab(cand)[:2], x, n) >= base - 1e-9 * abs(base):
+            trial = theta + t * step
+            trial[0] = min(max(trial[0], -LOGIT_BOUND), LOGIT_BOUND)
+            trial[1] = min(max(trial[1], lo), hi)
+            value = loglik(*_ab(trial)[:2], x, n)
+            if math.isfinite(value) and value >= base - 1e-9 * abs(base):
+                cand = trial
                 break
             t *= 0.5
+        if cand is None:  # no acceptable point along the step: stay at the current one
+            break
         if np.max(np.abs(cand - theta)) < 1e-13:
             theta = cand
             break
@@ -254,7 +271,7 @@ def category_totals(sums: dict[str, np.ndarray], n_cats: int, weights: np.ndarra
 
 
 def rank_run(sums: dict[str, np.ndarray], n_users: int, n_cats: int, ranked: np.ndarray, seed: int,
-             resamples: int = RESAMPLES, extras: bool = True) -> dict[str, Any]:
+             resamples: int | None = None, extras: bool = True) -> dict[str, Any]:
     """Point estimates and bootstrap draws over the ranked categories (indices in `ranked`).
 
     Always: the MLE prior, posterior means, and their ranks. With extras: raw rates (design effect), the Wilson
@@ -274,6 +291,7 @@ def rank_run(sums: dict[str, np.ndarray], n_users: int, n_cats: int, ranked: np.
                         "revenue": tot["revenue"][ranked] / n, "revenue_collapsed": tot["revenue_collapsed"][ranked] / n})
         return row
 
+    resamples = RESAMPLES if resamples is None else resamples
     point = evaluate(category_totals(sums, n_cats))
     rng = np.random.default_rng(seed)
     keys = ["estimate", "rank"] + (["raw", "wilson", "wilson_rank", "mom_estimate", "mom_rank", "revenue",
@@ -441,6 +459,30 @@ def _check_against_mart(totals: dict[str, np.ndarray], names: list[str], mart: d
                 sys.exit(f"HALT: {label} {name}: bootstrap input revenue differs from mart_category_ranking_counts.")
 
 
+def plain(value: Any) -> Any:
+    """numpy scalars and arrays to plain Python, recursively, so json.dumps accepts the result."""
+    if isinstance(value, dict):
+        return {str(k): plain(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [plain(v) for v in value]
+    if isinstance(value, np.ndarray):
+        return [plain(v) for v in value.tolist()]
+    if isinstance(value, np.bool_):
+        return bool(value)
+    if isinstance(value, np.integer):
+        return int(value)
+    if isinstance(value, np.floating):
+        return float(value)
+    return value
+
+
+def _partial(level: str, part: str, payload: Any) -> None:
+    """Write each finished part to a partial file under data/ (not committed), so a crash loses at most the part
+    in progress. The committed result is rankings.json, written once every part has run."""
+    write_json(PARTIAL_DIR / f"{level}__{part}.json", {"level": level, "part": part,
+                                                                                  "result": plain(payload)})
+
+
 def run_level(con, level: str) -> dict[str, Any]:
     data, names, n_users = _load_level(con, level)
     n_cats = len(names)
@@ -459,6 +501,7 @@ def run_level(con, level: str) -> dict[str, Any]:
                                          "category_sessions_with_purchase": int(totals["x"][c])}
                                         for c in np.flatnonzero(totals["n"] < MIN_SIZE)]
         specs[spec] = summary
+        _partial(level, spec, summary)
         if spec == "C1":
             c1_sums, c1_totals, c1_ranked, c1_run = sums, totals, ranked, run
     out["specs"] = specs
@@ -510,6 +553,7 @@ def run_level(con, level: str) -> dict[str, Any]:
         out["negative_control"].append({"permutation_seed": seed, "bootstrap_seed": SEED,
                                         "separable_pair_count": s["separable_pair_count"],
                                         "separable_pairs": s["separable_pairs"], "prior": s["prior"]})
+    _partial(level, "level", out)
     return out
 
 
@@ -586,7 +630,7 @@ def main() -> None:
     elapsed = round(time.perf_counter() - started, 1)
     for u in unknown.values():
         u["share"] = u["category_sessions"] / u["all_category_sessions"]
-    write_json(OUT, {
+    write_json(OUT, plain({
         "manifest": manifest(SCRIPT, sha),
         "available_ram_gb_before_run": available,
         "elapsed_seconds": elapsed,
@@ -599,7 +643,7 @@ def main() -> None:
         "unknown_exclusion": unknown,
         "levels": levels,
         "rules": rules,
-    })
+    }))
     print(f"Elapsed: {elapsed} s; peak spill: {peak_spill} bytes; rules fired: {fired or 'none'}", flush=True)
     sys.exit(3 if fired else 0)
 
