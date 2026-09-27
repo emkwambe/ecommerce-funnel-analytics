@@ -27,6 +27,7 @@ import duckdb
 
 from funnel.common import (
     CURRENT_EVIDENCE_DIR,
+    SPRINT2_EVIDENCE_DIR,
     DATA_DIR,
     DOCS_DIR,
     EVIDENCE_DIR,
@@ -502,7 +503,7 @@ def investigation_revenue_gap(con: duckdb.DuckDBPyConnection, dataset_sha: str) 
     }
 
 
-LATER_PURCHASES_JSON = CURRENT_EVIDENCE_DIR / "later_purchases.json"
+LATER_PURCHASES_JSON = SPRINT2_EVIDENCE_DIR / "later_purchases.json"
 # A fired stop rule blocks the export unless the owner resolved it; each resolution names its record.
 RESOLVED_STOP_RULES = {
     "R3 agreement: the B1 7-day count share lies inside the all-pairs KM 7-day 95% interval": (

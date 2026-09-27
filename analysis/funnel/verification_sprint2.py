@@ -16,7 +16,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from funnel.common import CURRENT_EVIDENCE_DIR, REPO_ROOT, write_text
+from funnel.common import REPO_ROOT, SPRINT2_EVIDENCE_DIR, write_text
 from funnel.export import CORRECTION_LOG, WEB_DATA, parse_correction_log
 
 OUT = REPO_ROOT / "ai-workflow" / "sprint-2-verification.md"
@@ -59,7 +59,7 @@ def pytest_summary(text: str) -> str:
 
 
 def production_section() -> list[str]:
-    smoke_file, shots_file = CURRENT_EVIDENCE_DIR / "smoke_production.txt", CURRENT_EVIDENCE_DIR / "screenshots.txt"
+    smoke_file, shots_file = SPRINT2_EVIDENCE_DIR / "smoke_production.txt", SPRINT2_EVIDENCE_DIR / "screenshots.txt"
     if not smoke_file.exists():
         return ["## Production", "", "Pending: the Step 7 deploy, production smoke, and screenshots have not run yet.", ""]
     smoke = smoke_file.read_text(encoding="utf-8")
@@ -75,11 +75,11 @@ def production_section() -> list[str]:
 
 
 def render_generated() -> str:
-    runs = _json(CURRENT_EVIDENCE_DIR / "dbt_build_runs.json")["runs"]
+    runs = _json(SPRINT2_EVIDENCE_DIR / "dbt_build_runs.json")["runs"]
     full = [r for r in runs if r["dbt_args"] == ["build"]]
-    verify = _json(CURRENT_EVIDENCE_DIR / "verify.json")
-    stats = _json(CURRENT_EVIDENCE_DIR / "later_purchases.json")
-    pytest_file = CURRENT_EVIDENCE_DIR / "pytest.txt"
+    verify = _json(SPRINT2_EVIDENCE_DIR / "verify.json")
+    stats = _json(SPRINT2_EVIDENCE_DIR / "later_purchases.json")
+    pytest_file = SPRINT2_EVIDENCE_DIR / "pytest.txt"
     gap = _json(WEB_DATA / "investigation_revenue_gap.json")
     later = _json(WEB_DATA / "investigation_later_purchases.json")
     log = parse_correction_log(CORRECTION_LOG.read_text(encoding="utf-8"))

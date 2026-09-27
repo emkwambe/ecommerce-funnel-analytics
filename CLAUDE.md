@@ -66,6 +66,7 @@ C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.pr
 C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.ramcheck
 C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.build
 C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.later_purchases
+C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.rankings
 C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.verify
 C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.export
 C:\Dev\ecommerce-funnel-analytics\analysis\.venv\Scripts\python.exe -m funnel.verification_sprint2
@@ -77,7 +78,8 @@ vercel deploy --prod --cwd C:\Dev\ecommerce-funnel-analytics\web
 
 - `funnel.build` runs `dbt build` on `pipeline\` behind the RAM and dataset-hash gates (extra arguments pass through to dbt).
 - `funnel.later_purchases` computes analysis B's bootstrap intervals, Kaplan–Meier, seed stability, and stop rules. It exits 3 when a stop rule fires.
-- `funnel.verify` recomputes every published figure from the Parquet file without dbt and compares them with the marts (it reads `later_purchases.json`, so it runs after `funnel.later_purchases`).
+- `funnel.rankings` computes the Sprint 3 category ranking (empirical-Bayes estimates, user-clustered rank intervals, R3, sensitivities, and the negative control). It exits 3 when a stop rule or slow-down trigger fires.
+- `funnel.verify` recomputes every published figure from the Parquet file without dbt and compares them with the marts (it reads `later_purchases.json` and `rankings.json`, so it runs after `funnel.later_purchases` and `funnel.rankings`).
 - `funnel.export` writes the site's JSON; run it from a clean tree.
 - Heavy runs (`build`, `verify`) take 10–25 minutes; run them one at a time, behind the memory gate, and monitor them.
 

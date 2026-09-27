@@ -26,7 +26,7 @@ import re
 import subprocess
 from pathlib import Path
 
-from funnel.common import CURRENT_EVIDENCE_DIR, REPO_ROOT, write_text
+from funnel.common import EVIDENCE_ROOT, REPO_ROOT, write_text
 
 OUT = REPO_ROOT / "ai-workflow" / "STATE.md"
 REPO = "emkwambe/ecommerce-funnel-analytics"
@@ -53,7 +53,7 @@ def mode_and_tier() -> tuple[str, str]:
 def live_release() -> str:
     tag = _run("git", "-C", str(REPO_ROOT), "describe", "--tags", "--abbrev=0", "origin/main")
     sha = _run("git", "-C", str(REPO_ROOT), "rev-list", "-n", "1", "--abbrev-commit", tag)
-    smokes = sorted(CURRENT_EVIDENCE_DIR.glob("smoke_production*.txt"), key=lambda p: p.stat().st_mtime)
+    smokes = sorted(EVIDENCE_ROOT.glob("sprint-*/smoke_production*.txt"), key=lambda p: p.stat().st_mtime)
     url = "unknown"
     if smokes:
         m = re.search(r"Smoke test against (\S+)", smokes[-1].read_text(encoding="utf-8"))

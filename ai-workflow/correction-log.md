@@ -459,6 +459,25 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the script decodes the pages strictly as UTF-8, drops the substitution, and writes the file itself as UTF-8 without a BOM. A check confirms no U+FFFD and no BOM, and all 11 sentences match exactly. Ships in this commit.
 - **Guard added:** the evidence script exits non-zero if any sentence isn't found by exact match.
 
+**2026-09-26 · Sprint 3 Step 4 · Three errors in the ranking code, caught before its first commit**
+- **Origin:** Claude Code (`analysis/funnel/verify.py` R2 posterior, `pipeline/models/marts/_marts.yml`, `analysis/tests/test_rankings.py`)
+- **What was produced:**
+  1. The independent R2 posterior decided "prior at the cap" from the sign of the s-score at s = 1e10.
+  2. The new marts' YAML, appended to `_marts.yml`, which had no trailing newline.
+  3. A test asserting that four identical-rate categories never have a separable pair.
+- **What was wrong:**
+  1. Near the cap the true s-score shrinks like 1/s², below rounding, so its sign is noise. The R2 path put overdispersed synthetic data at the cap and returned the pooled rate for every category (79% relative error).
+  2. The first new entry was glued onto the last line of the file, which is invalid YAML.
+  3. Under identical rates a chance extreme can separate. The test's seed happened to give a category at z = 2.59 and three separable pairs, so the assertion encoded a false guarantee.
+- **How it was caught:** local test: pytest runs before the commit: (1) `test_independent_posterior_agrees_with_rankings_within_the_r2_tolerance` failed; (2) the scratch `dbt build` on the synthetic log refused to parse the YAML; (3) the same test file failed, and a diagnosis over 40 datasets followed (1 of 40 separated).
+- **Fix:**
+  1. R2 brackets the root at the first positive-to-non-positive sign change on a grid of log s, then bisects.
+  2. The newline was restored.
+  3. The test now checks a false-separation rate. The calibration is logged as search-log row 36, before the real run, because it bears on stop rule F6.
+
+  All three ship in this commit.
+- **Guard added:** the agreement test (R2 against `funnel.rankings` within 1e-9); `test_identical_rates_rarely_separate`; the scratch dbt build is recorded as part of the code check (search-log row 26).
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.
