@@ -14,6 +14,7 @@ independent verification of analysis A is missing, on another dataset, or has a 
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import re
@@ -583,7 +584,29 @@ def investigation_later_purchases(con: duckdb.DuckDBPyConnection, dataset_sha: s
     }
 
 
-def main() -> None:
+# Exports that can be written alone, without the warehouse or verify.json (owner decision, v1.1.4, option (a)):
+# refreshing one of them leaves every other committed export byte-identical.
+STANDALONE = {"workflow.json": workflow_record}
+
+
+def write_only(name: str) -> None:
+    """Write one standalone export with its own manifest and the latest full build; touch no other file."""
+    if name not in STANDALONE:
+        sys.exit(f"HALT: --only supports {sorted(STANDALONE)}; {name!r} needs the full export.")
+    sha = require_dataset_hash_match()
+    build = last_full_build(sha)
+    payload = STANDALONE[name]()
+    write_json(WEB_DATA / name, {"manifest": manifest(SCRIPT, sha), "pipeline_build": build, **payload})
+    print(f"Wrote {WEB_DATA / name} (only)")
+
+
+def main(argv: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(description="Write the site's JSON exports.")
+    parser.add_argument("--only", help="write only this standalone export (e.g. workflow.json)")
+    args = parser.parse_args(argv)
+    if args.only:
+        write_only(args.only)
+        return
     sha = require_dataset_hash_match()
     build = last_full_build(sha)
     if not WAREHOUSE.exists():

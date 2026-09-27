@@ -124,7 +124,18 @@ def test_later_purchases_export_is_scoped_resolved_and_independently_verified():
     assert later["independent_verification"]["all_match"] is True
 
 
+# Exports refreshed on their own (funnel.export --only, owner decision v1.1.4, option (a)) carry their own manifest.
+STANDALONE_EXPORTS = ("workflow.json",)
+
+
 def test_exports_share_one_clean_manifest():
-    manifests = [json.loads((WEB_DATA / name).read_text(encoding="utf-8"))["manifest"] for name in EXPORTS]
-    assert all(m == manifests[0] for m in manifests), "all exports come from one run"
+    """The full-run exports share one clean manifest; a standalone export has its own, on the same dataset, and is
+    regenerated from the clean tree in its own commit (its content is checked against the correction log in
+    test_export.py)."""
+    full = [n for n in EXPORTS if n not in STANDALONE_EXPORTS]
+    manifests = [json.loads((WEB_DATA / name).read_text(encoding="utf-8"))["manifest"] for name in full]
+    assert all(m == manifests[0] for m in manifests), "all full-run exports come from one run"
     assert manifests[0]["git_worktree_dirty"] is False
+    for name in STANDALONE_EXPORTS:
+        m = json.loads((WEB_DATA / name).read_text(encoding="utf-8"))["manifest"]
+        assert m["script"] == "funnel.export" and m["dataset_sha256"] == manifests[0]["dataset_sha256"], name

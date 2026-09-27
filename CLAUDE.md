@@ -81,7 +81,7 @@ vercel deploy --prod --cwd C:\Dev\ecommerce-funnel-analytics\web
 - `funnel.later_purchases` computes analysis B's bootstrap intervals, Kaplan–Meier, seed stability, and stop rules. It exits 3 when a stop rule fires.
 - `funnel.rankings` computes the Sprint 3 category ranking (empirical-Bayes estimates, user-clustered rank intervals, R3, sensitivities, and the negative control). It exits 3 when a stop rule or slow-down trigger fires.
 - `funnel.verify` recomputes every published figure from the Parquet file without dbt and compares them with the marts (it reads `later_purchases.json` and `rankings.json`, so it runs after `funnel.later_purchases` and `funnel.rankings`).
-- `funnel.export` writes the site's JSON; run it from a clean tree.
+- `funnel.export` writes the site's JSON; run it from a clean tree. `--only workflow.json` rewrites that one file (the correction-log and timeline record), with no warehouse access and no other export touched.
 - `funnel.closing` writes `docs/closing-report.md` and `web/public/data/closing.json` from the owner-approved `ai-workflow/closing-content.md`, binding every figure to an export field; it reads committed files only and stops on any mismatch. Run it from a clean tree.
 - Heavy runs (`build`, `verify`) take 10–25 minutes; run them one at a time, behind the memory gate, and monitor them.
 

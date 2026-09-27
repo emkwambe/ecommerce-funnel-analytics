@@ -99,6 +99,10 @@ try {
   check("nav order: Funnel, Investigations, How it's built, Data, Data quality, Metrics, Further research",
     positions.every((p, i) => p >= 0 && (i === 0 || p > positions[i - 1])), positions.join(","));
   const built = await (await fetch(`${base}/how-its-built`)).text();
+  const workflow = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "public", "data", "workflow.json"), "utf-8"));
+  const total = workflow.correction_log.n_entries.toLocaleString("en-US");
+  check(`/how-its-built counts all ${total} correction-log entries`, built.includes(`${total}<!-- --> errors were caught`) || built.includes(`${total} errors were caught`));
+  check("/how-its-built shows the \"Unattributed second actor\" origin", built.includes("Unattributed second actor"));
   check("/how-its-built tile \"Verification by tests and human review\" with the owner sign-off sentence",
     built.includes("Verification by tests and human review") &&
     built.includes("The project owner reviewed the results and signed off each published claim."));

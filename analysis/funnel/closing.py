@@ -235,7 +235,16 @@ def _md_cell(text: str) -> str:
     return text.replace("|", "\\|")
 
 
-def render_report(template: str, bound: dict[str, Any], figures: dict[str, dict[str, Any]]) -> str:
+def site_change_counts(exports: dict[str, dict[str, Any]], contract_text: str) -> dict[str, int]:
+    """Changes entries listed on /data (data_story.json) and dated entries in the contract (docs/metrics.md)."""
+    from funnel.export import changes_entries
+
+    return {"published_changes": len(exports["data_story.json"]["changes_entries"]),
+            "contract_changes": len(changes_entries(contract_text))}
+
+
+def render_report(template: str, bound: dict[str, Any], figures: dict[str, dict[str, Any]],
+                  counts: dict[str, int] | None = None) -> str:
     findings = ["| # | Finding | Tier |", "|---|---|---|"]
     findings += [f"| {f['id']} | {_md_cell(render(f['text'], figures))} | {f['tier']} |" for f in bound["findings"]]
     questions = [f"**{bound['question_1']['lead']}** {render(bound['question_1']['text'], figures)}", ""]
@@ -254,13 +263,15 @@ def render_report(template: str, bound: dict[str, Any], figures: dict[str, dict[
                          f"[{ev['label']}]({href}) |")
     sources = sorted({f"`{v['source']}`: `{v['field']}`" for v in figures.values()})
     return (template.replace("{{findings}}", "\n".join(findings)).replace("{{questions}}", "\n".join(questions))
-            .replace("{{sources}}", "; ".join(sources)))
+            .replace("{{sources}}", "; ".join(sources))
+            .replace("{{published_changes}}", str((counts or {}).get("published_changes", "?")))
+            .replace("{{contract_changes}}", str((counts or {}).get("contract_changes", "?"))))
 
 
 # ---------- the run ----------
 
 def load_exports() -> dict[str, dict[str, Any]]:
-    names = sorted({f.source for f in FIGURES})
+    names = sorted({f.source for f in FIGURES} | {"data_story.json"})
     return {n: json.loads((WEB_DATA / n).read_text(encoding="utf-8")) for n in names}
 
 
@@ -276,7 +287,8 @@ def build(exports: dict[str, dict[str, Any]], content_text: str, template: str) 
     figures = resolve_figures(exports)
     bound = bind_content(parse_content(content_text), figures)
     naming_check(bound, figures)
-    report = render_report(template, bound, figures)
+    report = render_report(template, bound, figures,
+                           site_change_counts(exports, (REPO_ROOT / "docs" / "metrics.md").read_text(encoding="utf-8")))
     export = {
         "source": {"content": "ai-workflow/closing-content.md",
                    "content_sha256": hashlib.sha256(content_text.encode("utf-8")).hexdigest(),
