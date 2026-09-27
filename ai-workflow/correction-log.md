@@ -443,6 +443,22 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** a later labeled entry on the same date is keyed `<entry date>-<k>_item_<N>` (k = 2, 3, …), so the Sprint 2 keys don't change. Entries whose heading carries "DRAFT, pending H3" are left out of the metrics index and the changes list, and `test_changes_entries_are_indexed_with_their_sections` counts approved entries only. `web/content/metrics.md` re-synced. Ships in this commit.
 - **Guard added:** `test_draft_changes_entries_are_not_indexed` and `test_second_labeled_entry_on_a_date_keeps_the_first_entrys_keys` (test_export.py).
 
+**2026-09-26 · Sprint 3 Step 1 (H3) · Two new tests wrong on their first run**
+- **Origin:** Claude Code (`analysis/tests/test_web.py`, `analysis/tests/test_export.py`, written for the H3 changes in PR #15)
+- **What was produced:** `test_metrics_page_never_shows_draft_entries_as_defined_metrics` wrote its markdown copy with `Path.write_text`. `test_second_labeled_entry_on_a_date_keeps_the_first_entrys_keys` expected exactly one new key, with the prefix `2026-09-26-2`.
+- **What was wrong:** on Windows, `write_text` turns `\n` into `\r\n`, so the identity check on the approved contract failed for a reason unrelated to the page filter. The key test counted the entry's own `changes_…` heading row as a new item, and assumed no other entry dated 2026-09-26 existed after the H3 approval added the Sprint 3 entry.
+- **How it was caught:** local test: the pytest commit gate (`2 failed, 187 passed`, then `1 failed, 188 passed`), before commit. The product code (`web/lib/contract.mjs`, the exporter's keys) was correct in both cases.
+- **Fix:** the test writes bytes, and the key test compares item keys only and matches the `-<k>` prefix by pattern. Shipped in `4071352` (PR #15). The page-filter test was also checked to fail when the filter is bypassed (`1 failed`), so it tests the filter and not the fixture.
+- **Guard added:** none beyond the tests themselves; this entry was added in the Step 3 PR, because the Step 1 report said, wrongly, that errors caught before a commit needed no entry.
+
+**2026-09-26 · Sprint 3 Step 3 · Evidence file of verbatim quotes written with a corrupted character**
+- **Origin:** Claude Code (a scratch script extracting Tableau documentation quotes into `ai-workflow/evidence/sprint-3/tableau_public_docs_quotes.txt`)
+- **What was produced:** the first version of the evidence file, written from Python stdout redirected to a file, after decoding the pages with `errors="replace"` and substituting U+FFFD with an apostrophe.
+- **What was wrong:** stdout used the Windows code page, and the substitution masked a decoding shortcut. The file held U+FFFD in place of "’" inside a quote presented as verbatim.
+- **How it was caught:** executor self-review: reading the generated file before staging showed "isn�t", and a byte check confirmed the file was not valid UTF-8.
+- **Fix:** the script decodes the pages strictly as UTF-8, drops the substitution, and writes the file itself as UTF-8 without a BOM. A check confirms no U+FFFD and no BOM, and all 11 sentences match exactly. Ships in this commit.
+- **Guard added:** the evidence script exits non-zero if any sentence isn't found by exact match.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

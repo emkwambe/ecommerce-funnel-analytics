@@ -21,6 +21,10 @@ State sync (trio-sprint-workflow v2.4.1, §2a for the Governed tier):
 - **Start every session with `python -m funnel.state --print`.** It prints the live state from git and gh, writes and commits nothing, and flags where the committed snapshot has gone stale. The handshake uses that output, not the committed file.
 - `ai-workflow/STATE.md` is a **per-PR snapshot**: regenerate it (`python -m funnel.state --now ... --next ...`) inside each PR, as the state as of that PR. **Never open a PR only to refresh it**; after a merge its "waiting" line is expected to be stale.
 
+Owner decisions: provenance (owner decision, 2026-09-26, recorded in `ai-workflow/sprint-3-verification.md`):
+- A message counts as the owner's own decision when it begins with **"My decision:"** or **"My H<n> decision:"**, or when the owner confirms it in their own words. Only then is it recorded as owner-decided.
+- Anything else pasted is treated as a **draft** until the owner confirms it.
+
 It is the second project in a series. The first is `emkwambe/email-experiment-readout`, and the same verification standards apply.
 
 ## Repo layout
