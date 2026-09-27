@@ -299,6 +299,9 @@ def _warehouse(rng: np.random.Generator) -> duckdb.DuckDBPyConnection:
     return c
 
 
+IDENTITY = {"code_sha256": "code-a", "dataset_sha256": "data-a", "mart_fingerprint": "marts-a"}
+
+
 def test_run_level_rules_and_json_write_end_to_end(tmp_path, monkeypatch):
     import json
 
@@ -308,7 +311,7 @@ def test_run_level_rules_and_json_write_end_to_end(tmp_path, monkeypatch):
     monkeypatch.setattr(rk, "PARTIAL_DIR", tmp_path)
     c = _warehouse(np.random.default_rng(7))
     for level in rk.LEVELS:
-        out = rk.run_level(c, level)
+        out = rk.run_level(c, level, IDENTITY)
         assert [r["category"] for r in out["insufficient_data"]] if "insufficient_data" in out else True
         c1 = out["specs"]["C1"]
         assert len(c1["rows"]) == 5 and [r["category"] for r in c1["insufficient_data"]] == [
@@ -319,8 +322,10 @@ def test_run_level_rules_and_json_write_end_to_end(tmp_path, monkeypatch):
         rules = rk.triggers(out)
         assert len(rules) == 7 and all(isinstance(r["fired"], (bool, np.bool_)) for r in rules)
         json.dumps(rk.plain({"level": out, "rules": rules}))  # the final write must not fail on numpy types
-    assert sorted(p.name for p in tmp_path.iterdir()) == sorted(
-        f"{lvl}__{part}.json" for lvl in rk.LEVELS for part in ("C1", "C6", "C7", "C8", "level"))
+    parts = ["C1", "C6", "C7", "C8", *(f"C2_{s}" for s in rk.STABILITY_SEEDS), "C5_30", "C5_120",
+             *(f"C9_{s}" for s in rk.PERMUTATION_SEEDS)]
+    assert sorted(p.name for p in tmp_path.iterdir()) == sorted(f"{lvl}__{part}.json" for lvl in rk.LEVELS
+                                                                for part in parts)
     c.close()
 
 
@@ -332,3 +337,77 @@ def test_mle_survives_extreme_starting_points():
         assert all(math.isfinite(prior[k]) for k in ("a", "b", "mu", "s", "loglik"))
     assert rk._ab(np.array([-1000.0, 0.0]))[0] > 0 and rk._ab(np.array([1000.0, 0.0]))[1] > 0  # a and b stay positive
     assert rk.loglik(0.0, 1.0, np.array([1.0]), np.array([2.0])) == -math.inf
+
+
+# ---------- resume support and the exit-code file (owner decision, 2026-09-27) ----------
+
+def _counting_rank_run(monkeypatch) -> list[int]:
+    calls: list[int] = []
+    original = rk.rank_run
+
+    def counted(*args, **kwargs):
+        calls.append(1)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(rk, "rank_run", counted)
+    return calls
+
+
+def test_resume_reuses_only_parts_whose_key_matches(tmp_path, monkeypatch):
+    import json
+
+    monkeypatch.setattr(rk, "RESAMPLES", 10)
+    monkeypatch.setattr(rk, "MIN_SIZE", 50)
+    monkeypatch.setattr(rk, "SENSITIVITY_MIN_SIZES", (30, 120))
+    monkeypatch.setattr(rk, "PARTIAL_DIR", tmp_path)
+    calls = _counting_rank_run(monkeypatch)
+    c = _warehouse(np.random.default_rng(7))
+    level = "category_top"
+    first = rk.run_level(c, level, IDENTITY)
+    parts = len(calls)
+    assert parts == 4 + 3 + 2 + 5  # C1, C6-C8; C2 x 3; C5 at 30 and 120 (both change the set); C9 x 5
+
+    # The same key everywhere: every part is reused, and the result is identical.
+    calls.clear()
+    again = rk.run_level(c, level, IDENTITY)
+    assert calls == [] and json.dumps(rk.plain(again), sort_keys=True) == json.dumps(rk.plain(first), sort_keys=True)
+
+    # One part's recorded key differs (its seed): only that part is recomputed.
+    path = tmp_path / f"{level}__C2_{rk.STABILITY_SEEDS[0]}.json"
+    saved = json.loads(path.read_text(encoding="utf-8"))
+    saved["key"]["seed"] = 1
+    path.write_text(json.dumps(saved), encoding="utf-8")
+    calls.clear()
+    rk.run_level(c, level, IDENTITY)
+    assert len(calls) == 1
+
+    # A different code SHA (or data hash, or mart fingerprint): every part is recomputed.
+    for field in ("code_sha256", "dataset_sha256", "mart_fingerprint"):
+        calls.clear()
+        rk.run_level(c, level, {**IDENTITY, field: "changed"})
+        assert len(calls) == parts, field
+    c.close()
+
+
+def test_resume_recomputes_an_unreadable_or_keyless_partial(tmp_path, monkeypatch):
+    monkeypatch.setattr(rk, "PARTIAL_DIR", tmp_path)
+    (tmp_path / "category_top__C1.json").write_text("{not json", encoding="utf-8")
+    assert rk._cached("category_top", "C1", {"spec": "C1"}, 1, IDENTITY, lambda: {"v": 1}) == {"v": 1}
+    (tmp_path / "category_top__C1.json").write_text('{"level": "category_top", "result": {"v": 9}}', encoding="utf-8")
+    assert rk._cached("category_top", "C1", {"spec": "C1"}, 1, IDENTITY, lambda: {"v": 2}) == {"v": 2}
+    assert rk._cached("category_top", "C1", {"spec": "C1"}, 1, IDENTITY, lambda: {"v": 3}) == {"v": 2}
+
+
+def test_exit_code_file_holds_the_real_exit_code(tmp_path, monkeypatch):
+    target = tmp_path / "rankings_exit_code.txt"
+    target.write_text("0\n", encoding="utf-8")  # stale, from an earlier run
+
+    def stops_with_rule():
+        assert not target.exists(), "a stale exit-code file must be removed before the run starts"
+        raise SystemExit(3)
+
+    for main, expected in ((stops_with_rule, 3), (lambda: None, 0), (lambda: 1 / 0, 1),
+                           (lambda: (_ for _ in ()).throw(SystemExit("HALT: mismatch")), 1)):
+        monkeypatch.setattr(rk, "main", main)
+        assert rk.run_and_record(target) == expected
+        assert target.read_text(encoding="utf-8") == f"{expected}\n"

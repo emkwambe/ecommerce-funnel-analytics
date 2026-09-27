@@ -25,9 +25,15 @@ the current sprint's evidence folder.
 
 from __future__ import annotations
 
+import argparse
+import hashlib
+import json
 import math
 import sys
 import time
+import traceback
+from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -476,42 +482,61 @@ def plain(value: Any) -> Any:
     return value
 
 
-def _partial(level: str, part: str, payload: Any) -> None:
-    """Write each finished part to a partial file under data/ (not committed), so a crash loses at most the part
-    in progress. The committed result is rankings.json, written once every part has run."""
-    write_json(PARTIAL_DIR / f"{level}__{part}.json", {"level": level, "part": part,
-                                                                                  "result": plain(payload)})
+def _cached(level: str, part: str, specification: dict[str, Any], seed: int, identity: dict[str, str],
+            compute: Callable[[], Any]) -> Any:
+    """Resume support (owner decision, 2026-09-27): reuse a part's partial file only if its recorded key (code
+    SHA-256, dataset SHA-256, mart fingerprint, level, part, specification, and seed) equals the current run's;
+    otherwise compute the part and save it with its key."""
+    key = plain({**identity, "level": level, "part": part, "specification": specification, "seed": seed})
+    path = PARTIAL_DIR / f"{level}__{part}.json"
+    if path.exists():
+        try:
+            saved = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            saved = None
+        if isinstance(saved, dict) and saved.get("key") == key:
+            print(f"{level} {part}: reused from {path.name} (key matches)", flush=True)
+            return saved["result"]
+    result = plain(compute())
+    write_json(path, {"key": key, "result": result})
+    return result
 
 
-def run_level(con, level: str) -> dict[str, Any]:
+def run_level(con, level: str, identity: dict[str, str]) -> dict[str, Any]:
     data, names, n_users = _load_level(con, level)
     n_cats = len(names)
     out: dict[str, Any] = {"level": level, "users": n_users, "category_session_rows": int(len(data["x"]))}
+    base_spec = {"resamples": RESAMPLES, "interval": list(INTERVAL), "min_size": MIN_SIZE}
     specs: dict[str, Any] = {}
-    c1_sums = None
     for spec in ("C1", "C6", "C7", "C8"):
         sums = _spec_sums(data, spec, n_cats)
         totals = category_totals(sums, n_cats)
         _check_against_mart(totals, names, _mart_counts(con, spec, level), f"{spec} {level}")
         ranked = np.flatnonzero(totals["n"] >= MIN_SIZE)
         print(f"{level} {spec}: {len(ranked)} ranked of {n_cats} ...", flush=True)
-        run = rank_run(sums, n_users, n_cats, ranked, SEED, extras=(spec == "C1"))
-        summary = summarize(run, names, totals, ranked)
-        summary["insufficient_data"] = [{"category": names[c], "category_sessions": int(totals["n"][c]),
-                                         "category_sessions_with_purchase": int(totals["x"][c])}
-                                        for c in np.flatnonzero(totals["n"] < MIN_SIZE)]
-        specs[spec] = summary
-        _partial(level, spec, summary)
+
+        def compute(sums=sums, totals=totals, ranked=ranked, spec=spec) -> dict[str, Any]:
+            summary = summarize(rank_run(sums, n_users, n_cats, ranked, SEED, extras=(spec == "C1")),
+                                names, totals, ranked)
+            summary["insufficient_data"] = [{"category": names[c], "category_sessions": int(totals["n"][c]),
+                                             "category_sessions_with_purchase": int(totals["x"][c])}
+                                            for c in np.flatnonzero(totals["n"] < MIN_SIZE)]
+            return summary
+
+        specs[spec] = _cached(level, spec, {"spec": spec, **base_spec, "extras": spec == "C1"}, SEED, identity,
+                              compute)
         if spec == "C1":
-            c1_sums, c1_totals, c1_ranked, c1_run = sums, totals, ranked, run
+            c1_sums, c1_totals, c1_ranked = sums, totals, ranked
     out["specs"] = specs
 
     # C2 seed stability (C1).
     out["seed_stability"] = []
+    base = specs["C1"]
     for seed in STABILITY_SEEDS:
         print(f"{level} C2 seed {seed} ...", flush=True)
-        s = summarize(rank_run(c1_sums, n_users, n_cats, c1_ranked, seed, extras=False), names, c1_totals, c1_ranked)
-        base = specs["C1"]
+        s = _cached(level, f"C2_{seed}", {"spec": "C2", **base_spec}, seed, identity,
+                    lambda seed=seed: summarize(rank_run(c1_sums, n_users, n_cats, c1_ranked, seed, extras=False),
+                                                names, c1_totals, c1_ranked))
         out["seed_stability"].append({
             "seed": seed, "separable_pair_count": s["separable_pair_count"],
             "rank_intervals_changed": [r["category"] for r, b in zip(s["rows"], base["rows"])
@@ -530,30 +555,37 @@ def run_level(con, level: str) -> dict[str, Any]:
             out["min_size_sensitivity"][str(size)] = {"same_ranked_set_as_c1": True}
             continue
         print(f"{level} C5 minimum size {size}: {len(ranked)} ranked ...", flush=True)
-        s = summarize(rank_run(c1_sums, n_users, n_cats, ranked, SEED, extras=False), names, c1_totals, ranked)
+        s = _cached(level, f"C5_{size}", {"spec": "C5", **base_spec, "min_size": size}, SEED, identity,
+                    lambda ranked=ranked: summarize(rank_run(c1_sums, n_users, n_cats, ranked, SEED, extras=False),
+                                                    names, c1_totals, ranked))
         out["min_size_sensitivity"][str(size)] = {"same_ranked_set_as_c1": False, **s}
 
-    # C10 diagnostics: leave-one-out prior (F1).
+    # C10 diagnostics: leave-one-out prior (F1). Seconds, so never cached.
     x1, n1 = c1_totals["x"][c1_ranked], c1_totals["n"][c1_ranked]
     widths = np.array([r["estimate_interval"][1] - r["estimate_interval"][0] for r in specs["C1"]["rows"]])
-    out["leave_one_out"] = leave_one_out(x1, n1, specs["C1"]["prior"]["mu"], widths,
-                                         [names[c] for c in c1_ranked])
+    out["leave_one_out"] = plain(leave_one_out(x1, n1, specs["C1"]["prior"]["mu"], widths,
+                                               [names[c] for c in c1_ranked]))
 
     # C9 negative control: label permutations over the C1 ranked categories' category-sessions.
     out["negative_control"] = []
     eligible = np.isin(data["cat"], c1_ranked)
-    for seed in PERMUTATION_SEEDS:
-        print(f"{level} C9 permutation {seed} ...", flush=True)
-        permuted = permute_labels(data["cat"], eligible, seed)
-        sums = _spec_sums(data, "C1", n_cats, cat=permuted)
-        totals = category_totals(sums, n_cats)
-        if not np.array_equal(totals["n"], c1_totals["n"]):
-            sys.exit("HALT: the permutation changed a category's number of category-sessions.")
-        s = summarize(rank_run(sums, n_users, n_cats, c1_ranked, SEED, extras=False), names, totals, c1_ranked)
-        out["negative_control"].append({"permutation_seed": seed, "bootstrap_seed": SEED,
-                                        "separable_pair_count": s["separable_pair_count"],
-                                        "separable_pairs": s["separable_pairs"], "prior": s["prior"]})
-    _partial(level, "level", out)
+    for pseed in PERMUTATION_SEEDS:
+        print(f"{level} C9 permutation {pseed} ...", flush=True)
+
+        def compute_nc(pseed=pseed) -> dict[str, Any]:
+            permuted = permute_labels(data["cat"], eligible, pseed)
+            sums = _spec_sums(data, "C1", n_cats, cat=permuted)
+            totals = category_totals(sums, n_cats)
+            if not np.array_equal(totals["n"], c1_totals["n"]):
+                sys.exit("HALT: the permutation changed a category's number of category-sessions.")
+            s = summarize(rank_run(sums, n_users, n_cats, c1_ranked, SEED, extras=False), names, totals, c1_ranked)
+            return {"permutation_seed": pseed, "bootstrap_seed": SEED,
+                    "separable_pair_count": s["separable_pair_count"],
+                    "separable_pairs": s["separable_pairs"], "prior": s["prior"]}
+
+        out["negative_control"].append(_cached(level, f"C9_{pseed}", {"spec": "C9", **base_spec,
+                                                                       "bootstrap_seed": SEED}, pseed, identity,
+                                               compute_nc))
     return out
 
 
@@ -603,6 +635,25 @@ def triggers(level_out: dict[str, Any]) -> list[dict[str, Any]]:
     return out
 
 
+def mart_fingerprint(con) -> str:
+    """SHA-256 over mart_category_ranking_counts (every row) and a hash sum over mart_category_sessions, so a
+    rebuilt or changed mart never resumes from partial files computed on the old one."""
+    counts = con.execute("""
+        SELECT row_key, category_sessions, category_sessions_with_purchase, CAST(revenue AS VARCHAR),
+               CAST(revenue_collapsed AS VARCHAR)
+        FROM wh.main_marts.mart_category_ranking_counts ORDER BY row_key""").fetchall()
+    sessions = con.execute("""
+        SELECT count(*), sum(hash(category_level, category, user_session, user_id, has_purchase, revenue,
+                                  revenue_collapsed, is_long_session, is_most_active_user, has_missing_code_event))
+        FROM wh.main_marts.mart_category_sessions""").fetchone()
+    return hashlib.sha256(repr((counts, sessions)).encode("utf-8")).hexdigest()
+
+
+def code_sha256() -> str:
+    """SHA-256 of this module's source: any code change invalidates every partial file."""
+    return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+
+
 def main() -> None:
     from funnel.ingest import connect
     from funnel.profile import SpillSampler
@@ -612,6 +663,9 @@ def main() -> None:
     sha = require_dataset_hash_match()
     con = connect()
     con.execute(f"ATTACH '{(DATA_DIR / 'warehouse.duckdb').as_posix()}' AS wh (READ_ONLY)")
+    identity = {"code_sha256": code_sha256(), "dataset_sha256": sha, "mart_fingerprint": mart_fingerprint(con)}
+    print(f"Resume key: code {identity['code_sha256'][:12]}, data {sha[:12]}, marts "
+          f"{identity['mart_fingerprint'][:12]}", flush=True)
     sampler = SpillSampler(DUCKDB_TMP_DIR)
     sampler.start()
     try:
@@ -622,7 +676,7 @@ def main() -> None:
         threshold = con.execute("""
             SELECT value FROM wh.main_marts.mart_later_purchase_checks
             WHERE row_key = 'sensitivity_threshold:most_active_user_threshold_events'""").fetchone()[0]
-        levels = {level: run_level(con, level) for level in LEVELS}
+        levels = {level: run_level(con, level, identity) for level in LEVELS}
     finally:
         peak_spill = sampler.stop()
     rules = {level: triggers(levels[level]) for level in LEVELS}
@@ -635,6 +689,7 @@ def main() -> None:
         "available_ram_gb_before_run": available,
         "elapsed_seconds": elapsed,
         "peak_spill_bytes": peak_spill,
+        "resume_key": identity,
         "settings": {"resamples": RESAMPLES, "seed": SEED, "stability_seeds": list(STABILITY_SEEDS),
                      "permutation_seeds": list(PERMUTATION_SEEDS), "min_size": MIN_SIZE,
                      "sensitivity_min_sizes": list(SENSITIVITY_MIN_SIZES), "interval": list(INTERVAL),
@@ -648,5 +703,32 @@ def main() -> None:
     sys.exit(3 if fired else 0)
 
 
+def run_and_record(exit_code_file: Path | None) -> int:
+    """Run main() and return its real exit code. The exit-code file, if given, is removed at the start and written
+    as the very last step, so its absence means the run has not finished (or was killed)."""
+    if exit_code_file is not None and exit_code_file.exists():
+        exit_code_file.unlink()
+    try:
+        main()
+        code = 0
+    except SystemExit as stop:
+        if isinstance(stop.code, str):
+            print(stop.code, file=sys.stderr, flush=True)
+        code = stop.code if isinstance(stop.code, int) else (0 if stop.code is None else 1)
+    except KeyboardInterrupt:
+        traceback.print_exc()
+        code = 130
+    except Exception:
+        traceback.print_exc()
+        code = 1
+    if exit_code_file is not None:
+        exit_code_file.parent.mkdir(parents=True, exist_ok=True)
+        exit_code_file.write_text(f"{code}\n", encoding="utf-8")
+    return code
+
+
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Sprint 3 category ranking (method record C).")
+    parser.add_argument("--exit-code-file", type=Path, default=None,
+                        help="file that receives the run's real exit code as its last step")
+    sys.exit(run_and_record(parser.parse_args().exit_code_file))
