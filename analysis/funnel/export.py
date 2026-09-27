@@ -335,7 +335,9 @@ CORRECTION_LOG = REPO_ROOT / "ai-workflow" / "correction-log.md"
 ENTRY_HEADING = re.compile(r"^\*\*(\d{4}-\d{2}-\d{2}) · (.+?) · (.+)\*\*$", re.MULTILINE)
 # First matching rule wins; exported with the counts so the classification is visible.
 # Sprint 2 Step 4: "Project owner" added for errors in the owner's own specifications caught by a check.
-ORIGINS = ("Claude Code", "Claude Chat", "Project owner")
+# Sprint 3 (owner decision H4, 2026-09-27): "Unattributed second actor" for changes made by neither the owner nor
+# Claude Code in the session of record.
+ORIGINS = ("Claude Code", "Claude Chat", "Project owner", "Unattributed second actor")
 
 # "How it was caught" categories of the trio correction-log template (owner decision, Sprint 2, v1.1.2): local test,
 # CI, Copilot review, human review, smoke, executor self-review, planner review. Keyword rules on the entry's
@@ -401,7 +403,7 @@ def parse_correction_log(text: str) -> dict[str, Any]:
         "by_origin": count("origin"),
         "by_caught": count("caught_by"),
         "by_phase": count("phase"),
-        "origin_rule": "origin is the entry's Origin line (Claude Code, Claude Chat, or Project owner)",
+        "origin_rule": "origin is the entry's Origin line (Claude Code, Claude Chat, Project owner, or Unattributed second actor)",
         "caught_rules": [{"category": label, "keywords": list(words)} for label, words in CAUGHT_RULES],
         "entries": entries,
     }

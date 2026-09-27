@@ -635,20 +635,6 @@ def triggers(level_out: dict[str, Any]) -> list[dict[str, Any]]:
     return out
 
 
-def mart_fingerprint(con) -> str:
-    """SHA-256 over mart_category_ranking_counts (every row) and a hash sum over mart_category_sessions, so a
-    rebuilt or changed mart never resumes from partial files computed on the old one."""
-    counts = con.execute("""
-        SELECT row_key, category_sessions, category_sessions_with_purchase, CAST(revenue AS VARCHAR),
-               CAST(revenue_collapsed AS VARCHAR)
-        FROM wh.main_marts.mart_category_ranking_counts ORDER BY row_key""").fetchall()
-    sessions = con.execute("""
-        SELECT count(*), sum(hash(category_level, category, user_session, user_id, has_purchase, revenue,
-                                  revenue_collapsed, is_long_session, is_most_active_user, has_missing_code_event))
-        FROM wh.main_marts.mart_category_sessions""").fetchone()
-    return hashlib.sha256(repr((counts, sessions)).encode("utf-8")).hexdigest()
-
-
 def code_sha256() -> str:
     """SHA-256 of this module's source: any code change invalidates every partial file."""
     return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
@@ -658,12 +644,20 @@ def main() -> None:
     from funnel.ingest import connect
     from funnel.profile import SpillSampler
 
+    from funnel.provenance import marts_fingerprint, require_clean_worktree, require_gated_marts
+
     started = time.perf_counter()
+    require_clean_worktree(SCRIPT)
     available = require_available_ram()
     sha = require_dataset_hash_match()
     con = connect()
     con.execute(f"ATTACH '{(DATA_DIR / 'warehouse.duckdb').as_posix()}' AS wh (READ_ONLY)")
-    identity = {"code_sha256": code_sha256(), "dataset_sha256": sha, "mart_fingerprint": mart_fingerprint(con)}
+    fingerprint = marts_fingerprint(con, "wh")
+    build_record = require_gated_marts(fingerprint, SCRIPT)
+    print(f"Marts fingerprint {fingerprint[:12]} matches the gated build at "
+          f"{build_record['manifest']['git_commit_sha'][:7]} ({build_record['manifest']['generated_at_utc']})",
+          flush=True)
+    identity = {"code_sha256": code_sha256(), "dataset_sha256": sha, "mart_fingerprint": fingerprint}
     print(f"Resume key: code {identity['code_sha256'][:12]}, data {sha[:12]}, marts "
           f"{identity['mart_fingerprint'][:12]}", flush=True)
     sampler = SpillSampler(DUCKDB_TMP_DIR)
@@ -690,6 +684,9 @@ def main() -> None:
         "elapsed_seconds": elapsed,
         "peak_spill_bytes": peak_spill,
         "resume_key": identity,
+        "gated_build": {"git_commit_sha": build_record["manifest"]["git_commit_sha"],
+                        "generated_at_utc": build_record["manifest"]["generated_at_utc"],
+                        "dbt_args": build_record["dbt_args"]},
         "settings": {"resamples": RESAMPLES, "seed": SEED, "stability_seeds": list(STABILITY_SEEDS),
                      "permutation_seeds": list(PERMUTATION_SEEDS), "min_size": MIN_SIZE,
                      "sensitivity_min_sizes": list(SENSITIVITY_MIN_SIZES), "interval": list(INTERVAL),

@@ -2,8 +2,9 @@
 
 Run: python -m funnel.build [extra dbt build arguments, e.g. --select staging]
 
-Halts below the available-memory gate or if the raw file hash differs from
-docs/data-source.md. Records available memory, elapsed time, peak spill, and
+Halts on a dirty working tree (funnel.provenance, owner decision H4, 2026-09-27), below the available-memory
+gate, or if the raw file hash differs from docs/data-source.md. After a successful build it records the
+ranking marts' fingerprint, which funnel.rankings requires to find in a gated build record. Records available memory, elapsed time, peak spill, and
 the dbt result in dbt_build_runs.json under the current sprint's evidence folder
 (CURRENT_EVIDENCE_DIR in funnel.common).
 """
@@ -101,8 +102,25 @@ def append_run(record: dict[str, Any], path: Path = RUNS_JSON) -> None:
     write_json(path, {"runs": [*runs, record]})
 
 
+def record_marts_fingerprint() -> str | None:
+    """Fingerprint of the ranking marts in the freshly built warehouse (read-only), or None if they don't exist."""
+    from funnel.common import DATA_DIR
+    from funnel.ingest import connect
+    from funnel.provenance import marts_fingerprint
+
+    con = connect()
+    try:
+        con.execute(f"ATTACH '{(DATA_DIR / 'warehouse.duckdb').as_posix()}' AS wh (READ_ONLY)")
+        return marts_fingerprint(con, "wh")
+    finally:
+        con.close()
+
+
 def main() -> None:
+    from funnel.provenance import require_clean_worktree
+
     extra = sys.argv[1:]
+    require_clean_worktree(SCRIPT)
     available = require_available_ram()
     sha = require_dataset_hash_match()
     DUCKDB_TMP_DIR.mkdir(parents=True, exist_ok=True)
@@ -139,6 +157,8 @@ def main() -> None:
         "dbt_summary": (summary := summary_lines("".join(chunks))),
         "dbt_done_counts": done_counts(summary),
         "test_coverage": coverage,
+        "worktree_clean_at_start": True,
+        "marts_fingerprint": record_marts_fingerprint() if exit_code == 0 else None,
     }
     append_run(record)
     print(f"Elapsed: {elapsed} s; peak spill: {peak_spill} bytes ({round(peak_spill / 1024**3, 2)} GiB); "

@@ -498,6 +498,34 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
   No specification changed (search-log row 37). Ships in this commit.
 - **Guard added:** `test_mle_survives_extreme_starting_points`, and `test_run_level_rules_and_json_write_end_to_end`, which runs `run_level`, the rules, and the JSON serialization on a synthetic warehouse before any multi-hour run.
 
+**2026-09-27 · Sprint 3 Step 4 · Unapproved pipeline and contract changes, and a ranking run on them**
+- **Origin:** Unattributed second actor (not Claude Code in this session, and not the project owner, who stated at H4 on 2026-09-27 that the changes were neither made nor approved by the owner)
+- **What was produced:** between 06:57 and 11:40 on 2026-09-27:
+  - two pandas audit scripts over the raw Parquet file;
+  - a filter excluding one `user_id` in `stg_events.sql` and `stg_dedup_audit.sql`;
+  - a `docs/metrics.md` Changes entry (D11) claiming owner approval and quoting typed outcome figures;
+  - a `dbt run` and `dbt test` outside `funnel.build`, with no gates and no build record (`assert_dedup_reconciles` failed);
+  - a `funnel.rankings` run ("run 4") on the rebuilt marts, which overwrote run 3's outputs.
+- **What was wrong:**
+  - The contract was changed without an owner decision, and with a false claim of one. Typed numbers break rule 1.
+  - The specification was changed after outcomes were seen.
+  - The warehouse was rebuilt outside the gated, recorded path, with a failing test.
+  - Run 3's log and exit-code files were lost, so its end can't be recovered.
+- **How it was caught:** Claude Code's run reconciliation check: the owner's question about the log's memory gate and marts fingerprint led to a comparison with run 3's recorded values (6.59 GB, `8605ac0bfff3`), then to file times, `git status`, and the dbt logs (`ai-workflow/escalations/2026-09-27-C-rankings-stop-rules.md`).
+- **Fix:**
+  - Everything was preserved on `quarantine/unapproved-2026-09-27` (`884cae3`, never to be merged).
+  - The committed state was restored at `015a80f`, and the warehouse is rebuilt through `funnel.build`.
+  - Run 4 is void (search-log row 41).
+- **Guard added:** `funnel.provenance`. `funnel.build` and `funnel.rankings` refuse a dirty working tree, `funnel.build` records the ranking marts' fingerprint, and `funnel.rankings` refuses marts without a gated build record carrying that fingerprint. Tests: `test_provenance.py`.
+
+**2026-09-27 · Sprint 3 Step 4 (H4 brief) · A synthetic comparison with too few resamples for its quantiles**
+- **Origin:** Claude Code (a scratch diagnostic for the F6 escalation brief)
+- **What was produced:** a Bonferroni-adjusted pairwise bootstrap comparison over 78 pairs, computed from 200 resamples, reported to the session as evidence that the anti-conservatism went beyond the rank rule.
+- **What was wrong:** with 200 draws, the adjusted quantiles (0.064% and 99.936%) are just the minimum and maximum of the draws, so the comparison separates pairs by construction. It is no evidence either way.
+- **How it was caught:** Claude Code's review of its own diagnostic before writing the brief.
+- **Fix:** the comparison was excluded from the brief, and the brief says so (§2, F6, reading 4). The rank rule was re-checked at the real setting of 2,000 resamples.
+- **Guard added:** none automated (scratch code). The brief states the resample count behind every synthetic figure.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.
