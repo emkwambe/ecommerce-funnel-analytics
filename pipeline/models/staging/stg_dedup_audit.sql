@@ -1,8 +1,10 @@
 -- Raw row count and exact duplicate rows removed (metrics.md Section 2, D1; Section 10).
 -- Counted on raw rows, independently of stg_events: surplus rows beyond the first in each
 -- group of identical rows.
+-- D11: bot user 512475445 excluded before counting, matching the stg_events filter.
 with raw as (
     select * from {{ source('raw', 'events_oct_2019') }}
+    where user_id != 512475445
 ),
 
 identical_groups as (

@@ -301,3 +301,22 @@ Every data-quality metric states its basis. Exact duplicate rows removed are cou
 **Claim ceiling:** "Categories are ordered by estimated session conversion. Two categories are described as different only where their rank intervals don't overlap. This describes the period in the file and doesn't explain why categories differ."
 
 **Effect on published numbers:** none changes. A rankings page is added. The category funnel is unchanged, and item 5 reconciles the two.
+
+
+### 2026-09-27 · Bot exclusion at source (Section 2, D11)
+
+**Reason:** post-run audit of Run 3 (category rankings) found that user 512475445 generated
+5,129 sessions with 5,158 events across 10 auto-accessories brands and zero purchases —
+a 34x gap above the next heaviest user (149 sessions). One event per session across
+multiple brands with no cart or purchase activity is inconsistent with human browsing.
+The exclusion was approved by the project owner before any re-ranked number was published.
+
+**D11. Known bot exclusion.** User 512475445 is excluded from all analysis. The filter
+is applied in stg_events.sql before deduplication so no downstream model sees the
+user's events. The excluded session count (5,129) and event count (5,158) are published
+as a data-quality metric alongside the Section 10 figures.
+
+**Effect on published numbers:** auto category-session count decreases by 5,129 (from
+264,065 to 258,936). Auto session conversion rate changes from 0.0369 to 0.0376.
+No other category is affected. Rankings will be recomputed with the corrected dataset
+before any result is published.

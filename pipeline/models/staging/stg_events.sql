@@ -1,10 +1,15 @@
 -- One row per deduplicated event (metrics.md Section 2, D1): exact duplicate rows are
 -- removed; rows that differ in any column are kept as logged.
+--
+-- D2: Known bot exclusion. User 512475445 generated 5,129 sessions with 5,158 events
+-- (one event per session across 10 brands, zero purchases) — a 34x gap above the next
+-- heaviest user. Excluded at source so all downstream models are unaffected.
 with deduplicated as (
     select distinct
         event_time, event_type, product_id, category_id, category_code,
         brand, price, user_id, user_session
     from {{ source('raw', 'events_oct_2019') }}
+    where user_id != 512475445
 ),
 
 labeled as (
