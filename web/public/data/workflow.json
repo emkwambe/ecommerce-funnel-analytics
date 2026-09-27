@@ -1,9 +1,9 @@
 {
   "manifest": {
-    "git_commit_sha": "461d90a197c90c670f03e38587d7cee4465a6173",
-    "git_worktree_dirty": true,
+    "git_commit_sha": "dcd5619502ac9975eb9ac482f63ce7fbcaae063a",
+    "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-27T22:50:48+00:00",
+    "generated_at_utc": "2026-09-27T22:59:31+00:00",
     "script": "funnel.export"
   },
   "pipeline_build": {
