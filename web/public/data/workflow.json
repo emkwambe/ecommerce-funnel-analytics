@@ -1,9 +1,9 @@
 {
   "manifest": {
-    "git_commit_sha": "38a302e851a9a9ceab3b2f3f29f867abd3fb956b",
-    "git_worktree_dirty": false,
+    "git_commit_sha": "5944d58fdecde5f9d0648d99ba585a3241eaf682",
+    "git_worktree_dirty": true,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-28T00:15:29+00:00",
+    "generated_at_utc": "2026-09-28T01:27:50+00:00",
     "script": "funnel.export"
   },
   "pipeline_build": {
@@ -117,15 +117,15 @@
   ],
   "correction_log": {
     "source": "ai-workflow/correction-log.md",
-    "n_entries": 62,
+    "n_entries": 63,
     "by_origin": {
-      "Claude Code": 55,
+      "Claude Code": 56,
       "Claude Chat": 4,
       "Project owner": 2,
       "Unattributed second actor": 1
     },
     "by_caught": {
-      "Executor self-review": 33,
+      "Executor self-review": 34,
       "Local test": 17,
       "Human review": 6,
       "Smoke": 4,
@@ -155,7 +155,8 @@
       "Sprint 3 Step 4": 3,
       "Sprint 3 Step 4 (H4 brief)": 1,
       "Closing": 2,
-      "Closing (H9 records)": 1
+      "Closing (H9 records)": 1,
+      "v1.1.5": 1
     },
     "origin_rule": "origin is the entry's Origin line (Claude Code, Claude Chat, Project owner, or Unattributed second actor)",
     "caught_rules": [
@@ -657,6 +658,13 @@
         "title": "A report-drift test compared raw line endings",
         "origin": "Claude Code",
         "caught_by": "Local test"
+      },
+      {
+        "date": "2026-09-28",
+        "phase": "v1.1.5",
+        "title": "A desktop layout check scrolled too little to test pinning",
+        "origin": "Claude Code",
+        "caught_by": "Executor self-review"
       }
     ]
   },
@@ -689,11 +697,69 @@
   "tech_stack": {
     "groups": [
       {
-        "group": "Data",
+        "group": "AI workflow",
+        "items": [
+          {
+            "name": "Claude Chat",
+            "role": "The command center: planning, framing, and challenging the work with the project owner.",
+            "version": null,
+            "version_source": null
+          },
+          {
+            "name": "Claude Code",
+            "role": "The executor: carries out each step in the repository under binding rules and stops at every checkpoint.",
+            "version": null,
+            "version_source": null
+          },
+          {
+            "name": "Human checkpoints",
+            "role": "The project owner decides scope, contract changes, and merges, and signs off every published claim.",
+            "version": null,
+            "version_source": null
+          }
+        ]
+      },
+      {
+        "group": "Languages",
+        "items": [
+          {
+            "name": "Python",
+            "role": "The analysis package: ingestion, profiling, builds, statistics, exports, and guards.",
+            "version": "3.12.10",
+            "version_source": {
+              "file": "ai-workflow/tools.md",
+              "key": "Python"
+            }
+          },
+          {
+            "name": "SQL",
+            "role": "Every query over the data, in DuckDB, and every dbt model.",
+            "version": null,
+            "version_source": null
+          },
+          {
+            "name": "TypeScript",
+            "role": "The site's code.",
+            "version": "^5",
+            "version_source": {
+              "file": "web/package.json",
+              "key": "typescript"
+            }
+          },
+          {
+            "name": "HTML/CSS",
+            "role": "The site's markup and styles.",
+            "version": null,
+            "version_source": null
+          }
+        ]
+      },
+      {
+        "group": "Data and storage",
         "items": [
           {
             "name": "Kaggle CLI",
-            "role": "Downloads the October 2019 event log from its Kaggle dataset page (`python -m funnel.ingest`).",
+            "role": "Downloads the October 2019 event log from its Kaggle dataset page.",
             "version": "2.2.4",
             "version_source": {
               "file": "analysis/requirements.txt",
@@ -722,7 +788,7 @@
         "items": [
           {
             "name": "dbt-core",
-            "role": "Staging, intermediate, and mart models, each documented and tested, built through `funnel.build` behind memory and dataset-hash gates.",
+            "role": "Staging, intermediate, and mart models, each documented and tested, built behind memory and dataset-hash gates.",
             "version": "1.12.5",
             "version_source": {
               "file": "analysis/requirements.txt",
@@ -740,7 +806,7 @@
           },
           {
             "name": "dbt tests",
-            "role": "Schema tests (not null, unique, accepted values), singular reconciliation tests that tie marts to totals and to each other, and tie checks on earliest and latest values; every build must run every expected test.",
+            "role": "Schema tests (not null, unique, accepted values), reconciliation tests that tie tables to totals and to each other, and checks on earliest and latest values; every build must run every expected test.",
             "version": null,
             "version_source": null
           }
@@ -749,15 +815,6 @@
       {
         "group": "Analysis and verification",
         "items": [
-          {
-            "name": "Python",
-            "role": "The `funnel` package: ingestion, profiling, builds, statistics, exports, and guards.",
-            "version": "3.12.10",
-            "version_source": {
-              "file": "ai-workflow/tools.md",
-              "key": "Python"
-            }
-          },
           {
             "name": "pandas",
             "role": "Small aggregates only; the raw data is too large for it.",
@@ -778,7 +835,7 @@
           },
           {
             "name": "pytest",
-            "role": "The commit gate (pytest's own exit code), with guard tests for the naming rules, row-level data, and drift between exports and their sources.",
+            "role": "The commit gate, with guard tests for the naming rules, row-level data, and drift between exports and their sources.",
             "version": "9.1.1",
             "version_source": {
               "file": "analysis/requirements.txt",
@@ -786,7 +843,7 @@
             }
           },
           {
-            "name": "Independent verifier (`funnel.verify`)",
+            "name": "Independent verifier",
             "role": "Recomputes every published figure from the Parquet file with separately written SQL, without dbt.",
             "version": null,
             "version_source": null
@@ -806,12 +863,12 @@
             }
           },
           {
-            "name": "TypeScript",
-            "role": "The site's code.",
-            "version": "^5",
+            "name": "React",
+            "role": "The site's components.",
+            "version": "19.1.0",
             "version_source": {
               "file": "web/package.json",
-              "key": "typescript"
+              "key": "react"
             }
           },
           {
@@ -824,7 +881,7 @@
             }
           },
           {
-            "name": "Vercel (CLI)",
+            "name": "Vercel CLI",
             "role": "Production hosting; deploys go through the Vercel CLI, never on merge.",
             "version": "58.4.4",
             "version_source": {
@@ -838,8 +895,17 @@
         "group": "Engineering practice",
         "items": [
           {
+            "name": "Git",
+            "role": "Version control; history is never rewritten.",
+            "version": "2.53.0",
+            "version_source": {
+              "file": "ai-workflow/tools.md",
+              "key": "git"
+            }
+          },
+          {
             "name": "GitHub",
-            "role": "Source, pull requests, and release tags; every change reaches `main` through a pull request.",
+            "role": "Source, pull requests, and release tags; every change reaches main through a pull request.",
             "version": null,
             "version_source": null
           },
@@ -851,7 +917,7 @@
           },
           {
             "name": "Branch protection",
-            "role": "On `main`: pull request required, checks required and up to date, enforced for admins, no force pushes.",
+            "role": "On main: pull request required, checks required and up to date, enforced for admins, no force pushes.",
             "version": null,
             "version_source": null
           },
@@ -869,29 +935,6 @@
               "file": "web/package.json",
               "key": "playwright"
             }
-          }
-        ]
-      },
-      {
-        "group": "AI workflow",
-        "items": [
-          {
-            "name": "Claude Chat",
-            "role": "The command center: planning, framing, and challenging the work with the project owner.",
-            "version": null,
-            "version_source": null
-          },
-          {
-            "name": "Claude Code",
-            "role": "The executor: carries out each step in the repository under binding rules and stops at every checkpoint.",
-            "version": null,
-            "version_source": null
-          },
-          {
-            "name": "Human checkpoints",
-            "role": "The project owner decides scope, contract changes, and merges, and signs off every published claim.",
-            "version": null,
-            "version_source": null
           }
         ]
       }

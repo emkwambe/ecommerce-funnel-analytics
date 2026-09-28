@@ -26,50 +26,52 @@ README_START, README_END = "<!-- tech-stack:start -->", "<!-- tech-stack:end -->
 # (group, name, role, version source): the source is ("requirements", package), ("package.json", package), or
 # ("tools.md", the tool's row name), or None.
 STACK: tuple[tuple[str, str, str, tuple[str, str] | None], ...] = (
-    ("Data", "Kaggle CLI", "Downloads the October 2019 event log from its Kaggle dataset page (`python -m funnel.ingest`).",
-     ("requirements", "kaggle")),
-    ("Data", "Parquet", "The ingested event log is stored once as a Parquet file; every stage reads it from there.", None),
-    ("Data", "DuckDB", "Runs every query over the raw data and holds the warehouse the dbt models build into, with a "
-                       "fixed memory limit.", ("requirements", "duckdb")),
-    ("Transformation and quality", "dbt-core", "Staging, intermediate, and mart models, each documented and tested, "
-                                               "built through `funnel.build` behind memory and dataset-hash gates.",
-     ("requirements", "dbt-core")),
-    ("Transformation and quality", "dbt-duckdb", "The dbt adapter for DuckDB.", ("requirements", "dbt-duckdb")),
-    ("Transformation and quality", "dbt tests", "Schema tests (not null, unique, accepted values), singular "
-                                                "reconciliation tests that tie marts to totals and to each other, and "
-                                                "tie checks on earliest and latest values; every build must run every "
-                                                "expected test.", None),
-    ("Analysis and verification", "Python", "The `funnel` package: ingestion, profiling, builds, statistics, exports, "
-                                            "and guards.", ("tools.md", "Python")),
-    ("Analysis and verification", "pandas", "Small aggregates only; the raw data is too large for it.",
-     ("requirements", "pandas")),
-    ("Analysis and verification", "pyarrow", "Reads and writes the Parquet file.", ("requirements", "pyarrow")),
-    ("Analysis and verification", "pytest", "The commit gate (pytest's own exit code), with guard tests for the naming "
-                                            "rules, row-level data, and drift between exports and their sources.",
-     ("requirements", "pytest")),
-    ("Analysis and verification", "Independent verifier (`funnel.verify`)", "Recomputes every published figure from the "
-                                                                           "Parquet file with separately written SQL, "
-                                                                           "without dbt.", None),
-    ("Web and delivery", "Next.js", "The site, prerendered from the JSON exports at build time.", ("package.json", "next")),
-    ("Web and delivery", "TypeScript", "The site's code.", ("package.json", "typescript")),
-    ("Web and delivery", "Tailwind CSS", "Layout and the light and dark themes.", ("package.json", "tailwindcss")),
-    ("Web and delivery", "Vercel (CLI)", "Production hosting; deploys go through the Vercel CLI, never on merge.",
-     ("tools.md", "Vercel CLI")),
-    ("Engineering practice", "GitHub", "Source, pull requests, and release tags; every change reaches `main` through a "
-                                       "pull request.", None),
-    ("Engineering practice", "GitHub Actions CI", "Required checks on every pull request: Python tests, the web build, "
-                                                  "and a documentation link check.", None),
-    ("Engineering practice", "Branch protection", "On `main`: pull request required, checks required and up to date, "
-                                                  "enforced for admins, no force pushes.", None),
-    ("Engineering practice", "GitGuardian", "Secret scanning on every pull request.", None),
-    ("Engineering practice", "Playwright", "Screenshots at phone width in both themes, failing on any horizontal "
-                                           "overflow.", ("package.json", "playwright")),
+    # Order and names: owner decision for PR #21 (v1.1.5), starting with the AI workflow.
     ("AI workflow", "Claude Chat", "The command center: planning, framing, and challenging the work with the project "
                                    "owner.", None),
     ("AI workflow", "Claude Code", "The executor: carries out each step in the repository under binding rules and stops "
                                    "at every checkpoint.", None),
     ("AI workflow", "Human checkpoints", "The project owner decides scope, contract changes, and merges, and signs off "
                                          "every published claim.", None),
+    ("Languages", "Python", "The analysis package: ingestion, profiling, builds, statistics, exports, and guards.",
+     ("tools.md", "Python")),
+    ("Languages", "SQL", "Every query over the data, in DuckDB, and every dbt model.", None),
+    ("Languages", "TypeScript", "The site's code.", ("package.json", "typescript")),
+    ("Languages", "HTML/CSS", "The site's markup and styles.", None),
+    ("Data and storage", "Kaggle CLI", "Downloads the October 2019 event log from its Kaggle dataset page.",
+     ("requirements", "kaggle")),
+    ("Data and storage", "Parquet", "The ingested event log is stored once as a Parquet file; every stage reads it from "
+                                    "there.", None),
+    ("Data and storage", "DuckDB", "Runs every query over the raw data and holds the warehouse the dbt models build into, "
+                                   "with a fixed memory limit.", ("requirements", "duckdb")),
+    ("Transformation and quality", "dbt-core", "Staging, intermediate, and mart models, each documented and tested, "
+                                               "built behind memory and dataset-hash gates.", ("requirements", "dbt-core")),
+    ("Transformation and quality", "dbt-duckdb", "The dbt adapter for DuckDB.", ("requirements", "dbt-duckdb")),
+    ("Transformation and quality", "dbt tests", "Schema tests (not null, unique, accepted values), reconciliation tests "
+                                                "that tie tables to totals and to each other, and checks on earliest and "
+                                                "latest values; every build must run every expected test.", None),
+    ("Analysis and verification", "pandas", "Small aggregates only; the raw data is too large for it.",
+     ("requirements", "pandas")),
+    ("Analysis and verification", "pyarrow", "Reads and writes the Parquet file.", ("requirements", "pyarrow")),
+    ("Analysis and verification", "pytest", "The commit gate, with guard tests for the naming rules, row-level data, and "
+                                            "drift between exports and their sources.", ("requirements", "pytest")),
+    ("Analysis and verification", "Independent verifier", "Recomputes every published figure from the Parquet file with "
+                                                          "separately written SQL, without dbt.", None),
+    ("Web and delivery", "Next.js", "The site, prerendered from the JSON exports at build time.", ("package.json", "next")),
+    ("Web and delivery", "React", "The site's components.", ("package.json", "react")),
+    ("Web and delivery", "Tailwind CSS", "Layout and the light and dark themes.", ("package.json", "tailwindcss")),
+    ("Web and delivery", "Vercel CLI", "Production hosting; deploys go through the Vercel CLI, never on merge.",
+     ("tools.md", "Vercel CLI")),
+    ("Engineering practice", "Git", "Version control; history is never rewritten.", ("tools.md", "git")),
+    ("Engineering practice", "GitHub", "Source, pull requests, and release tags; every change reaches main through a "
+                                       "pull request.", None),
+    ("Engineering practice", "GitHub Actions CI", "Required checks on every pull request: Python tests, the web build, "
+                                                  "and a documentation link check.", None),
+    ("Engineering practice", "Branch protection", "On main: pull request required, checks required and up to date, "
+                                                  "enforced for admins, no force pushes.", None),
+    ("Engineering practice", "GitGuardian", "Secret scanning on every pull request.", None),
+    ("Engineering practice", "Playwright", "Screenshots at phone width in both themes, failing on any horizontal "
+                                           "overflow.", ("package.json", "playwright")),
 )
 GROUPS = tuple(dict.fromkeys(g for g, *_ in STACK))
 

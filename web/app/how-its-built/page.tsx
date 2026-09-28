@@ -58,41 +58,25 @@ export default function HowItsBuiltPage() {
       {/* Owner decision v1.1.5: timeline left and tech stack right (sticky) on wide screens; on narrow screens one
           column, the stack first as a compact summary. Every item and version comes from workflow.json. */}
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,19rem)] lg:gap-8">
-      <aside id="tech-stack" className="space-y-3 lg:sticky lg:top-6 lg:order-last lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto lg:pr-2" aria-labelledby="tech-stack-heading">
+      <aside id="tech-stack" className="space-y-3 lg:sticky lg:top-6 lg:order-last lg:self-start" aria-labelledby="tech-stack-heading">
         <h2 id="tech-stack-heading" className="text-xl font-semibold tracking-tight">Tech stack</h2>
-        {/* Narrow screens: one line per layer; roles on demand. */}
-        <div className="space-y-2 text-sm lg:hidden">
+        {/* Owner decision (PR #21, option (b)): one compact column at every width. Each layer lists its tools with
+            versions; each tool's role is available on demand. */}
+        <div className="space-y-2 text-sm">
           {record.tech_stack.groups.map((g) => (
             <details key={g.group} className="rounded-lg border border-line bg-surface px-3 py-2">
               <summary className="cursor-pointer [overflow-wrap:anywhere]">
                 <span className="font-medium">{g.group}:</span>{" "}
                 <span className="text-muted">
-                  {g.items.map((i) => (i.version ? `${i.name.replace(/`/g, "")} ${i.version}` : i.name.replace(/`/g, ""))).join(" · ")}
+                  {g.items.map((i) => (i.version ? `${i.name} ${i.version}` : i.name)).join(" · ")}
                 </span>
               </summary>
               <ul className="mt-2 space-y-1 text-xs text-muted">
                 {g.items.map((i) => (
-                  <li key={i.name}><span className="text-ink"><InlineText text={i.name} /></span>: <InlineText text={i.role} /></li>
+                  <li key={i.name}><span className="text-ink">{i.name}</span>: <InlineText text={i.role} /></li>
                 ))}
               </ul>
             </details>
-          ))}
-        </div>
-        {/* Wide screens: every item with its version and role. */}
-        <div className="hidden space-y-4 lg:block">
-          {record.tech_stack.groups.map((g) => (
-            <div key={g.group} className="space-y-1.5">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted">{g.group}</h3>
-              <ul className="space-y-1.5 text-sm">
-                {g.items.map((i) => (
-                  <li key={i.name}>
-                    <span className="font-medium"><InlineText text={i.name} /></span>
-                    {i.version && <span className="num ml-1.5 text-xs text-muted">{i.version}</span>}
-                    <div className="text-xs leading-snug text-muted"><InlineText text={i.role} /></div>
-                  </li>
-                ))}
-              </ul>
-            </div>
           ))}
         </div>
         <Sources fields={[`workflow.json: tech_stack (versions read from ${record.tech_stack.sources.join(", ")})`]} />

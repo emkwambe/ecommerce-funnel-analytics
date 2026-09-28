@@ -7,8 +7,9 @@ import json
 from funnel import tech_stack as ts
 from funnel.export import WEB_DATA
 
-OWNER_GROUPS = ["Data", "Transformation and quality", "Analysis and verification", "Web and delivery",
-                "Engineering practice", "AI workflow"]
+# Owner decision for PR #21 (v1.1.5): seven layers, starting with the AI workflow.
+OWNER_GROUPS = ["AI workflow", "Languages", "Data and storage", "Transformation and quality",
+                "Analysis and verification", "Web and delivery", "Engineering practice"]
 
 
 def _committed() -> dict:
@@ -33,9 +34,10 @@ def test_committed_stack_is_the_current_resolution_in_the_owner_groups():
     assert committed == json.loads(json.dumps(ts.resolve())), "refresh: python -m funnel.export --only workflow.json"
     assert [g["group"] for g in committed["groups"]] == OWNER_GROUPS
     names = {i["name"] for g in committed["groups"] for i in g["items"]}
-    assert {"Kaggle CLI", "Parquet", "DuckDB", "dbt-core", "dbt-duckdb", "pandas", "pyarrow", "pytest", "Next.js",
-            "TypeScript", "Tailwind CSS", "GitHub Actions CI", "Branch protection", "GitGuardian", "Playwright",
-            "Claude Chat", "Claude Code", "Human checkpoints"} <= names
+    assert {"Claude Chat", "Claude Code", "Human checkpoints", "Python", "SQL", "TypeScript", "HTML/CSS", "Kaggle CLI",
+            "Parquet", "DuckDB", "dbt-core", "dbt-duckdb", "dbt tests", "pandas", "pyarrow", "pytest",
+            "Independent verifier", "Next.js", "React", "Tailwind CSS", "Vercel CLI", "Git", "GitHub",
+            "GitHub Actions CI", "Branch protection", "GitGuardian", "Playwright"} == names
     assert all(i["role"] for g in committed["groups"] for i in g["items"])
 
 
