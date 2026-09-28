@@ -45,6 +45,53 @@ Every number on the site is read from JSON exports written by code, each carryin
   - open questions and accepted risks: [ai-workflow/uncertainty-register.md](ai-workflow/uncertainty-register.md).
 - **Tools and environment.** [ai-workflow/tools.md](ai-workflow/tools.md) lists the tools, their verified versions, and what each may and may not be used as evidence for. [CHANGELOG.md](CHANGELOG.md) records each release, and [.env.example](.env.example) lists every environment variable the code reads.
 
+<!-- tech-stack:start -->
+## Tech stack
+
+Each tool with its role in this project. Versions are read by `python -m funnel.export --only workflow.json` from `analysis/requirements.txt`, `web/package.json`, and `ai-workflow/tools.md`; a test fails if any differs from its source. The same list is on the [How it's built](https://ecommercefunnel-analytics.vercel.app/how-its-built) page.
+
+**Data**
+
+- **Kaggle CLI** `2.2.4`: Downloads the October 2019 event log from its Kaggle dataset page (`python -m funnel.ingest`).
+- **Parquet**: The ingested event log is stored once as a Parquet file; every stage reads it from there.
+- **DuckDB** `1.5.5`: Runs every query over the raw data and holds the warehouse the dbt models build into, with a fixed memory limit.
+
+**Transformation and quality**
+
+- **dbt-core** `1.12.5`: Staging, intermediate, and mart models, each documented and tested, built through `funnel.build` behind memory and dataset-hash gates.
+- **dbt-duckdb** `1.11.0`: The dbt adapter for DuckDB.
+- **dbt tests**: Schema tests (not null, unique, accepted values), singular reconciliation tests that tie marts to totals and to each other, and tie checks on earliest and latest values; every build must run every expected test.
+
+**Analysis and verification**
+
+- **Python** `3.12.10`: The `funnel` package: ingestion, profiling, builds, statistics, exports, and guards.
+- **pandas** `3.0.6`: Small aggregates only; the raw data is too large for it.
+- **pyarrow** `25.0.1`: Reads and writes the Parquet file.
+- **pytest** `9.1.1`: The commit gate (pytest's own exit code), with guard tests for the naming rules, row-level data, and drift between exports and their sources.
+- **Independent verifier (`funnel.verify`)**: Recomputes every published figure from the Parquet file with separately written SQL, without dbt.
+
+**Web and delivery**
+
+- **Next.js** `15.5.26`: The site, prerendered from the JSON exports at build time.
+- **TypeScript** `^5`: The site's code.
+- **Tailwind CSS** `^4`: Layout and the light and dark themes.
+- **Vercel (CLI)** `58.4.4`: Production hosting; deploys go through the Vercel CLI, never on merge.
+
+**Engineering practice**
+
+- **GitHub**: Source, pull requests, and release tags; every change reaches `main` through a pull request.
+- **GitHub Actions CI**: Required checks on every pull request: Python tests, the web build, and a documentation link check.
+- **Branch protection**: On `main`: pull request required, checks required and up to date, enforced for admins, no force pushes.
+- **GitGuardian**: Secret scanning on every pull request.
+- **Playwright** `^1.63.0`: Screenshots at phone width in both themes, failing on any horizontal overflow.
+
+**AI workflow**
+
+- **Claude Chat**: The command center: planning, framing, and challenging the work with the project owner.
+- **Claude Code**: The executor: carries out each step in the repository under binding rules and stops at every checkpoint.
+- **Human checkpoints**: The project owner decides scope, contract changes, and merges, and signs off every published claim.
+<!-- tech-stack:end -->
+
 ## Reproduce
 
 Requirements: Python 3.12, Node 22, a Kaggle API token in the `KAGGLE_API_TOKEN` environment variable, and about 25 GB of free disk. Heavy stages need at least 3 GB of available memory and halt otherwise. Commands use absolute paths (Windows PowerShell).

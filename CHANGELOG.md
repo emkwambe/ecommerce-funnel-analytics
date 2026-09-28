@@ -7,6 +7,7 @@ Entries up to v1.0.1 were reconstructed in Sprint 2 from the git history. Figure
 ## [Unreleased]
 
 ### Added
+- Tech stack (v1.1.5, owner decision 2026-09-27): six layers, each item with its role in this project, on `/how-its-built` beside the git timeline and in the README. Versions are written by `funnel.export --only workflow.json` from `analysis/requirements.txt`, `web/package.json`, and `ai-workflow/tools.md`, and `test_tech_stack.py` fails if one differs from its source. On narrow screens the stack comes first as a compact summary.
 - Owner H9 sign-off (2026-09-27) on the live v1.1.4 home page findings F1–F4, the Further research page, the closing content, and How it's built: claim-ledger rows C16–C20.
 
 ## [1.1.4] — 2026-09-27
