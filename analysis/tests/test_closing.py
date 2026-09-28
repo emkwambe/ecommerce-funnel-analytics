@@ -12,6 +12,7 @@ from funnel import closing as c
 from funnel.common import REPO_ROOT, recorded_dataset_sha256
 
 APP = REPO_ROOT / "web" / "app"
+LF, CRLF = chr(10), chr(13) + chr(10)
 
 
 @pytest.fixture(scope="module")
@@ -26,7 +27,9 @@ def committed():
 
 def test_committed_report_and_export_equal_a_fresh_build(inputs, committed):
     report, export = c.build(*inputs)
-    assert c.REPORT.read_bytes().decode("utf-8") == report, "docs/closing-report.md is stale; run python -m funnel.closing"
+    # Line endings are normalized: git's autocrlf may check the committed report out with CRLF on Windows.
+    on_disk = c.REPORT.read_bytes().decode("utf-8").replace(CRLF, LF)
+    assert on_disk == report.replace(CRLF, LF), "docs/closing-report.md is stale; run python -m funnel.closing"
     assert {k: v for k, v in committed.items() if k != "manifest"} == json.loads(json.dumps(export))
 
 

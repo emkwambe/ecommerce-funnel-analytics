@@ -542,6 +542,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the report links to the brief by relative path (`../ai-workflow/escalations/...`), which the link checker resolves in the branch. The `/questions` page keeps the absolute GitHub link, which resolves after the merge and isn't link-checked. Report regenerated in this commit.
 - **Guard added:** none new; the CI link check caught it as designed.
 
+**2026-09-27 · Closing (H9 records) · A report-drift test compared raw line endings**
+- **Origin:** Claude Code (`analysis/tests/test_closing.py`, `test_committed_report_and_export_equal_a_fresh_build`)
+- **What was produced:** a byte-for-byte comparison of `docs/closing-report.md` with the generator's output.
+- **What was wrong:** on Windows, git's autocrlf checks the committed report out with CRLF line endings, so the test failed although the content was identical. CI (Linux) was unaffected.
+- **How it was caught:** local test: the pytest commit gate on the H9 records branch (`1 failed, 229 passed`).
+- **Fix:** the comparison normalizes line endings. Ships in this commit.
+- **Guard added:** none new; the test still fails on any content difference.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

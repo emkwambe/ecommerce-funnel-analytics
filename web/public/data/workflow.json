@@ -1,9 +1,9 @@
 {
   "manifest": {
-    "git_commit_sha": "dcd5619502ac9975eb9ac482f63ce7fbcaae063a",
+    "git_commit_sha": "2c489ad4ca9d06e6e3a833883805f8c8e4100096",
     "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-27T22:59:31+00:00",
+    "generated_at_utc": "2026-09-27T23:53:25+00:00",
     "script": "funnel.export"
   },
   "pipeline_build": {
@@ -117,16 +117,16 @@
   ],
   "correction_log": {
     "source": "ai-workflow/correction-log.md",
-    "n_entries": 61,
+    "n_entries": 62,
     "by_origin": {
-      "Claude Code": 54,
+      "Claude Code": 55,
       "Claude Chat": 4,
       "Project owner": 2,
       "Unattributed second actor": 1
     },
     "by_caught": {
       "Executor self-review": 33,
-      "Local test": 16,
+      "Local test": 17,
       "Human review": 6,
       "Smoke": 4,
       "CI": 2
@@ -154,7 +154,8 @@
       "Sprint 3 Step 3": 1,
       "Sprint 3 Step 4": 3,
       "Sprint 3 Step 4 (H4 brief)": 1,
-      "Closing": 2
+      "Closing": 2,
+      "Closing (H9 records)": 1
     },
     "origin_rule": "origin is the entry's Origin line (Claude Code, Claude Chat, Project owner, or Unattributed second actor)",
     "caught_rules": [
@@ -649,6 +650,13 @@
         "title": "The closing report linked to a file not yet on main",
         "origin": "Claude Code",
         "caught_by": "CI"
+      },
+      {
+        "date": "2026-09-27",
+        "phase": "Closing (H9 records)",
+        "title": "A report-drift test compared raw line endings",
+        "origin": "Claude Code",
+        "caught_by": "Local test"
       }
     ]
   },

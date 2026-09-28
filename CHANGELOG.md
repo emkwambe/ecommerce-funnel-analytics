@@ -6,7 +6,14 @@ Entries up to v1.0.1 were reconstructed in Sprint 2 from the git history. Figure
 
 ## [Unreleased]
 
-### Changed (cosmetic patch for v1.1.4, owner decision 2026-09-27)
+### Added
+- Owner H9 sign-off (2026-09-27) on the live v1.1.4 home page findings F1–F4, the Further research page, the closing content, and How it's built: claim-ledger rows C16–C20.
+
+## [1.1.4] — 2026-09-27
+
+Tag `v1.1.4` (commit `7755e9b`, the merges of PRs #18 and #19), deployed to production from `main`, where the production smoke test passed before tagging (`ai-workflow/evidence/sprint-3/smoke_production_v1.1.4.txt`).
+
+### Changed (cosmetic patch, owner decision 2026-09-27)
 - Navigation order: Funnel, Investigations, How it's built, Data, Data quality, Metrics, Further research.
 - The questions page is labeled "Further research" in the navigation and titled "Questions for further research"; `/questions` is unchanged, and the home page's links use the new name.
 - `/how-its-built`: the verification tile is "Verification by tests and human review", and it states that the project owner reviewed the results and signed off each published claim.
