@@ -149,6 +149,11 @@ export type Workflow = Export & {
     entries: { date: string; phase: string; title: string; origin: string; caught_by: string }[];
   };
   workflow_files: string[];
+  tech_stack: {
+    groups: { group: string; items: { name: string; role: string; version: string | null;
+      version_source: { file: string; key: string } | null }[] }[];
+    sources: string[];
+  };
 };
 
 export type GapCell = {

@@ -103,6 +103,10 @@ try {
   const total = workflow.correction_log.n_entries.toLocaleString("en-US");
   check(`/how-its-built counts all ${total} correction-log entries`, built.includes(`${total}<!-- --> errors were caught`) || built.includes(`${total} errors were caught`));
   check("/how-its-built shows the \"Unattributed second actor\" origin", built.includes("Unattributed second actor"));
+  const stackItems = workflow.tech_stack.groups.flatMap((g) => g.items);
+  check("/how-its-built has a Tech stack section beside the timeline", built.includes('id="tech-stack"') && built.includes("Timeline from git"));
+  check(`/how-its-built lists all ${stackItems.length} tech-stack items with their exported versions`,
+    stackItems.every((i) => built.includes(i.name.replace(/`/g, "").split(" (")[0]) && (!i.version || built.includes(i.version))));
   check("/how-its-built tile \"Verification by tests and human review\" with the owner sign-off sentence",
     built.includes("Verification by tests and human review") &&
     built.includes("The project owner reviewed the results and signed off each published claim."));

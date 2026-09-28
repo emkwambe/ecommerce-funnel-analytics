@@ -1,0 +1,53 @@
+Smoke test against http://localhost:3011
+PASS  docs/data-source.md records a dataset SHA-256  (fedd938409b5)
+PASS  GET / returns 200  (status 200)
+PASS  GET /funnel returns 200  (status 200)
+PASS  GET /data-quality returns 200  (status 200)
+PASS  GET /data returns 200  (status 200)
+PASS  GET /metrics returns 200  (status 200)
+PASS  GET /how-its-built returns 200  (status 200)
+PASS  GET /investigations returns 200  (status 200)
+PASS  GET /investigations/revenue-figures returns 200  (status 200)
+PASS  GET /investigations/later-purchases returns 200  (status 200)
+PASS  GET /questions returns 200  (status 200)
+PASS  kpis.json loads  (status 200)
+PASS  kpis.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  funnel_category.json loads  (status 200)
+PASS  funnel_category.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  purchase_paths.json loads  (status 200)
+PASS  purchase_paths.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  data_quality.json loads  (status 200)
+PASS  data_quality.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  metrics_index.json loads  (status 200)
+PASS  metrics_index.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  data_story.json loads  (status 200)
+PASS  data_story.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  workflow.json loads  (status 200)
+PASS  workflow.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  investigation_revenue_gap.json loads  (status 200)
+PASS  investigation_revenue_gap.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  investigation_later_purchases.json loads  (status 200)
+PASS  investigation_later_purchases.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  closing.json loads  (status 200)
+PASS  closing.json manifest dataset SHA-256 matches docs/data-source.md  (fedd938409b5…)
+PASS  footer attribution link on / : https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store
+PASS  footer attribution link on / : https://rees46.com
+PASS  / shows "Project status: closed"
+PASS  / links prominently to /questions
+PASS  / shows headline finding F1  (In October 2019, 48% of revenue came fro)
+PASS  / shows headline finding F2  (For carted products in sessions starting)
+PASS  / shows headline finding F3  (The two revenue figures differ by $18.5M)
+PASS  / shows headline finding F4  (A pre-registered category ranking was no)
+PASS  /questions marks question 1 "Start here"
+PASS  /questions shows all 9 questions
+PASS  /questions has a Sources line
+PASS  /questions is titled "Questions for further research"
+PASS  /questions renders inline code, not literal backticks  (user_id)
+PASS  /questions evidence links use readable labels
+PASS  nav order: Funnel, Investigations, How it's built, Data, Data quality, Metrics, Further research  (127,197,274,347,413,482,548)
+PASS  /how-its-built counts all 62 correction-log entries
+PASS  /how-its-built shows the "Unattributed second actor" origin
+PASS  /how-its-built has a Tech stack section beside the timeline
+PASS  /how-its-built lists all 27 tech-stack items with their exported versions
+PASS  /how-its-built tile "Verification by tests and human review" with the owner sign-off sentence
+51/51 checks passed

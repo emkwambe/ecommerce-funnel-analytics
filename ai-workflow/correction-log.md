@@ -550,6 +550,14 @@ All fixes below ship in the Sprint 0 evidence commit that adds this log's entrie
 - **Fix:** the comparison normalizes line endings. Ships in this commit.
 - **Guard added:** none new; the test still fails on any content difference.
 
+**2026-09-28 · v1.1.5 · A desktop layout check scrolled too little to test pinning**
+- **Origin:** Claude Code (a scratch Playwright check of `/how-its-built` at 1280 px)
+- **What was produced:** a check that scrolled by the smaller of the stack's travel room and the distance to its pinning point, then tested whether the stack was pinned.
+- **What was wrong:** the stack only pins once its top reaches the sticky offset, so the capped scroll never reached the pinned range, and the check reported "not pinned" for a layout that was.
+- **How it was caught:** executor self-review of the check's own numbers: the stack's top moved by exactly the scrolled distance and stopped short of the sticky offset.
+- **Fix:** the check scrolls to the middle of the pinned range (the distance to the sticky offset plus half the travel room); rerun, it passes in both themes. Scratch code; no committed file changed.
+- **Guard added:** none automated (scratch code); the check prints the stack's top before and after scrolling.
+
 **2026-09-24 · Sprint 0 · Checks run with no error found**
 - **Origin:** n/a
 - **Checks that ran clean:** the Step 0 preflight gates, run after the disk-space stop; Kaggle token authentication with no `kaggle.json` available; downloaded file size against the Kaggle listing; three independent row counts; CSV-to-Parquet type preservation; the raw `event_time` format and round trip; the dataset hash gate; the metric-lock guard on the real profile and on injected leaks; and the row-level data scan of committable files.

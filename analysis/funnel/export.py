@@ -38,6 +38,7 @@ from funnel.common import (
     require_dataset_hash_match,
     write_json,
 )
+from funnel import tech_stack
 from funnel.ingest import KAGGLE_LICENSE_FIELD, PUBLISHER_USAGE_STATEMENT, REES46_URL, connect
 
 SCRIPT = "funnel.export"
@@ -434,6 +435,7 @@ def workflow_record() -> dict[str, Any]:
         "timeline": git_timeline(),
         "correction_log": parse_correction_log(CORRECTION_LOG.read_text(encoding="utf-8")),
         "workflow_files": [f for f in files if f.endswith(".md")],
+        "tech_stack": tech_stack.resolve(),  # owner decision v1.1.5; versions read from their source files
     }
 
 
@@ -598,6 +600,9 @@ def write_only(name: str) -> None:
     payload = STANDALONE[name]()
     write_json(WEB_DATA / name, {"manifest": manifest(SCRIPT, sha), "pipeline_build": build, **payload})
     print(f"Wrote {WEB_DATA / name} (only)")
+    if name == "workflow.json":  # the README's tech-stack section renders the same list
+        tech_stack.sync_readme(payload["tech_stack"])
+        print("Refreshed the README's tech-stack section")
 
 
 def main(argv: list[str] | None = None) -> None:

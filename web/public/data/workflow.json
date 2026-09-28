@@ -1,9 +1,9 @@
 {
   "manifest": {
-    "git_commit_sha": "2c489ad4ca9d06e6e3a833883805f8c8e4100096",
+    "git_commit_sha": "8cd47aeb8df9d247fe0fa1b32891fa9c649a4580",
     "git_worktree_dirty": false,
     "dataset_sha256": "fedd938409b5f836ec89b39c861b13dad99fc7cd9beb1fddd97a2d50488b5b80",
-    "generated_at_utc": "2026-09-27T23:53:25+00:00",
+    "generated_at_utc": "2026-09-28T01:30:05+00:00",
     "script": "funnel.export"
   },
   "pipeline_build": {
@@ -117,15 +117,15 @@
   ],
   "correction_log": {
     "source": "ai-workflow/correction-log.md",
-    "n_entries": 62,
+    "n_entries": 63,
     "by_origin": {
-      "Claude Code": 55,
+      "Claude Code": 56,
       "Claude Chat": 4,
       "Project owner": 2,
       "Unattributed second actor": 1
     },
     "by_caught": {
-      "Executor self-review": 33,
+      "Executor self-review": 34,
       "Local test": 17,
       "Human review": 6,
       "Smoke": 4,
@@ -155,7 +155,8 @@
       "Sprint 3 Step 4": 3,
       "Sprint 3 Step 4 (H4 brief)": 1,
       "Closing": 2,
-      "Closing (H9 records)": 1
+      "Closing (H9 records)": 1,
+      "v1.1.5": 1
     },
     "origin_rule": "origin is the entry's Origin line (Claude Code, Claude Chat, Project owner, or Unattributed second actor)",
     "caught_rules": [
@@ -657,6 +658,13 @@
         "title": "A report-drift test compared raw line endings",
         "origin": "Claude Code",
         "caught_by": "Local test"
+      },
+      {
+        "date": "2026-09-28",
+        "phase": "v1.1.5",
+        "title": "A desktop layout check scrolled too little to test pinning",
+        "origin": "Claude Code",
+        "caught_by": "Executor self-review"
       }
     ]
   },
@@ -685,5 +693,256 @@
     "ai-workflow/sprint-3.md",
     "ai-workflow/tools.md",
     "ai-workflow/uncertainty-register.md"
-  ]
+  ],
+  "tech_stack": {
+    "groups": [
+      {
+        "group": "AI workflow",
+        "items": [
+          {
+            "name": "Claude Chat",
+            "role": "The command center: planning, framing, and challenging the work with the project owner.",
+            "version": null,
+            "version_source": null
+          },
+          {
+            "name": "Claude Code",
+            "role": "The executor: carries out each step in the repository under binding rules and stops at every checkpoint.",
+            "version": null,
+            "version_source": null
+          },
+          {
+            "name": "Human checkpoints",
+            "role": "The project owner decides scope, contract changes, and merges, and signs off every published claim.",
+            "version": null,
+            "version_source": null
+          }
+        ]
+      },
+      {
+        "group": "Languages",
+        "items": [
+          {
+            "name": "Python",
+            "role": "The analysis package: ingestion, profiling, builds, statistics, exports, and guards.",
+            "version": "3.12.10",
+            "version_source": {
+              "file": "ai-workflow/tools.md",
+              "key": "Python"
+            }
+          },
+          {
+            "name": "SQL",
+            "role": "Every query over the data, in DuckDB, and every dbt model.",
+            "version": null,
+            "version_source": null
+          },
+          {
+            "name": "TypeScript",
+            "role": "The site's code.",
+            "version": "^5",
+            "version_source": {
+              "file": "web/package.json",
+              "key": "typescript"
+            }
+          },
+          {
+            "name": "HTML/CSS",
+            "role": "The site's markup and styles.",
+            "version": null,
+            "version_source": null
+          }
+        ]
+      },
+      {
+        "group": "Data and storage",
+        "items": [
+          {
+            "name": "Kaggle CLI",
+            "role": "Downloads the October 2019 event log from its Kaggle dataset page.",
+            "version": "2.2.4",
+            "version_source": {
+              "file": "analysis/requirements.txt",
+              "key": "kaggle"
+            }
+          },
+          {
+            "name": "Parquet",
+            "role": "The ingested event log is stored once as a Parquet file; every stage reads it from there.",
+            "version": null,
+            "version_source": null
+          },
+          {
+            "name": "DuckDB",
+            "role": "Runs every query over the raw data and holds the warehouse the dbt models build into, with a fixed memory limit.",
+            "version": "1.5.5",
+            "version_source": {
+              "file": "analysis/requirements.txt",
+              "key": "duckdb"
+            }
+          }
+        ]
+      },
+      {
+        "group": "Transformation and quality",
+        "items": [
+          {
+            "name": "dbt-core",
+            "role": "Staging, intermediate, and mart models, each documented and tested, built behind memory and dataset-hash gates.",
+            "version": "1.12.5",
+            "version_source": {
+              "file": "analysis/requirements.txt",
+              "key": "dbt-core"
+            }
+          },
+          {
+            "name": "dbt-duckdb",
+            "role": "The dbt adapter for DuckDB.",
+            "version": "1.11.0",
+            "version_source": {
+              "file": "analysis/requirements.txt",
+              "key": "dbt-duckdb"
+            }
+          },
+          {
+            "name": "dbt tests",
+            "role": "Schema tests (not null, unique, accepted values), reconciliation tests that tie tables to totals and to each other, and checks on earliest and latest values; every build must run every expected test.",
+            "version": null,
+            "version_source": null
+          }
+        ]
+      },
+      {
+        "group": "Analysis and verification",
+        "items": [
+          {
+            "name": "pandas",
+            "role": "Small aggregates only; the raw data is too large for it.",
+            "version": "3.0.6",
+            "version_source": {
+              "file": "analysis/requirements.txt",
+              "key": "pandas"
+            }
+          },
+          {
+            "name": "pyarrow",
+            "role": "Reads and writes the Parquet file.",
+            "version": "25.0.1",
+            "version_source": {
+              "file": "analysis/requirements.txt",
+              "key": "pyarrow"
+            }
+          },
+          {
+            "name": "pytest",
+            "role": "The commit gate, with guard tests for the naming rules, row-level data, and drift between exports and their sources.",
+            "version": "9.1.1",
+            "version_source": {
+              "file": "analysis/requirements.txt",
+              "key": "pytest"
+            }
+          },
+          {
+            "name": "Independent verifier",
+            "role": "Recomputes every published figure from the Parquet file with separately written SQL, without dbt.",
+            "version": null,
+            "version_source": null
+          }
+        ]
+      },
+      {
+        "group": "Web and delivery",
+        "items": [
+          {
+            "name": "Next.js",
+            "role": "The site, prerendered from the JSON exports at build time.",
+            "version": "15.5.26",
+            "version_source": {
+              "file": "web/package.json",
+              "key": "next"
+            }
+          },
+          {
+            "name": "React",
+            "role": "The site's components.",
+            "version": "19.1.0",
+            "version_source": {
+              "file": "web/package.json",
+              "key": "react"
+            }
+          },
+          {
+            "name": "Tailwind CSS",
+            "role": "Layout and the light and dark themes.",
+            "version": "^4",
+            "version_source": {
+              "file": "web/package.json",
+              "key": "tailwindcss"
+            }
+          },
+          {
+            "name": "Vercel CLI",
+            "role": "Production hosting; deploys go through the Vercel CLI, never on merge.",
+            "version": "58.4.4",
+            "version_source": {
+              "file": "ai-workflow/tools.md",
+              "key": "Vercel CLI"
+            }
+          }
+        ]
+      },
+      {
+        "group": "Engineering practice",
+        "items": [
+          {
+            "name": "Git",
+            "role": "Version control; history is never rewritten.",
+            "version": "2.53.0",
+            "version_source": {
+              "file": "ai-workflow/tools.md",
+              "key": "git"
+            }
+          },
+          {
+            "name": "GitHub",
+            "role": "Source, pull requests, and release tags; every change reaches main through a pull request.",
+            "version": null,
+            "version_source": null
+          },
+          {
+            "name": "GitHub Actions CI",
+            "role": "Required checks on every pull request: Python tests, the web build, and a documentation link check.",
+            "version": null,
+            "version_source": null
+          },
+          {
+            "name": "Branch protection",
+            "role": "On main: pull request required, checks required and up to date, enforced for admins, no force pushes.",
+            "version": null,
+            "version_source": null
+          },
+          {
+            "name": "GitGuardian",
+            "role": "Secret scanning on every pull request.",
+            "version": null,
+            "version_source": null
+          },
+          {
+            "name": "Playwright",
+            "role": "Screenshots at phone width in both themes, failing on any horizontal overflow.",
+            "version": "^1.63.0",
+            "version_source": {
+              "file": "web/package.json",
+              "key": "playwright"
+            }
+          }
+        ]
+      }
+    ],
+    "sources": [
+      "ai-workflow/tools.md",
+      "analysis/requirements.txt",
+      "web/package.json"
+    ]
+  }
 }
