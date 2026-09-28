@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getWorkflow } from "@/lib/data";
-import { blobUrl, commitUrl, fmtInt, treeUrl } from "@/lib/format";
+import { COMMITS_URL, blobUrl, commitUrl, fmtInt, treeUrl } from "@/lib/format";
 import { InlineText, PageHeader, Sources } from "../ui";
 
 export const metadata: Metadata = { title: "How it's built · E-commerce Funnel Analytics" };
@@ -84,6 +84,11 @@ export default function HowItsBuiltPage() {
 
       <section className="min-w-0 space-y-4">
         <h2 className="text-xl font-semibold tracking-tight">Timeline from git</h2>
+        <p className="text-sm">
+          <a className="text-accent underline" href={COMMITS_URL} data-testid="full-history-link">
+            View the full history on GitHub →
+          </a>
+        </p>
         <ol className="relative space-y-4 border-l border-line pl-5">
           {record.timeline.map((e) => (
             <li key={e.sha} className="relative">

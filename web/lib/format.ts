@@ -1,3 +1,5 @@
+import { REPO_URL } from "./site.mjs";
+
 const int = new Intl.NumberFormat("en-US");
 
 export const fmtInt = (n: number) => int.format(n);
@@ -28,7 +30,7 @@ export function fmtIntCompact(n: number): string {
 
 export const shortSha = (sha: string, n = 7) => sha.slice(0, n);
 
-export const REPO_URL = "https://github.com/emkwambe/ecommerce-funnel-analytics";
+export { COMMITS_URL, REPO_URL } from "./site.mjs";
 export const commitUrl = (sha: string) => `${REPO_URL}/commit/${sha}`;
 export const treeUrl = (path: string) => `${REPO_URL}/tree/main/${path}`;
 export const blobUrl = (path: string) => `${REPO_URL}/blob/main/${path}`;

@@ -136,3 +136,19 @@ def test_home_findings_are_descriptive_only():
     found = [w for w in banned if re.search(rf"\b{re.escape(w)}", text)]
     assert found == [], f"descriptive findings use {found}"
     assert text.count("<p>") == 2, "exactly two findings, each in its own paragraph"
+
+def test_repository_url_is_set_in_one_place():
+    """Owner decision (v1.1.6): the header link, the full-history link, and every commit or file link read the
+    repository URL from web/lib/site.mjs; no other web source types it."""
+    url = "github.com/emkwambe/ecommerce-funnel-analytics"
+    config = WEB / "lib" / "site.mjs"
+    assert url in config.read_text(encoding="utf-8")
+    sources = [p for d in (WEB / "app", WEB / "lib", WEB / "scripts") for p in d.rglob("*")
+               if p.suffix in {".ts", ".tsx", ".mjs", ".js"} and p != config]
+    assert sources
+    typed = [str(p.relative_to(REPO_ROOT)) for p in sources if url in p.read_text(encoding="utf-8")]
+    assert typed == [], f"read the repository URL from web/lib/site.mjs: {typed}"
+    layout = (WEB / "app" / "layout.tsx").read_text(encoding="utf-8")
+    assert 'aria-label="GitHub"' in layout and "href={REPO_URL}" in layout
+    built = (WEB / "app" / "how-its-built" / "page.tsx").read_text(encoding="utf-8")
+    assert "href={COMMITS_URL}" in built and "View the full history on GitHub" in built

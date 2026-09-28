@@ -2,6 +2,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { COMMITS_URL, REPO_URL } from "../lib/site.mjs";
 
 const base = (process.env.SMOKE_URL || "https://ecommercefunnel-analytics.vercel.app").replace(/\/$/, "");
 const dataSourceDoc = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "docs", "data-source.md");
@@ -48,6 +49,10 @@ for (const path of PAGES) {
   try {
     const res = await fetch(base + path, { redirect: "follow" });
     check(`GET ${path} returns 200`, res.status === 200, `status ${res.status}`);
+    const html = await res.text();
+    const header = html.slice(html.indexOf("<nav"), html.indexOf("</nav>"));
+    check(`${path}: header links to GitHub (aria-label "GitHub", ${REPO_URL})`,
+      header.includes(`href="${REPO_URL}"`) && header.includes('aria-label="GitHub"'));
   } catch (e) {
     check(`GET ${path} returns 200`, false, String(e));
   }
@@ -99,6 +104,8 @@ try {
   check("nav order: Funnel, Investigations, How it's built, Data, Data quality, Metrics, Further research",
     positions.every((p, i) => p >= 0 && (i === 0 || p > positions[i - 1])), positions.join(","));
   const built = await (await fetch(`${base}/how-its-built`)).text();
+  check(`/how-its-built links "View the full history on GitHub" to ${COMMITS_URL}`,
+    built.includes(`href="${COMMITS_URL}"`) && built.includes("View the full history on GitHub"));
   const workflow = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "public", "data", "workflow.json"), "utf-8"));
   const total = workflow.correction_log.n_entries.toLocaleString("en-US");
   check(`/how-its-built counts all ${total} correction-log entries`, built.includes(`${total}<!-- --> errors were caught`) || built.includes(`${total} errors were caught`));
